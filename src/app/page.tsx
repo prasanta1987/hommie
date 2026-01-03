@@ -6,6 +6,9 @@ import { auth } from './firebase/config';
 import SignIn from './components/sign-in';
 import styles from './page.module.css';
 
+import LandingPage from './components/LandingPage'
+import Footer from './components/Footer'
+
 export default function Home() {
   const [user, loading] = useAuthState(auth);
 
@@ -18,12 +21,9 @@ export default function Home() {
   }
 
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.intro}>
-          <h1>Welcome, {user.displayName}!</h1>
-        </div>
-      </main>
+    <div className='d-flex flex-column'>
+      <LandingPage />
+      <Footer />
     </div>
   );
 }
