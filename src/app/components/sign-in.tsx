@@ -64,38 +64,46 @@ const SignIn = () => {
   }
 
   return (
-    <div className='signInContainer'>
-      <form onSubmit={handleSubmit}>
-        <h2>{isSignUp ? 'Create an Account' : 'Sign In'}</h2>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-          className="inputField"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-          className="inputField"
-        />
-        {error && <p className="error">{error}</p>}
-        <div className="buttonContainer">
-            <button type="submit" className='signInButton'>
+    <div className='d-flex justify-content-center align-items-center vh-100'>
+      <div className="card p-4" style={{ width: '100%', maxWidth: '400px' }}>
+        <form onSubmit={handleSubmit}>
+          <h2 className="text-center mb-4">{isSignUp ? 'Create an Account' : 'Sign In'}</h2>
+          <div className="mb-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+                className="form-control"
+              />
+          </div>
+          <div className="mb-3">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                className="form-control"
+              />
+          </div>
+
+          {error && <p className="text-danger text-center mb-3">{error}</p>}
+
+          <div className="d-grid">
+            <button type="submit" className='btn btn-primary'>
               {isSignUp ? 'Sign Up' : 'Sign In'}
             </button>
-        </div>
-        <p className="toggleText">
-          {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <a href="#" onClick={() => setIsSignUp(!isSignUp)}>
-            {isSignUp ? 'Sign In' : 'Sign Up'}
-          </a>
-        </p>
-      </form>
+          </div>
+          <p className="mt-3 text-center">
+            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+            <a href="#" onClick={(e) => { e.preventDefault(); setIsSignUp(!isSignUp); }}>
+              {isSignUp ? 'Sign In' : 'Sign Up'}
+            </a>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };
