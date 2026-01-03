@@ -1,19 +1,14 @@
 
-'use client';
-
 import React from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../firebase/config';
-import { signOut } from 'firebase/auth';
 
 const Footer = () => {
-  const [user] = useAuthState(auth);
-
   return (
-    <></>
+    <footer className="footer mt-auto py-3 bg-light">
+      <div className="container text-center">
+        <span className="text-muted">© 2024 MyApp.com</span>
+      </div>
+    </footer>
   );
 };
 
 export default Footer;
-
-

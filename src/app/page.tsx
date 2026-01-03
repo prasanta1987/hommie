@@ -7,7 +7,6 @@ import SignIn from './components/sign-in';
 import styles from './page.module.css';
 
 import LandingPage from './components/LandingPage'
-import Footer from './components/Footer'
 
 export default function Home() {
   const [user, loading] = useAuthState(auth);
@@ -21,9 +20,8 @@ export default function Home() {
   }
 
   return (
-    <div className='d-flex flex-column'>
+    <div>
       <LandingPage />
-      <Footer />
     </div>
   );
 }
