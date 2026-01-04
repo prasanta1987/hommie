@@ -1,11 +1,28 @@
-
+import admin from '@/app/firebase/adminConfig'
 import React from 'react';
 
-const Footer = () => {
+const Footer = async () => {
+  let userCount = 0;
+  try {
+    const userRecords = await admin.auth().listUsers();
+    userCount = userRecords.users.length;
+    
+    // const data = admin.database().ref('users');
+    // const snapshot = await data.once('value');
+    // const users = snapshot.val();
+
+    // console.log(users);
+
+
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    // Handle the error appropriately
+  }
+
   return (
     <footer className="footer mt-auto py-3 bg-light">
       <div className="container text-center">
-        <span className="text-muted">© 2024 MyApp.com</span>
+        <span className="text-muted">Total Users: {userCount}</span>
       </div>
     </footer>
   );

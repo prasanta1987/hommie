@@ -18,7 +18,7 @@ const Navbar = () => {
         </button>
         <div className="navbar-collapse collapse" id="basic-navbar-nav">
           <div className="me-auto navbar-nav"></div>
-          <button type="button" className="btn btn-outline-danger">Log Out</button>
+          <button type="button" onClick={() => signOut(auth)} className="btn btn-outline-danger">Log Out</button>
         </div>
       </div>
     </nav>
@@ -26,23 +26,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-
-/*
-    <nav className='navbar navbar-expand-md navbar-light bg-light'>
-      <div className="container">
-        <a className="navbar-brand" href="#">My App</a>
-        {user && (
-          <div className='d-flex align-items-center'>
-            <span className='navbar-text me-3'>Welcome, {user.email}</span>
-            <button onClick={() => signOut(auth)} className='btn btn-outline-danger'>
-              Sign Out
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
-
-
-
-*/

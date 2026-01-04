@@ -19,7 +19,7 @@ const SignIn = () => {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
+    } catch (error: { code: string }) {
       setError(getFirebaseErrorMessage(error.code));
       console.error(error);
     }
@@ -30,7 +30,7 @@ const SignIn = () => {
     setError(null);
     try {
         await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
+    } catch (error: { code: string }) {
         setError(getFirebaseErrorMessage(error.code));
         console.error(error);
     }
