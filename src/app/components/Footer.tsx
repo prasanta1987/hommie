@@ -7,11 +7,11 @@ const Footer = async () => {
     const userRecords = await admin.auth().listUsers();
     userCount = userRecords.users.length;
     
-    // const data = admin.database().ref('users');
-    // const snapshot = await data.once('value');
-    // const users = snapshot.val();
+    const data = admin.database().ref('users');
+    const snapshot = await data.once('value');
+    const usersData = snapshot.val();
 
-    // console.log(users);
+    console.log(usersData);
 
 
   } catch (error) {
