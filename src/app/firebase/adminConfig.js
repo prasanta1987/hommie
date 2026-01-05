@@ -12,7 +12,7 @@ if (!admin.apps.length) {
       databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     });
     console.log('Firebase admin initialized successfully for project:', admin.app().options.projectId);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Firebase admin initialization error:', error.message);
   }
 }

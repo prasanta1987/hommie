@@ -1,52 +1,56 @@
-
 'use client';
 
-import React, { useState } from 'react';
-import { 
+import React, { useState, useEffect } from 'react';
+import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword 
+  createUserWithEmailAndPassword,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { redirect } from 'next/navigation';
-
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [isSignUp, setIsSignUp] = useState(false);
-  
-  const [user] = useAuthState(auth);
-  
-  
-  if (user) {
-     redirect('/'); // Redirect to login page if no user
-    }
+  const [user, setUser] = useState(null);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (user) {
+    redirect('/');
+  }
+
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
+    } catch (error) {
       setError(getFirebaseErrorMessage(error.code));
       console.error(error);
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setError(null);
     try {
-        await createUserWithEmailAndPassword(auth, email, password);
-    } catch (error: any) {
-        setError(getFirebaseErrorMessage(error.code));
-        console.error(error);
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      setError(getFirebaseErrorMessage(error.code));
+      console.error(error);
     }
   };
 
-  const getFirebaseErrorMessage = (errorCode: string) => {
+  const getFirebaseErrorMessage = (errorCode) => {
     switch (errorCode) {
       case 'auth/invalid-email':
         return 'Invalid email address.';
@@ -59,19 +63,19 @@ const SignIn = () => {
       case 'auth/email-already-in-use':
         return 'This email is already in use.';
       case 'auth/weak-password':
-          return 'Password should be at least 6 characters.'
+        return 'Password should be at least 6 characters.';
       default:
         return 'An unexpected error occurred. Please try again.';
     }
-  }
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     if (isSignUp) {
       handleSignUp(e);
     } else {
       handleSignIn(e);
     }
-  }
+  };
 
   return (
     <div className='d-flex justify-content-center align-items-center vh-100'>
@@ -79,24 +83,24 @@ const SignIn = () => {
         <form onSubmit={handleSubmit}>
           <h2 className="text-center mb-4">{isSignUp ? 'Create an Account' : 'Sign In'}</h2>
           <div className="mb-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-                className="form-control"
-              />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+              className="form-control"
+            />
           </div>
           <div className="mb-3">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                required
-                className="form-control"
-              />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              className="form-control"
+            />
           </div>
 
           {error && <p className="text-danger text-center mb-3">{error}</p>}
