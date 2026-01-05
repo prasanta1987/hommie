@@ -15,7 +15,7 @@ const LandingPage = () => {
   const [data, loading, error] = useObjectVal(ref(db, dbPath));
 
   return (
-    <div className='container flex-grow-1 overflow-auto mt-5'>
+    <div className='container mb-5 text-dark'>
       <div className="card">
         <div className="card-header">
           <h1>Hi, {user ? user.email : 'Guest'}</h1>

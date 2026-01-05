@@ -22,8 +22,8 @@ const Footer = async () => {
   }
 
   return (
-    <footer className="bg-gray-800 text-dark p-4 text-center">
-      <div className="container mx-auto">
+    <footer className="bg-dark text-light p-2 text-center sticky-bottom">
+      <div className="container">
         <p>&copy; {new Date().getFullYear()} My Awesome App. All Rights Reserved.</p>
       </div>
     </footer>

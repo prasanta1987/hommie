@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en" className="h-100">
       <body className={`d-flex flex-column h-100 ${geistSans.variable} ${geistMono.variable}`}>
         <Navbar />
-        <main className="flex-grow-1">{children}</main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>
