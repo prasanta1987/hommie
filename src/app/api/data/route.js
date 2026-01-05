@@ -4,7 +4,7 @@ import admin from '../../firebase/adminConfig.js';
 export async function GET() {
   try {
     const db = admin.database();
-    const ref = db.ref('boards');
+    const ref = db.ref('playlist');
     const snapshot = await ref.once('value');
     const data = snapshot.val();
     return NextResponse.json(data);

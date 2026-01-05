@@ -1,117 +1,133 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Badge, Modal, Button, Form } from 'react-bootstrap';
 import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit } from 'react-icons/fi';
-import { Modal, Button, Form, Spinner } from 'react-bootstrap';
-import '../components/LandingPage.css';
-import { updateBoardName } from '../actions';
+import './Boards.css';
 
-const Boards = ({ uid, boardData, isOpen, onToggle }) => {
+import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
+
+export default function Boards(props) {
+    const [isOpen, setIsOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [isPending, setIsPending] = useState(false);
-    const [state, setState] = useState({ message: "", errors: {} });
-
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => {
-      setShowModal(false);
-    };
-
-    const onFeedSelect = (feedName) => { 
-        console.log(`Selected feed: ${feedName} on board: ${boardData.deviceCode}`);
-    }
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        setIsPending(true);
-        const formData = new FormData(event.target);
-        const result = await updateBoardName(uid, formData);
-        setState(result);
-        setIsPending(false);
-    };
+    const [boardName, setBoardName] = useState(props.boardData.name);
+    const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
 
     useEffect(() => {
-        if (state.message === "success") {
-            handleCloseModal();
-        }
-    }, [state]);
+        console.log(props.boardData);
+        setBoardName(props.boardData.name);
+        setDeviceCode(props.boardData.deviceCode);
+    }, [props.boardData.name, props.boardData.deviceCode]);
+
+
+    const onFeedSelect = (devCode, devFeed) => {
+        props.sendSelectedBoard(devCode, devFeed);
+        setIsOpen(false); // Close dropdown after selection
+    };
+
+    const toggleDropdown = () => setIsOpen(!isOpen);
+
+    const handleShowModal = () => {
+        setBoardName(boardName); // Reset input field to current name
+        setShowModal(true);
+        setIsOpen(false); // Close dropdown when opening modal
+    };
+    const handleCloseModal = () => setShowModal(false);
+
+    const handleSaveName = () => {
+        setBoardName(boardName);
+        // Here you would typically call a prop function to update the name in the parent component, e.g.:
+        // props.onBoardNameChange(props.boardData.deviceCode, boardName);
+        console.log(`Board name changed to: ${boardName}`);
+
+        updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
+            "name": boardName
+        })
+        handleCloseModal();
+    };
+
+
+
+    const deleteBoard = () => {
+        updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
+            "isDeleted": props.boardData.isDeleted ? false : true
+        })
+        setShowModal(false);
+    };
+
+    const forceDeleteBoard = () => {
+        setValueToDatabase(`${props.uid}/${deviceCode}`, null)
+        setShowModal(false);
+    }
+
 
     return (
-        <div className="board-container bg-light rounded p-2 shadow-sm position-relative">
-            <div className="d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                    <FiHardDrive className="me-2" />
-                    <h6 className="mb-0 me-2">{boardData.name}</h6>
-                    <Button variant="link" onClick={handleShowModal} className="p-0">
-                        <FiEdit size="0.8rem"/>
-                    </Button>
-                </div>
-                <div className="d-flex align-items-center">
-                    <Button variant="light" size="sm" onClick={onToggle}>
-                        {isOpen ? <FiChevronUp /> : <FiChevronDown />}
-                    </Button>
-                </div>
+        (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
+        &&
+        <>
+            <div className={"boards-dropdown"}>
+                <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${props.boardData.isDeleted && "bg-warning"}`}>
+                    <FiHardDrive className="boards-dropdown-item-icon" />
+                    <span>{boardName}</span>
+                    {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+                </button>
+                {isOpen && (
+                    <div className="boards-dropdown-menu">
+                        <div className="boards-dropdown-header">
+                            {boardName}
+                            <FiEdit onClick={handleShowModal} style={{ cursor: 'pointer', marginLeft: '10px' }} />
+                        </div>
+                        {(props.boardData.devFeeds) &&
+                            Object.keys(props.boardData.devFeeds).map(devFeed => {
+                                const isSelected = props.boardData.devFeeds[devFeed].isSelected;
+                                return (
+                                    <div
+                                        className={`boards-dropdown-item ${isSelected ? "bg-primary text-light" : ""}`}
+                                        key={devFeed}
+                                        onClick={() => onFeedSelect(props.boardData.deviceCode, devFeed)}
+                                    >
+                                        <span>{devFeed}</span>
+                                        <Badge className='bg-dark'>{props.boardData.devFeeds[devFeed].value}</Badge>
+                                    </div>
+                                )
+                            })
+                        }
+                    </div>
+                )}
             </div>
 
-            {isOpen && (
-                <div className="dropdown-overlay shadow-lg rounded">
-                    <h6 className='pt-2 px-2'>Feeds:</h6>
-                    {boardData.devFeeds ? (
-                        <ul className="list-group list-group-flush">
-                            {Object.entries(boardData.devFeeds).map(([feedName, feedData]) => (
-                                <li key={feedName} className="list-group-item d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>{feedName}:</strong> {String(feedData.value)}
-                                        <br />
-                                        <small className="text-muted">{new Date(feedData.time).toLocaleString()}</small>
-                                    </div>
-                                    <Form.Check 
-                                        type="switch"
-                                        id={`feed-switch-${boardData.deviceCode}-${feedName}`}
-                                        checked={feedData.isSelected}
-                                        onChange={() => onFeedSelect(feedName)}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className='px-2'>No feeds available for this board.</p>
-                    )}
-                </div>
-            )}
-
             <Modal show={showModal} onHide={handleCloseModal}>
-                <Form onSubmit={handleSubmit}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit Board Name</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <input type="hidden" name="deviceCode" value={boardData.deviceCode} />
-                        <Form.Group className="mb-3">
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Board Name</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="formBoardName">
                             <Form.Label>Board Name</Form.Label>
-                            <Form.Control 
-                                type="text" 
-                                name="newName" 
-                                defaultValue={boardData.name} 
-                                isInvalid={!!state.errors?.newName}
+                            <Form.Control
+                                type="text"
+                                value={boardName}
+                                onChange={(e) => setBoardName(e.target.value)}
                             />
-                            <Form.Control.Feedback type="invalid">
-                                {state.errors?.newName?.join(', ')}
-                            </Form.Control.Feedback>
                         </Form.Group>
-                         {state.message && state.message !== "success" && (
-                            <div className="alert alert-danger">{state.message}</div>
-                        )}
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleCloseModal} disabled={isPending}>Close</Button>
-                        <Button variant="primary" type="submit" disabled={isPending}>
-                            {isPending ? <><Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/> Saving...</> : "Save Changes"}
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer className='d-flex justify-content-between'>
+                    <div className='d-flex justify-content-between gap-1'>
+                        <Button variant={`${props.boardData.isDeleted ? "success" : "warning"}`}
+                            onClick={deleteBoard}>
+                            {props.boardData.isDeleted ? "Restore" : "Delete"}
                         </Button>
-                    </Modal.Footer>
-                </Form>
+                        {
+                            props.boardData.isDeleted &&
+                            <Button variant="danger" onClick={forceDeleteBoard}>
+                                Force Delete
+                            </Button>
+                        }
+                    </div>
+                    <Button variant="primary" onClick={handleSaveName}>
+                        Save Changes
+                    </Button>
+                </Modal.Footer>
             </Modal>
-        </div>
+        </>
     );
-};
-
-export default Boards;
+}

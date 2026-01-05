@@ -2,108 +2,143 @@
 
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebase/config';
+import { SiArduino } from "react-icons/si";
 import { onAuthStateChanged } from 'firebase/auth';
 import { ref, onValue } from "firebase/database";
 import { Spinner } from 'react-bootstrap';
-import './LandingPage.css'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Boards from '../ui/Boards';
+import Feeds from '../ui/Feeds';
+import { Container } from 'react-bootstrap';
+import { Modal, Button, Form } from 'react-bootstrap';
+import { esp32Imports, esp32Code, esp8266Imports, esp8266Code } from '../miscFunctions/arduinoCode';
+import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
+import './LandingPage.css'
 
-const LandingPage = () => {
-  const [user, setUser] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
-  const [data, setData] = useState(null);
-  const [dataLoading, setDataLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [openDropdown, setOpenDropdown] = useState(null);
+const LandingPage = (props) => {
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setUserLoading(false);
-    });
+  const [userUid, setUserUid] = useState(null);
+  const [dbData, setDBData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [codeSelectedText, setCodeSelectedText] = useState('ESP32');
 
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      const dbPath = user.uid;
-      const dbRef = ref(db, dbPath);
-
-      const unsubscribe = onValue(dbRef, (snapshot) => {
-        setData(snapshot.val());
-        setDataLoading(false);
-      }, (error) => {
-        setError(error);
-        setDataLoading(false);
-      });
-
-      return () => unsubscribe();
-    }
-  }, [user]);
-
-  const handleToggleDropdown = (deviceCode) => {
-    setOpenDropdown(prev => (prev === deviceCode ? null : deviceCode));
-  };
-
-  if (userLoading) {
-    return (
-      <div className='container mb-5 text-dark'>
-        <p>Loading user...</p>
-      </div>
-    );
+  const boardSelection = (devCode, devFeed) => {
+    const feedStatus = dbData[devCode].devFeeds[devFeed].isSelected;
+    updateValuesToDatabase(`${userUid}/${devCode}/devFeeds/${devFeed}`, { "isSelected": !feedStatus });
   }
 
-  let boardCollection = {};
-  if (data) {
-    if ('name' in data && 'deviceCode' in data) {
-      boardCollection = { [data.deviceCode]: data };
+  useEffect(() => {
+
+    if (props.userData) {
+      setUserUid(props.userData.uid);
+      setDBData(props.userDbData);
     } else {
-      boardCollection = data;
+      setUserUid(null);
+      setDBData(null);
     }
+  }, [props.userData, props.userDbData]);
+
+  const handleShowModal = (device) => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const codeSelected = (code) => {
+    setCodeSelectedText(code);
+  }
+
+
+  let codeStringEsp32 =
+    esp32Imports +
+    `
+// Use this code to connect your device to the Firebase Realtime Database
+String uid = "${userUid}";
+` + esp32Code;
+
+
+  let codeStringEsp8266 =
+    esp8266Imports +
+    `
+// Use this code to connect your device to the Firebase Realtime Database
+String uid = "${userUid}";
+` + esp8266Code;
+
+
+  const handleCopyCode = () => {
+
+    let variableData = codeSelectedText == 'ESP32' ? codeStringEsp32 : codeStringEsp8266
+
+    navigator.clipboard.writeText(variableData).then(() => {
+      setShowModal(false);;
+    }).catch(err => {
+      alert('Could not copy text: ', err);
+    })
   }
 
   return (
-    <div className='container mb-5 text-dark'>
-      {dataLoading && (
-        <div className='d-flex align-items-center'>
-          <Spinner animation="border" size="sm" className="me-2" />
-          <span>Loading data...</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          <strong>Error:</strong> {error.message}
-        </div>
-      )}
-
-      {user && data && (
-        <div className='d-flex flex-row flex-wrap gap-3'>
+    <Container fluid className='bg-dark text-light flex-grow-1 overflow-auto pb-5'>
+      <Container className='d-flex justify-content-between align-items-center pt-2'>
+        <div className='d-flex justify-content-start gap-3 align-items-center flex-wrap'>
           {
-            Object.keys(boardCollection).map(key => {
-              const board = boardCollection[key];
-              if (board && typeof board === 'object') { 
-                return (
-                  <Boards 
-                    key={key} 
-                    uid={user.uid}
-                    boardData={board} 
-                    isOpen={openDropdown === board.deviceCode}
-                    onToggle={() => handleToggleDropdown(board.deviceCode)}
-                  />
-                );
-              }
-              return null;
-            })
+            (userUid) ?
+              (dbData)
+                ? Object.keys(dbData).map(data => {
+                  return (
+                    <Boards
+                      key={data}
+                      sendSelectedBoard={boardSelection}
+                      boardData={dbData[data]}
+                      uid={userUid}
+                    />
+                  )
+                })
+                : "None"
+              : "None"
           }
         </div>
-      )}
+        {
+          (userUid) && <div><SiArduino style={{ cursor: 'pointer' }} color="#0ff" size={40} onClick={handleShowModal} /></div>
+        }
 
-      {user && !dataLoading && !error && !data && (
-        <p>No data available. Please add some data to see it here.</p>
-      )}
-    </div>
+
+      </Container>
+      <Container className='d-flex justify-content-start gap-3 pt-2'>
+        {dbData && <Feeds feedData={dbData} />}
+      </Container>
+
+      <Modal show={showModal} fullscreen={true} onHide={handleCloseModal} centered data-bs-theme="dark">
+        <Modal.Header closeButton>
+          <Modal.Title>Arduino Configuration for {codeSelectedText}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
+            {codeSelectedText == 'ESP32' ? codeStringEsp32 : codeStringEsp8266}
+          </SyntaxHighlighter>
+        </Modal.Body>
+        <Modal.Footer className='d-flex justify-content-between'>
+          <Button variant='secondary' onClick={handleCloseModal}>
+            Close
+          </Button>
+          <Button variant='success' onClick={handleCopyCode}>
+            Copy Code
+          </Button>
+          <div className='d-flex gap-3'>
+            <Button variant='primary' onClick={() => codeSelected('ESP8266')}>
+              ESP8266
+            </Button>
+            <Button variant='primary' onClick={() => codeSelected('ESP32')}>
+              ESP32
+            </Button>
+          </div>
+        </Modal.Footer>
+      </Modal>
+
+    </Container>
+
   );
 };
 
