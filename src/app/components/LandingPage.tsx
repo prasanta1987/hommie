@@ -9,8 +9,10 @@ import { ref } from "firebase/database";
 
 const LandingPage = () => {
   const [user] = useAuthState(auth);
+  console.log(user?.uid)
+  const dbPath = user?.uid;
 
-  const [data, loading, error] = useObjectVal(ref(db, '/test')); // Example path
+  const [data, loading, error] = useObjectVal(ref(db, dbPath));
 
   return (
     <div className='container flex-grow-1 overflow-auto mt-5'>
@@ -26,7 +28,7 @@ const LandingPage = () => {
             <pre>{JSON.stringify(data, null, 2)}</pre>
           )}
           {!loading && !data && (
-            <p>No data available at the &apos;test/&apos; path in your database. Please add some data to see it here.</p>
+            <p>No data available at the &apos;{dbPath}&apos; path in your database. Please add some data to see it here.</p>
           )}
         </div>
       </div>

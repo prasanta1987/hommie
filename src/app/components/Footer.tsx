@@ -1,28 +1,30 @@
-import admin from '@/app/firebase/adminConfig'
+
 import React from 'react';
+import admin from '@/app/firebase/adminConfig';
 
 const Footer = async () => {
-  let userCount = 0;
+  let usersData = null;
+  let error = null;
+
   try {
-    const userRecords = await admin.auth().listUsers();
-    userCount = userRecords.users.length;
-    
-    const data = admin.database().ref('users');
+    const data = admin.database().ref('xUXsdrqmjlTC4MMYz2COmOfwSCD3');
     const snapshot = await data.once('value');
-    const usersData = snapshot.val();
-
-    console.log(usersData);
-
-
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    // Handle the error appropriately
+    usersData = snapshot.val();
+    console.log('Successfully fetched data:', usersData);
+  } catch (e: any) {
+    error = e.message;
+    console.error('Firebase error:', e.message);
+    if (admin.apps.length) {
+      console.log('Admin SDK initialized for project:', admin.app().options.projectId);
+    } else {
+      console.log('Admin SDK not initialized.');
+    }
   }
 
   return (
-    <footer className="footer mt-auto py-3 bg-light">
-      <div className="container text-center">
-        <span className="text-muted">Total Users: {userCount}</span>
+    <footer className="bg-gray-800 text-dark p-4 text-center">
+      <div className="container mx-auto">
+        <p>&copy; {new Date().getFullYear()} My Awesome App. All Rights Reserved.</p>
       </div>
     </footer>
   );

@@ -18,7 +18,10 @@ const Navbar = () => {
         </button>
         <div className="navbar-collapse collapse" id="basic-navbar-nav">
           <div className="me-auto navbar-nav"></div>
-          <button type="button" onClick={() => signOut(auth)} className="btn btn-outline-danger">Log Out</button>
+          {
+            user && <button type="button" onClick={() => signOut(auth)} className="btn btn-outline-danger">Log Out</button>
+          }
+
         </div>
       </div>
     </nav>

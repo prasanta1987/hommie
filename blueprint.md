@@ -1,28 +1,21 @@
-
 # Project Blueprint
 
 ## Overview
 
-This document outlines the plan, features, and design of the Next.js application. The application will feature a navigation bar with Firebase authentication.
+This document outlines the architecture, features, and design of the Next.js application. It serves as a single source of truth for the project's current state.
+
+## Implemented Features
+
+### Firebase Integration
+
+- **Client-Side SDK:** The project is configured to use the Firebase client-side SDK for web applications. Configuration is managed through environment variables in `.env.local` and initialized in `src/app/firebase/config.ts`.
+- **Admin SDK:** The Firebase Admin SDK is integrated for server-side operations. It's configured via environment variables in `.env.local` and initialized in `src/app/firebase/adminConfig.ts`.
 
 ## Current Plan
 
-1.  **Set up Firebase**: Add Firebase configuration to the project.
-2.  **Install Firebase dependencies**: Install `firebase` and `react-firebase-hooks`.
-3.  **Create Firebase configuration file**: Create a file to initialize Firebase.
-4.  **Create `Navbar` component**: Create a navigation bar that shows user authentication status.
-5.  **Create `SignIn` page**: Create a page for users to sign in.
-6.  **Update main page**: Protect the main page so it's only visible to authenticated users.
-
-## Features
-
-*   Firebase authentication with Google Sign-In.
-*   Protected main page, accessible only after sign-in.
-*   Navigation bar showing user's email and a sign-out button.
-
-## Design
-
-*   **Layout**: The application will have a main content area and a top navigation bar.
-*   **Styling**: The UI will be clean and modern, with a focus on usability.
-*   **Color Palette**: A simple and elegant color scheme will be used.
-*   **Typography**: Clear and readable fonts will be used for all text.
+- **Task:** Configure Firebase client and admin SDKs.
+- **Status:** Complete.
+  - Added necessary Firebase configuration to `.idx/mcp.json`.
+  - Created `.env.local` with placeholder credentials for both client and admin SDKs.
+  - Installed the `firebase-admin` package.
+  - Verified the existence and correctness of `src/app/firebase/config.ts` and `src/app/firebase/adminConfig.ts`.

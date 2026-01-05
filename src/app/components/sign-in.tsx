@@ -7,12 +7,22 @@ import {
   createUserWithEmailAndPassword 
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { redirect } from 'next/navigation';
+
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
+  
+  const [user] = useAuthState(auth);
+  
+  
+  if (user) {
+     redirect('/'); // Redirect to login page if no user
+    }
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
