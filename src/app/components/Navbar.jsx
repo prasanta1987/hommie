@@ -7,6 +7,7 @@ import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { FiLogOut } from 'react-icons/fi';
 
 const AppNavbar = () => {
+  
   const [user, setUser] = useState(null);
 
   useEffect(() => {

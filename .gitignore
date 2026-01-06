@@ -12,6 +12,8 @@
 .firebase
 .idx/
 
+firebase-debug.log
+
 # testing
 /coverage
 
