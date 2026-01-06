@@ -1,3 +1,4 @@
+
 import { Inter } from 'next/font/google';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -17,8 +18,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-100">
-      <body className={`d-flex flex-column h-100 ${inter.variable}`}>
+    <html lang="en" className="h-100" suppressHydrationWarning={true}>
+      <body className={`d-flex flex-column h-100 ${inter.variable}`} suppressHydrationWarning={true}>
         <Navbar />
         <main className='bg-dark'>{children}</main>
         <Footer />
