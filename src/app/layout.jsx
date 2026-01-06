@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="h-100">
       <body className={`d-flex flex-column h-100 ${inter.variable}`}>
         <Navbar />
-        <main>{children}</main>
+        <main className='bg-dark'>{children}</main>
         <Footer />
       </body>
     </html>

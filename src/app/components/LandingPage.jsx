@@ -52,25 +52,9 @@ const LandingPage = (props) => {
   }
 
 
-  let codeStringEsp32 =
-    esp32Imports +
-    `
-// Use this code to connect your device to the Firebase Realtime Database
-String uid = "${userUid}";
-` + esp32Code;
-
-
-  let codeStringEsp8266 =
-    esp8266Imports +
-    `
-// Use this code to connect your device to the Firebase Realtime Database
-String uid = "${userUid}";
-` + esp8266Code;
-
-
   const handleCopyCode = () => {
 
-    let variableData = codeSelectedText == 'ESP32' ? codeStringEsp32 : codeStringEsp8266
+    let variableData = codeSelectedText == 'ESP32' ? esp32Code : esp8266Code
 
     navigator.clipboard.writeText(variableData).then(() => {
       setShowModal(false);;
@@ -116,7 +100,7 @@ String uid = "${userUid}";
         </Modal.Header>
         <Modal.Body>
           <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
-            {codeSelectedText == 'ESP32' ? codeStringEsp32 : codeStringEsp8266}
+            {codeSelectedText == 'ESP32' ? esp32Code : esp8266Code}
           </SyntaxHighlighter>
         </Modal.Body>
         <Modal.Footer className='d-flex justify-content-between'>
