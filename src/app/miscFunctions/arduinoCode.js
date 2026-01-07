@@ -158,9 +158,9 @@ public:
 
         JSONVar devCreate;
         devCreate["uid"] = this->uid;
-        devCreate["path"] = this->uid;
-        devCreate[this->devCode]["name"] = deviceName;
-        devCreate[this->devCode]["deviceCode"] = this->devCode;
+        devCreate["path"] = this->devCode;
+        devCreate["data"]["name"] = deviceName;
+        devCreate["data"]["deviceCode"] = this->devCode;
 
         this->httpRequest("POST", "setArduinoData", JSON.stringify(devCreate));
       }
