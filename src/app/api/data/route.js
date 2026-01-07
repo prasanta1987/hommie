@@ -26,7 +26,7 @@ export async function POST(request) {
     const signInUser = await signInWithEmailAndPassword(auth, body.email, body.password);
 
     if (signInUser) {
-      return NextResponse.json({ "msg": signInUser }, { status: 200 });
+      return NextResponse.json({ "msg": signInUser.user.uid }, { status: 200 });
     } else {
       return NextResponse.json({ "msg": "Wrong Cred" }, { status: 200 });
     }
