@@ -175,8 +175,8 @@ public:
 
 
     data["uid"] = this->uid;
-    data["path"] = this->devCode + "/devFeeds";
-    data["data"][FEED] = VALUE;
+    data["path"] = this->devCode + "/devFeeds/" + FEED;
+    data["data"]["value"] = VALUE;
 
     Serial.println(data);
 

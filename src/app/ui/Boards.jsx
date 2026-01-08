@@ -63,7 +63,7 @@ export default function Boards(props) {
 
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
-        (props.boardKey)
+        (typeof props.boardData=='object')
         &&
         <>
             <div className={"boards-dropdown"}>
