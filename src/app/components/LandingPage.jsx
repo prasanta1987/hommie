@@ -12,7 +12,7 @@ import Boards from '../ui/Boards';
 import Feeds from '../ui/Feeds';
 import { Container } from 'react-bootstrap';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { esp32Imports, esp32Code, esp8266Imports, esp8266Code } from '../miscFunctions/arduinoCode';
+import { esp32Code, esp8266Code } from '../miscFunctions/arduinoCode';
 import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
 import './LandingPage.css'
 

@@ -4,7 +4,7 @@ import admin from '../../firebase/adminConfig.js';
 export async function POST(request) {
     try {
         const bodyData = await request.json();
-        const { uid, path, data } = bodyData;
+        const { uid, path, data, purpose = null } = bodyData;
 
         if (!uid || !path || !data) {
             return NextResponse.json({ "msg": "Missing uid, path, or data in request body" }, { status: 400 });
@@ -14,6 +14,8 @@ export async function POST(request) {
 
         const db = admin.database();
         const dbRef = db.ref(`${uid}/${path}`);
+
+        if(purpose == "FEED") data.time = new Date().getTime();
 
         await dbRef.update(data);
 

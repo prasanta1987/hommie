@@ -7,7 +7,7 @@ import './Feeds.css';
 // Helper function to format timestamp
 const formatTimestamp = (dateValue) => {
 
-    let dateInput = parseInt(dateValue * 1000);
+    let dateInput = parseInt(dateValue);
 
     const date = new Date(dateInput);
 

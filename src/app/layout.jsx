@@ -4,7 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './globals.css';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -21,8 +20,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="h-100" suppressHydrationWarning={true}>
       <body className={`d-flex flex-column h-100 ${inter.variable}`} suppressHydrationWarning={true}>
         <Navbar />
-        <main className='bg-dark'>{children}</main>
-        <Footer />
+        <main className='bg-dark bg-dark d-flex flex-column'>{children}</main>
       </body>
     </html>
   );
