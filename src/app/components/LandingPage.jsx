@@ -74,6 +74,7 @@ const LandingPage = (props) => {
                   return (
                     <Boards
                       key={data}
+                      boardKey={data}
                       sendSelectedBoard={boardSelection}
                       boardData={dbData[data]}
                       uid={userUid}

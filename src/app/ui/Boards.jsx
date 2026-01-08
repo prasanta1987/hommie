@@ -13,8 +13,9 @@ export default function Boards(props) {
 
     useEffect(() => {
         console.log(props.boardData);
+        console.log(props.boardKey);
         setBoardName(props.boardData.name);
-        setDeviceCode(props.boardData.deviceCode);
+        setDeviceCode(props.boardKey);
     }, [props.boardData.name, props.boardData.deviceCode]);
 
 
@@ -39,7 +40,8 @@ export default function Boards(props) {
         console.log(`Board name changed to: ${boardName}`);
 
         updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
-            "name": boardName
+            "name": boardName,
+            "deviceCode": deviceCode
         })
         handleCloseModal();
     };
@@ -60,19 +62,20 @@ export default function Boards(props) {
 
 
     return (
-        (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
+        // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
+        (props.boardKey)
         &&
         <>
             <div className={"boards-dropdown"}>
                 <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${props.boardData.isDeleted && "bg-warning"}`}>
                     <FiHardDrive className="boards-dropdown-item-icon" />
-                    <span>{boardName}</span>
+                    <span>{boardName || props.boardKey}</span>
                     {isOpen ? <FiChevronUp /> : <FiChevronDown />}
                 </button>
                 {isOpen && (
                     <div className="boards-dropdown-menu">
                         <div className="boards-dropdown-header">
-                            {boardName}
+                            {boardName || props.boardKey}
                             <FiEdit onClick={handleShowModal} style={{ cursor: 'pointer', marginLeft: '10px' }} />
                         </div>
                         {(props.boardData.devFeeds) &&
