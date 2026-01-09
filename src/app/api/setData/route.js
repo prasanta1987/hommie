@@ -38,8 +38,8 @@ export async function POST(request) {
 
         } else if (purpose == "deviceAuth") {
 
-            const { name, deviceCode } = data
-            
+            const { deviceName, deviceCode } = data
+
             let errors = {};
 
             if (!deviceCode) errors.deviceCode = "Device Code is required";
@@ -53,7 +53,7 @@ export async function POST(request) {
             let newDevice = {
                 [deviceCode]: {
                     uid: uid,
-                    deviceName: name || null,
+                    deviceName: deviceName || null,
                     deviceCode: deviceCode
                 }
             }
@@ -62,10 +62,26 @@ export async function POST(request) {
             return NextResponse.json({ "msg": "Addition Request Sent" }, { status: 200 });
 
         } else if (purpose == "setDeviceProfile") {
-            
-            const { deviceCode } = data
+
+            const { deviceName, deviceCode } = data
+
+            let errors = {};
+
+            if (!deviceCode) errors.deviceCode = "Device Code is required";
+
+            if (Object.keys(errors).length > 0) {
+                return NextResponse.json({ "error": errors }, { status: 400 });
+            }
+
             const dbRef = db.ref(`${uid}/${deviceCode}`);
-            await dbRef.update(data);
+            await dbRef.update({
+                deviceName: deviceName || null,
+                deviceCode: deviceCode
+            });
+
+            const oldRef = db.ref(`nextDevice/${deviceCode}`);
+            await oldRef.remove();
+
             return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
 
         } else {

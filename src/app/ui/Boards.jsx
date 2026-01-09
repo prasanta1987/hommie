@@ -8,13 +8,13 @@ import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/act
 export default function Boards(props) {
     const [isOpen, setIsOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [boardName, setBoardName] = useState(props.boardData.name);
+    const [boardName, setBoardName] = useState(props.boardData.deviceName);
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
 
     useEffect(() => {
         console.log(props.boardData);
         console.log(props.boardKey);
-        setBoardName(props.boardData.name);
+        setBoardName(props.boardData.deviceName);
         setDeviceCode(props.boardKey);
     }, [props.boardData.name, props.boardData.deviceCode]);
 
