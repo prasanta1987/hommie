@@ -59,7 +59,7 @@ export async function POST(request) {
             }
 
             await dbRef.update(newDevice);
-            return NextResponse.json({ "msg": "Data Added/Updated" }, { status: 200 });
+            return NextResponse.json({ "msg": "Addition Request Sent" }, { status: 200 });
 
         } else if (purpose == "setDeviceProfile") {
             
