@@ -4,40 +4,57 @@ import admin from '../../firebase/adminConfig.js';
 export async function POST(request) {
     try {
 
-        let errors = {};
-        
         const bodyData = await request.json();
-        const { uid, path = null, data, purpose } = bodyData;
+        const { uid, purpose, data } = bodyData;
 
-        if (!uid || !data || !purpose) {
-            return NextResponse.json({ "error": "Missing Desired Inputs Perameters" }, { status: 400 });
+        if (!uid || !purpose || !data) {
+            return NextResponse.json({ "error": "Missing Key Parameters" }, { status: 400 });
         }
 
         await admin.auth().getUser(uid);
+
         const db = admin.database();
 
         if (purpose == "FEED") {
 
-            if (!path) {
-                return NextResponse.json({ "error": "Missing Desired Inputs Perameters" }, { status: 400 });
-            } else {
-                data.time = new Date().getTime();
+            const { deviceCode, feedName, data } = bodyData;
+            let errors = {};
 
-                const dbRef = db.ref(`${uid}/${path}`);
-                await dbRef.update(data);
+            if (!deviceCode) errors.deviceCode = "Device Code is required";
+            if (!feedName) errors.feedName = "Feed Name is required";
+            if (!data) errors.data = "Data is required";
 
-                return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
+
+            if (Object.keys(errors).length > 0) {
+                return NextResponse.json({ "error": errors }, { status: 400 });
             }
+
+            data.time = new Date().getTime();
+
+            const dbRef = db.ref(`${uid}/${deviceCode}/devFeeds/${feedName}`);
+            await dbRef.update(data);
+
+            return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
 
         } else if (purpose == "deviceAuth") {
 
-            const dbRef = db.ref("nextDevice");
             const { name, deviceCode } = data
+            
+            let errors = {};
+
+            if (!deviceCode) errors.deviceCode = "Device Code is required";
+
+            if (Object.keys(errors).length > 0) {
+                return NextResponse.json({ "error": errors }, { status: 400 });
+            }
+
+            const dbRef = db.ref("nextDevice");
 
             let newDevice = {
                 [deviceCode]: {
                     uid: uid,
-                    deviceName: name
+                    deviceName: name || null,
+                    deviceCode: deviceCode
                 }
             }
 
@@ -45,6 +62,7 @@ export async function POST(request) {
             return NextResponse.json({ "msg": "Data Added/Updated" }, { status: 200 });
 
         } else if (purpose == "setDeviceProfile") {
+            
             const { deviceCode } = data
             const dbRef = db.ref(`${uid}/${deviceCode}`);
             await dbRef.update(data);
