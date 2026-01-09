@@ -40,7 +40,7 @@ export async function POST(request) {
             return NextResponse.json({ "msg": "Data Added/Updated" }, { status: 200 });
 
         } else {
-            return NextResponse.json({ "error": "Wrong Parameters/Value Supplied" }, { status: 200 });
+            return NextResponse.json({ "error": "Wrong Purpose Detected" }, { status: 200 });
         }
 
 

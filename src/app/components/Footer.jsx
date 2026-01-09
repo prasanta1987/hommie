@@ -46,7 +46,8 @@ const Footer = (props) => {
 
         updateValuesToDatabase(`/nextDevice/${selectedDevice.id}`, {
             deviceName: (deviceName !== '' ? deviceName : selectedDevice.deviceName || selectedDevice.deviceCode),
-            allowedStat: true
+            allowedStat: true,
+            uid: null
         });
 
         handleCloseModal();
