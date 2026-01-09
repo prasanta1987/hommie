@@ -63,7 +63,7 @@ export default function Boards(props) {
 
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
-        (typeof props.boardData=='object')
+        (typeof props.boardData == 'object')
         &&
         <>
             <div className={"boards-dropdown"}>
@@ -85,7 +85,7 @@ export default function Boards(props) {
                                     <div
                                         className={`boards-dropdown-item ${isSelected ? "bg-primary text-light" : ""}`}
                                         key={devFeed}
-                                        onClick={() => onFeedSelect(props.boardData.deviceCode, devFeed)}
+                                        onClick={() => onFeedSelect(deviceCode, devFeed)}
                                     >
                                         <span>{devFeed}</span>
                                         <Badge className='bg-dark'>{props.boardData.devFeeds[devFeed].value}</Badge>
