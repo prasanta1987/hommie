@@ -19,30 +19,6 @@ const esp8266Imports = `
 
 const esp32Code = `
 
-// Add your WiFi credentials
-char ssid[] = "YOUR_SSID";
-char pass[] = "YOUR_PASSWORD";
-
-// WiFiClientSecure client for ESP32 Boards;
-WiFiClientSecure *client = new WiFiClientSecure;
-
-void setup() {
-
-    Serial.begin(115200);  //If Required for Debuging
-    preferences.begin("IOT", false);
-
-};
-    
-void loop(){
-    // Void Loop Section
-};
-
-`;
-
-
-
-
-const esp8266Code = `
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecureBearSSL.h>
@@ -91,6 +67,7 @@ void setup(void)
   devCode = preferences.getString("devCode", "NONE");
 
   initDevice();
+  
   Serial.println("Device Setup Completed...");
 }
 
@@ -146,7 +123,7 @@ void initDevice()
       devCreate["uid"] = uid;
       devCreate["purpose"] = "deviceAuth";
       devCreate["data"]["deviceCode"] = devCode;
-      devCreate["data"]["name"] = deviceName;
+      devCreate["data"]["deviceName"] = deviceName;
 
       httpRequest("POST", "setData", JSON.stringify(devCreate));
 
