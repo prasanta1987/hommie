@@ -3,6 +3,9 @@ import admin from '../../firebase/adminConfig.js';
 
 export async function POST(request) {
     try {
+
+        let errors = {};
+        
         const bodyData = await request.json();
         const { uid, path = null, data, purpose } = bodyData;
 
@@ -22,7 +25,7 @@ export async function POST(request) {
 
                 const dbRef = db.ref(`${uid}/${path}`);
                 await dbRef.update(data);
-                
+
                 return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
             }
 
