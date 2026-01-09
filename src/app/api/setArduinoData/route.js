@@ -4,28 +4,31 @@ import admin from '../../firebase/adminConfig.js';
 export async function POST(request) {
     try {
         const bodyData = await request.json();
-        const { uid, path, data, purpose } = bodyData;
+        const { uid, path = null, data, purpose } = bodyData;
 
-        if (!uid || !path || !data || !purpose) {
+        if (!uid || !data || !purpose) {
             return NextResponse.json({ "error": "Missing Desired Inputs Perameters" }, { status: 400 });
         }
 
         await admin.auth().getUser(uid);
-
         const db = admin.database();
-        const dbRef = db.ref(`${uid}/${path}`);
 
         if (purpose == "FEED") {
-            data.time = new Date().getTime();
 
-            const dbRef = db.ref(`${uid}/${path}`);
-            await dbRef.update(data);
+            if (!path) {
+                return NextResponse.json({ "error": "Missing Desired Inputs Perameters" }, { status: 400 });
+            } else {
+                data.time = new Date().getTime();
 
-            return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
+                const dbRef = db.ref(`${uid}/${path}`);
+                await dbRef.update(data);
+                
+                return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
+            }
 
         } else if (purpose == "deviceAuth") {
-            const dbRef = db.ref(path);
 
+            const dbRef = db.ref("nextDevice");
             const { name, deviceCode } = data
 
             let newDevice = {
@@ -35,9 +38,14 @@ export async function POST(request) {
                 }
             }
 
-
             await dbRef.update(newDevice);
             return NextResponse.json({ "msg": "Data Added/Updated" }, { status: 200 });
+
+        } else if (purpose == "setDeviceProfile") {
+            const { deviceCode } = data
+            const dbRef = db.ref(`${uid}/${deviceCode}`);
+            await dbRef.update(data);
+            return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
 
         } else {
             return NextResponse.json({ "error": "Wrong Purpose Detected" }, { status: 200 });
