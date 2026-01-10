@@ -34,7 +34,11 @@ export async function POST(request) {
             const dbRef = db.ref(`${uid}/${deviceCode}/devFeeds/${feedName}`);
             await dbRef.update(data);
 
-            return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
+            const ref = db.ref(`${uid}/${deviceCode}`);
+            const snapshot = await ref.once('value');
+            const snapShotData = snapshot.val();
+
+            return NextResponse.json(snapShotData , { status: 200 });
 
         } else if (purpose == "deviceAuth") {
 
@@ -85,7 +89,7 @@ export async function POST(request) {
             return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
 
         } else {
-            return NextResponse.json({ "error": "Wrong Purpose Detected" }, { status: 200 });
+            return NextResponse.json({ "error": "Wrong Purpose Detected" }, { status: 400 });
         }
 
 

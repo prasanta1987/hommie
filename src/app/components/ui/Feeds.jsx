@@ -18,9 +18,9 @@ const formatTimestamp = (dateValue) => {
     return date.toLocaleString('en-IN', {
         hour: 'numeric',
         minute: 'numeric',
+        second:'numeric',
         day: 'numeric',
         month: 'short',
-        year: 'numeric',
         hour12: true,
         timeZone: 'Asia/Kolkata'
     }
