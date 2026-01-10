@@ -92,7 +92,7 @@ const Feeds = React.memo((props) => {
                         .filter(feedName => board.devFeeds[feedName].isSelected)
                         .map(feedName => ({
                             ...board.devFeeds[feedName],
-                            boardName: board.name,
+                            boardName: board.deviceName,
                             feedName: feedName,
                             id: `${board.deviceCode}-${feedName}`
                         }));

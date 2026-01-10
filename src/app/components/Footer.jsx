@@ -54,25 +54,23 @@ const Footer = (props) => {
     };
 
     return (
-        <footer className="bg-dark text-light p-2 text-center sticky-bottom">
+        <footer className="bg-dark text-light fixed-bottom">
             {(unassignedDevices.length > 0 && props.userData) && (
-                <footer className='fixed-bottom text-white bg-dark p-3'>
-                    <div className='container'>
-                        <h5>Unassigned Devices</h5>
-                        <div className='d-flex flex-wrap justify-content-space-between'>
-                            {unassignedDevices.map((device) => (
-                                <Button
-                                    key={device.id}
-                                    // variant='outline-light'
-                                    className='m-1 bg-primary'
-                                    onClick={() => handleShowModal(device)}
-                                >
-                                    {device.deviceName || device.deviceCode}
-                                </Button>
-                            ))}
-                        </div>
+                <div className='container-fluid p-2'>
+                    <h5>Unassigned Devices</h5>
+                    <div className='d-flex flex-wrap justify-content-space-between'>
+                        {unassignedDevices.map((device) => (
+                            <Button
+                                key={device.id}
+                                // variant='outline-light'
+                                className='m-1 bg-primary btn-sm'
+                                onClick={() => handleShowModal(device)}
+                            >
+                                {device.deviceName || device.deviceCode}
+                            </Button>
+                        ))}
                     </div>
-                </footer>
+                </div>
             )}
 
             <Modal show={showModal} onHide={handleCloseModal} centered>

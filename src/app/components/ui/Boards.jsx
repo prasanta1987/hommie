@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Badge, Modal, Button, Form } from 'react-bootstrap';
 import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit } from 'react-icons/fi';
+
 import './Boards.css';
 
-import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
+import { setValueToDatabase, updateValuesToDatabase } from '../../miscFunctions/actions';
 
 export default function Boards(props) {
     const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +41,7 @@ export default function Boards(props) {
         console.log(`Board name changed to: ${boardName}`);
 
         updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
-            "name": boardName,
+            "deviceName": boardName,
             "deviceCode": deviceCode
         })
         handleCloseModal();
