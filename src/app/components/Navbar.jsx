@@ -5,6 +5,7 @@ import { auth } from '../firebase/config';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut } from 'react-icons/fi';
+import { CgProfile } from "react-icons/cg";
 
 import ArduinoCode from './ui/ArduinoCode'
 
@@ -39,7 +40,7 @@ const AppNavbar = () => {
     <>
       <Navbar style={{ backgroundColor: '#21344f' }} className='navbar-dark' expand="md" sticky="top">
         <Container>
-          <Navbar.Brand onClick={() => setShowModal(true)} style={{ cursor: 'pointer' }}>
+          <Navbar.Brand>
             Hi, {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -54,6 +55,12 @@ const AppNavbar = () => {
                   color="#d42013"
                   size={28}
                   onClick={() => signOut(auth)} />
+
+                <CgProfile
+                  style={{ cursor: 'pointer' }}
+                  color="#54ff9a"
+                  size={28}
+                  onClick={() => setShowModal(true)} />
               </>
             )}
 
@@ -71,7 +78,7 @@ const AppNavbar = () => {
               <Form.Label>Enter Display Name</Form.Label>
               <Form.Control
                 type="text"
-                placeholder={user.displayName}
+                placeholder={user && user.displayName}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
