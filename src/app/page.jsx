@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { auth, db } from './firebase/config';
-import { onAuthStateChanged } from 'firebase/auth';
 import SignIn from './components/sign-in';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useObjectVal } from 'react-firebase-hooks/database';
 import { ref } from 'firebase/database';
-
+import { Spinner } from 'react-bootstrap';
 import LandingPage from './components/LandingPage';
 import Footer from './components/Footer';
 import NoBoard from './components/ui/NoBoard';
@@ -19,7 +17,11 @@ export default function Home() {
   const [dbData, dataLoading, dataError] = useObjectVal(user ? ref(db, user.uid) : null);
 
   if (loading || dataLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className='text-center flex-grow-1 d-flex justify-content-center align-items-center'>
+        <Spinner animation="grow" variant="info" size="lg" />
+      </div>
+    );
   }
 
   if (error || dataError) {

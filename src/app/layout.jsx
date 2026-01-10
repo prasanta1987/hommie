@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className="h-100" suppressHydrationWarning={true}>
       <body className={`d-flex flex-column h-100 ${inter.variable}`} suppressHydrationWarning={true}>
         <Navbar />
-        <main className='d-flex flex-column'>{children}</main>
+        <main className='d-flex flex-column bg-dark'>{children}</main>
       </body>
     </html>
   );

@@ -38,7 +38,7 @@ const AppNavbar = () => {
 
   return (
     <>
-      <Navbar style={{ backgroundColor: '#21344f' }} className='navbar-dark' expand="md" sticky="top">
+      <Navbar style={{ backgroundColor: '#21344f',boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
         <Container>
           <Navbar.Brand>
             Hi, {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
@@ -50,17 +50,18 @@ const AppNavbar = () => {
               <>
                 <ArduinoCode />
 
-                <FiLogOut
-                  style={{ cursor: 'pointer' }}
-                  color="#d42013"
-                  size={28}
-                  onClick={() => signOut(auth)} />
-
                 <CgProfile
                   style={{ cursor: 'pointer' }}
                   color="#54ff9a"
                   size={28}
                   onClick={() => setShowModal(true)} />
+
+                <FiLogOut
+                  style={{ cursor: 'pointer' }}
+                  color="#d42013"
+                  size={28}
+                  onClick={() => signOut(auth)} />
+                  
               </>
             )}
 
