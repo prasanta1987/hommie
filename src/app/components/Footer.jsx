@@ -50,16 +50,16 @@ const Footer = (props) => {
     };
 
     return (
-        <footer className="bg-dark text-light fixed-bottom">
+        <footer style={{boxShadow: '0px 0px 12px 0px #000000'}} className="bg-dark text-light fixed-bottom">
             {(unassignedDevices.length > 0 && props.userData) && (
-                <div className='container-fluid p-2'>
-                    <h5>Unassigned Devices</h5>
+                <div className='container p-2 text-center'>
+                    <h5 style={{color: '#b5b5b5'}}>Devices Waiting for Approval</h5>
                     <div className='d-flex flex-wrap justify-content-space-between'>
                         {unassignedDevices.map((device) => (
                             <Button
                                 key={device.id}
-                                // variant='outline-light'
-                                className='m-1 bg-primary btn-sm'
+                                variant='warning'
+                                className='m-1 btn-sm'
                                 onClick={() => handleShowModal(device)}
                             >
                                 {device.deviceName || device.deviceCode}
