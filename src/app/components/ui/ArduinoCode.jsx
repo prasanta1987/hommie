@@ -40,7 +40,6 @@ export default function ArduinoCode() {
         <>
             <SiArduino
                 style={{ cursor: 'pointer' }}
-                className="me-2"
                 color="#0ff" size={40}
                 onClick={handleShowModal}
             />

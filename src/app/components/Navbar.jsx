@@ -38,14 +38,12 @@ const AppNavbar = () => {
 
   return (
     <>
-      <Navbar style={{ backgroundColor: '#21344f',boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
-        <Container>
+      <Navbar style={{ backgroundColor: '#21344f', boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
+        <Container className='d-flex'>
           <Navbar.Brand>
-            Hi, {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
+            {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls="basic-navbar-nav" />
-          <Navbar.Collapse id="basic-navbar-nav" className='gap-1'>
-            <Nav className="me-auto"></Nav>
+          <Nav className="gap-3 align-items-center flex-row">
             {user && (
               <>
                 <ArduinoCode />
@@ -61,11 +59,10 @@ const AppNavbar = () => {
                   color="#d42013"
                   size={28}
                   onClick={() => signOut(auth)} />
-                  
+
               </>
             )}
-
-          </Navbar.Collapse>
+          </Nav>
         </Container>
       </Navbar >
 
