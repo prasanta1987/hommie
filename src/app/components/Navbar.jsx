@@ -40,7 +40,7 @@ const AppNavbar = () => {
     <>
       <Navbar style={{ backgroundColor: '#21344f', boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
         <Container className='d-flex'>
-          <Navbar.Brand>
+          <Navbar.Brand className='text-info'>
             {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
           </Navbar.Brand>
           <Nav className="gap-3 align-items-center flex-row">
