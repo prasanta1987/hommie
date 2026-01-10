@@ -16,16 +16,12 @@ const Footer = (props) => {
 
     const [deviceData, dataLoading, dataError] = useObjectVal(props.userData ? ref(db, "nextDevice") : null);
 
-
-    console.log(deviceData);
-
     const unassignedDevices = deviceData
         ? Object.keys(deviceData)
             .map((key) => ({ id: key, ...deviceData[key] }))
             .filter((device) => device.uid == props.userData && device.allowedStat != true)
         : [];
 
-    console.log(unassignedDevices);
 
     const handleShowModal = (device) => {
         setSelectedDevice(device);

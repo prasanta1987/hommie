@@ -18,7 +18,6 @@ export default function Home() {
   const [user, loading, error] = useAuthState(auth);
   const [dbData, dataLoading, dataError] = useObjectVal(user ? ref(db, user.uid) : null);
 
-  console.log(dbData);
   if (loading || dataLoading) {
     return <div>Loading...</div>;
   }

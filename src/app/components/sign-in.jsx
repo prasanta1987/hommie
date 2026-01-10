@@ -4,13 +4,14 @@ import React, { useState, useEffect } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  onAuthStateChanged
+  onAuthStateChanged, updateProfile
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { redirect } from 'next/navigation';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -43,7 +44,13 @@ const SignIn = () => {
     e.preventDefault();
     setError(null);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user,
+        {
+          displayName: displayName,
+        }
+      )
+
     } catch (error) {
       setError(getFirebaseErrorMessage(error.code));
       console.error(error);
@@ -83,6 +90,17 @@ const SignIn = () => {
         <form onSubmit={handleSubmit}>
           <h2 className="text-center mb-4">{isSignUp ? 'Create an Account' : 'Sign In'}</h2>
           <div className="mb-3">
+            {isSignUp
+              &&
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Display Name"
+                required
+                className="mb-3 form-control"
+              />
+            }
             <input
               type="email"
               value={email}
