@@ -38,7 +38,7 @@ export async function POST(request) {
             const snapshot = await ref.once('value');
             const snapShotData = snapshot.val();
 
-            return NextResponse.json(snapShotData , { status: 200 });
+            return NextResponse.json(snapShotData, { status: 200 });
 
         } else if (purpose == "deviceAuth") {
 
@@ -87,6 +87,23 @@ export async function POST(request) {
             await oldRef.remove();
 
             return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
+
+        } else if (purpose == "delDeviceProfile") {
+
+            const { deviceCode } = data;
+
+            let errors = {};
+
+            if (!deviceCode) errors.deviceCode = "Device Code is required";
+
+            if (Object.keys(errors).length > 0) {
+                return NextResponse.json({ "error": errors }, { status: 400 });
+            }
+
+            const dbRef = db.ref(uid);
+            await dbRef.remove();
+
+            return NextResponse.json({ "msg": "Device Deleted" }, { status: 200 });
 
         } else {
             return NextResponse.json({ "error": "Wrong Purpose Detected" }, { status: 400 });

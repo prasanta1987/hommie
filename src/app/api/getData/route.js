@@ -31,7 +31,7 @@ export async function POST(request) {
 
 
             } else if (purpose == "getDevices") {
-                const ref = db.ref(uid);
+                const ref = db.ref(`${uid}/${deviceCode}`);
                 const snapshot = await ref.once('value');
                 const data = snapshot.val();
                 return NextResponse.json(data, { status: 200 });
