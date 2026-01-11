@@ -50,10 +50,10 @@ const Footer = (props) => {
     };
 
     return (
-        <footer style={{boxShadow: '0px 0px 12px 0px #000000'}} className="bg-dark text-light fixed-bottom">
+        <footer style={{ boxShadow: '0px 0px 12px 0px #000000' }} className="bg-dark text-light fixed-bottom">
             {(unassignedDevices.length > 0 && props.userData) && (
                 <div className='container p-2 text-center'>
-                    <h5 style={{color: '#b5b5b5'}}>Devices Waiting for Approval</h5>
+                    <h5 style={{ color: '#b5b5b5' }}>Devices Waiting for Approval</h5>
                     <div className='d-flex flex-wrap justify-content-space-between'>
                         {unassignedDevices.map((device) => (
                             <Button
@@ -74,9 +74,12 @@ const Footer = (props) => {
                     <Modal.Title>Set Device Name</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>
-                        Current Device: <strong>{selectedDevice?.deviceName || selectedDevice?.deviceCode}</strong>
-                    </p>
+                    {
+                        selectedDevice?.deviceName && <p>Current Device Name: <strong>{selectedDevice?.deviceName}</strong></p>
+                    }
+                    {
+                        selectedDevice?.deviceCode && <p>Current Device Code: <strong>{selectedDevice?.deviceCode}</strong></p>
+                    }
                     <Form.Group controlId='formDeviceName'>
                         <Form.Label>New Device Name</Form.Label>
                         <Form.Control
