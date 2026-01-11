@@ -7,7 +7,7 @@ export async function POST(request) {
         const bodyData = await request.json();
         const { uid, purpose, data } = bodyData;
 
-        if (!uid || !purpose || !data) {
+        if (!uid || !purpose ) {
             return NextResponse.json({ "error": "Missing Key Parameters" }, { status: 400 });
         }
 
@@ -42,7 +42,7 @@ export async function POST(request) {
 
         } else if (purpose == "deviceAuth") {
 
-            const { deviceName, deviceCode } = data
+            const { deviceName, deviceCode } = bodyData
 
             let errors = {};
 
@@ -67,7 +67,7 @@ export async function POST(request) {
 
         } else if (purpose == "setDeviceProfile") {
 
-            const { deviceName, deviceCode } = data
+            const { deviceName, deviceCode } = bodyData
 
             let errors = {};
 
@@ -90,7 +90,7 @@ export async function POST(request) {
 
         } else if (purpose == "delDeviceProfile") {
 
-            const { deviceCode } = data;
+            const { deviceCode } = bodyData;
 
             let errors = {};
 
