@@ -20,7 +20,7 @@ export async function POST(request) {
                     const snapshot = await ref.once('value');
                     const data = snapshot.val();
                     if(data == null){
-                        return NextResponse.json(false, { status: 200 });
+                        return NextResponse.json({"error":"Device Not Found"}, { status: 404 });
                         // return NextResponse.json({"error":"Wrong Device Code Supplied"}, { status: 200 });
                     } else {
                         return NextResponse.json(data, { status: 200 });
@@ -41,7 +41,7 @@ export async function POST(request) {
 
         }
         catch {
-            return NextResponse.json({ "error": "User Not Found" }, { status: 200 });
+            return NextResponse.json({ "error": "User Not Found" }, { status: 404 });
         }
     } catch (error) {
         console.error('Error fetching data:', error);

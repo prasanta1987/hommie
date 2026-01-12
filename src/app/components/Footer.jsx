@@ -49,6 +49,15 @@ const Footer = (props) => {
         handleCloseModal();
     };
 
+    const handleDiscardDevice=()=>{
+        console.log(selectedDevice.id);
+        setValueToDatabase(`/nextDevice/${selectedDevice.id}`, null);
+
+        handleCloseModal();
+    }
+
+    console.log(unassignedDevices);
+
     return (
         <footer style={{ boxShadow: '0px 0px 12px 0px #000000' }} className="bg-dark text-light fixed-bottom">
             {(unassignedDevices.length > 0 && props.userData) && (
@@ -71,7 +80,7 @@ const Footer = (props) => {
 
             <Modal show={showModal} onHide={handleCloseModal} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Set Device Name</Modal.Title>
+                    <Modal.Title>Un-Assigned Device</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {
@@ -93,6 +102,9 @@ const Footer = (props) => {
                 <Modal.Footer>
                     <Button variant='secondary' onClick={handleCloseModal}>
                         Close
+                    </Button>
+                    <Button variant='secondary' onClick={handleDiscardDevice}>
+                        Discard
                     </Button>
                     <Button variant='primary' onClick={handleSaveDeviceName}>
                         Save Changes

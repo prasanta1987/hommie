@@ -18,7 +18,7 @@ const formatTimestamp = (dateValue) => {
     return date.toLocaleString('en-IN', {
         hour: 'numeric',
         minute: 'numeric',
-        second:'numeric',
+        second: 'numeric',
         day: 'numeric',
         month: 'short',
         hour12: true,
@@ -51,6 +51,42 @@ const formatTimestamp = (dateValue) => {
 };
 
 
+function calculateAgeing(epochMs) {
+    const diffMs = Date.now() - epochMs;
+    const diffSec = Math.floor(diffMs / 1000);
+
+    // Scaling Logic
+    if (diffSec < 60) {
+        return `${diffSec} seconds ago`;
+    }
+
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) {
+        return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+    }
+
+    const diffHrs = Math.floor(diffMin / 60);
+    if (diffHrs < 24) {
+        return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+    }
+
+    const diffDays = Math.floor(diffHrs / 24);
+    if (diffDays < (24 * 30)) {
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    }
+
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) {
+        return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+    }
+
+    const diffYear = Math.floor(diffMonths / 12);
+    return `${diffYear} year${diffYear > 1 ? 's' : ''} ago`;
+
+}
+
+
+
 const FeedCard = ({ feed, boardName, feedName }) => {
     if (!feed) return null;
 
@@ -71,9 +107,11 @@ const FeedCard = ({ feed, boardName, feedName }) => {
                     <FiCpu className="board-icon" />
                     <span>{boardName}</span>
                 </div>
-                <div className="feed-timestamp">
+                <div className="feed-timestamp d-flex align-items-center">
                     <FiClock className="board-icon" />
-                    {dbTimestamp ? formatTimestamp(dbTimestamp) : 'No timestamp'}
+                    <span>
+                        {dbTimestamp ? calculateAgeing(dbTimestamp) : 'No timestamp'}
+                    </span>
                 </div>
             </div>
         </div>
