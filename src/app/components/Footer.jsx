@@ -56,8 +56,7 @@ const Footer = (props) => {
         handleCloseModal();
     }
 
-    console.log(unassignedDevices);
-
+    
     return (
         <footer style={{ boxShadow: '0px 0px 12px 0px #000000' }} className="bg-dark text-light fixed-bottom">
             {(unassignedDevices.length > 0 && props.userData) && (

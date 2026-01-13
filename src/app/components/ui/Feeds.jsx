@@ -51,44 +51,55 @@ const formatTimestamp = (dateValue) => {
 };
 
 
-function calculateAgeing(epochMs) {
-    const diffMs = Date.now() - epochMs;
-    const diffSec = Math.floor(diffMs / 1000);
 
-    // Scaling Logic
-    if (diffSec < 60) {
-        return `${diffSec} seconds ago`;
-    }
-
-    const diffMin = Math.floor(diffSec / 60);
-    if (diffMin < 60) {
-        return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
-    }
-
-    const diffHrs = Math.floor(diffMin / 60);
-    if (diffHrs < 24) {
-        return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
-    }
-
-    const diffDays = Math.floor(diffHrs / 24);
-    if (diffDays < (24 * 30)) {
-        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    }
-
-    const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths < 12) {
-        return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
-    }
-
-    const diffYear = Math.floor(diffMonths / 12);
-    return `${diffYear} year${diffYear > 1 ? 's' : ''} ago`;
-
-}
 
 
 
 const FeedCard = ({ feed, boardName, feedName }) => {
     if (!feed) return null;
+
+    const [millis, setMillis] = useState(new Date().getTime())
+
+    useEffect(() => {
+        setInterval(() => {
+            setMillis(new Date().getTime())
+        }, 1000)
+    }, [millis]);
+
+    function calculateAgeing(epochMs) {
+        const diffMs = millis - epochMs;
+        const diffSec = Math.floor(diffMs / 1000);
+
+        // Scaling Logic
+        if (diffSec < 60) {
+            return `${diffSec} seconds ago`;
+        }
+
+        const diffMin = Math.floor(diffSec / 60);
+        if (diffMin < 60) {
+            return `${diffMin} minute${diffMin > 1 ? 's' : ''} ago`;
+        }
+
+        const diffHrs = Math.floor(diffMin / 60);
+        if (diffHrs < 24) {
+            return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+        }
+
+        const diffDays = Math.floor(diffHrs / 24);
+        if (diffDays < (24 * 30)) {
+            return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        }
+
+        const diffMonths = Math.floor(diffDays / 30);
+        if (diffMonths < 12) {
+            return `${diffMonths} month${diffMonths > 1 ? 's' : ''} ago`;
+        }
+
+        const diffYear = Math.floor(diffMonths / 12);
+        return `${diffYear} year${diffYear > 1 ? 's' : ''} ago`;
+
+    }
+
 
     // Use the timestamp from the feed data, assuming it has a 'time' property
     const dbTimestamp = feed.time ? feed.time : null;

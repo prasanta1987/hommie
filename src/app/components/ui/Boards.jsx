@@ -13,8 +13,6 @@ export default function Boards(props) {
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
 
     useEffect(() => {
-        console.log(props.boardData);
-        console.log(props.boardKey);
         setBoardName(props.boardData.deviceName);
         setDeviceCode(props.boardKey);
     }, [props.boardData.name, props.boardData.deviceCode]);
@@ -36,9 +34,6 @@ export default function Boards(props) {
 
     const handleSaveName = () => {
         setBoardName(boardName);
-        // Here you would typically call a prop function to update the name in the parent component, e.g.:
-        // props.onBoardNameChange(props.boardData.deviceCode, boardName);
-        console.log(`Board name changed to: ${boardName}`);
 
         updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
             "deviceName": boardName,
