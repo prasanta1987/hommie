@@ -50,7 +50,7 @@ const LandingPage = (props) => {
           }
         </div>
       </Container>
-      <Container className='d-flex justify-content-start gap-3 pt-2'>
+      <Container className='justify-content-start pt-2'>
         {dbData && <Feeds feedData={dbData} />}
       </Container>
     </Container>

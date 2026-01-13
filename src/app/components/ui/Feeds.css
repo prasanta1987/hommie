@@ -1,16 +1,14 @@
 .feeds-grid {
-    display: flex;
-    flex-wrap: wrap;
-    /* justify-content: center; */
-    gap: 20px;
-    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
 }
 
 .feed-card {
     background: #e9f4ff;
     border-radius: 16px;
-    padding: 24px;
-    width: 280px;
+    padding: 10px 20px;
+    width: 100%;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.18);
     display: flex;
