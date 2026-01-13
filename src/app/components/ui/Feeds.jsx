@@ -68,9 +68,9 @@ const FeedCard = ({ feed, boardName, feedName }) => {
 
     function calculateAgeing(epochMs) {
         const diffMs = millis - epochMs;
-        const diffSec = Math.floor(diffMs / 1000);
 
-        // Scaling Logic
+
+        const diffSec = Math.floor(diffMs / 1000);
         if (diffSec < 60) {
             return `${diffSec} seconds ago`;
         }
@@ -83,6 +83,8 @@ const FeedCard = ({ feed, boardName, feedName }) => {
         const diffHrs = Math.floor(diffMin / 60);
         if (diffHrs < 24) {
             return `${diffHrs} hour${diffHrs > 1 ? 's' : ''} ago`;
+        } else {
+            return formatTimestamp(epochMs)
         }
 
         const diffDays = Math.floor(diffHrs / 24);
