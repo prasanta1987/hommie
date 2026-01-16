@@ -4,7 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { useObjectVal } from 'react-firebase-hooks/database';
 import { auth, db } from '../firebase/config';
 import { ref } from 'firebase/database';
-import { setValueToDatabase } from '../miscFunctions/actions';
+import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
 
 // A draggable widget component for the sidebar
 const DraggableWidget = ({ id, name, onDragStart }) => {
@@ -142,20 +142,12 @@ const DisplayPage = () => {
     if (backgroundUrl) {
       dataToSend.background = backgroundUrl;
     }
-    setValueToDatabase(`/${user.uid}/display`, dataToSend);
+    updateValuesToDatabase(`/${user.uid}/display`, dataToSend);
   };
   
     const handleBackgroundUpdate = () => {
     if (user && backgroundInput) {
-        const currentWidgetsData = widgets.reduce((acc, widget) => {
-            acc[widget.name] = { x: widget.x, y: widget.y };
-            return acc;
-        }, {});
-        const dataToSend = {
-            ...currentWidgetsData,
-            background: backgroundInput,
-        };
-        setValueToDatabase(`/${user.uid}/display`, dataToSend);
+      updateValuesToDatabase(`/${user.uid}/display`, {"background": backgroundInput});
     }
   };
 
@@ -178,8 +170,8 @@ const DisplayPage = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           style={{
-            width: '480px', 
-            height: '360px', // 4:3 aspect ratio
+            width: '320px', 
+            height: '240px', // 4:3 aspect ratio
             border: '2px dashed #555',
             borderRadius: '10px',
             position: 'relative',
@@ -210,7 +202,7 @@ const DisplayPage = () => {
                 userSelect: 'none'
               }}
             >
-              {widget.name}: ({widget.x}, {widget.y})
+              {widget.name}
             </div>
           ))}
         </div>
@@ -231,14 +223,7 @@ const DisplayPage = () => {
                     Set
                 </button>
             </div>
-          <h3>Widget Coordinates:</h3>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {widgets.map(w => (
-              <li key={w.id} style={{ backgroundColor: '#2a2a2a', padding: '5px 10px', borderRadius: '3px', margin: '5px 0' }}>
-                {`${w.name} (${w.id.slice(-4)}) is at (${w.x}, ${w.y})`}
-              </li>
-            ))}
-          </ul>
+
         </div>
       </div>
     </div>
