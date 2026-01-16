@@ -164,14 +164,13 @@ const DisplayPage = () => {
 
       {/* Main Content */}
       <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
-        <h2>Virtual Screen</h2>
         <div
           ref={virtualScreenRef}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           style={{
-            width: '320px', 
-            height: '240px', // 4:3 aspect ratio
+            width: '480px', 
+            height: '360px', // 4:3 aspect ratio
             border: '2px dashed #555',
             borderRadius: '10px',
             position: 'relative',
