@@ -1,6 +1,6 @@
 .feeds-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 10px;
 }
 
@@ -43,8 +43,24 @@
 .feed-card-body {
     text-align: center;
     flex-grow: 1;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
+
+.feed-card-footer {
+    font-size: 12px;
+    color: #020b37;
+    border-top: 1px solid #dddce7;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+@media screen and (max-width: 425px) {
+    .feed-card-footer {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+  }
 
 .feed-value {
     font-size: 48px;
@@ -53,16 +69,7 @@
     line-height: 1.2;
 }
 
-.feed-card-footer {
-    font-size: 12px;
-    color: #020b37;
-    text-align: center;
-    border-top: 1px solid #f0f0f0;
-    padding-top: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+
 
 .feed-board-info {
     display: flex;

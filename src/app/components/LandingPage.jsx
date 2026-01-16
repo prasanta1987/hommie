@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Boards from './ui/Boards';
 import Feeds from './ui/Feeds';
-import { Container } from 'react-bootstrap';
 
 import { updateValuesToDatabase } from '../miscFunctions/actions';
 import './LandingPage.css'
@@ -32,8 +31,8 @@ const LandingPage = (props) => {
 
 
   return (
-    <Container fluid className='bg-dark text-light flex-grow-1 overflow-auto pb-5'>
-      <Container className='d-flex justify-content-between align-items-center pt-2'>
+    <div className='container-fluid bg-dark text-light flex-grow-1 overflow-auto pb-5'>
+      <div className='container d-flex justify-content-between align-items-center pt-2'>
         <div className='d-flex justify-content-start gap-3 align-items-center flex-wrap'>
           {
             Object.keys(dbData).map(data => {
@@ -49,11 +48,11 @@ const LandingPage = (props) => {
             })
           }
         </div>
-      </Container>
-      <Container className='justify-content-start pt-2'>
+      </div>
+      <div className='container justify-content-start pt-2'>
         {dbData && <Feeds feedData={dbData} />}
-      </Container>
-    </Container>
+      </div>
+    </div>
 
   );
 };
