@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 // Import the client-side db instance and functions
 import { db } from '../../firebase/config.js';
-import { ref, get } from 'firebase/database';
+import { ref, get, set, update } from 'firebase/database';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/config.js';
 
@@ -32,13 +32,32 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
-    const signInUser = await signInWithEmailAndPassword(auth, email, password);
+    const { purpose } = body;
 
-    if (signInUser) {
-      return NextResponse.json({ "uid": signInUser.user.uid }, { status: 200 });
+    let errors = {};
+    const { path, data } = body;
+
+    if (!path) errors.path = "Path is Required";
+    if (!data) errors.data = "Data is required";
+
+    if (Object.keys(errors).length > 0) {
+      return NextResponse.json({ "error": errors }, { status: 400 });
+    }
+
+    if (purpose == "SET") {
+
+      const dbRef = ref(db, path);
+      await set(dbRef, data);
+      return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
+
+    } else if (purpose == "UPDATE") {
+
+      const dbRef = ref(db, path);
+      await update(dbRef, data);
+      return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
+
     } else {
-      return NextResponse.json({ "msg": "Wrong Creds" }, { status: 401 });
+      return NextResponse.json({ "purpose": "Wrong Purpose" }, { status: 401 });
     }
 
   } catch (error) {
