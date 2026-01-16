@@ -31,6 +31,8 @@ const DraggableWidget = ({ id, name, onDragStart }) => {
 // The main display page component
 const DisplayPage = () => {
   const [widgets, setWidgets] = useState([]);
+  const [backgroundUrl, setBackgroundUrl] = useState('');
+  const [backgroundInput, setBackgroundInput] = useState('');
   const virtualScreenRef = useRef(null);
   const [user] = useAuthState(auth);
   const [data, loading, error] = useObjectVal(user ? ref(db, `/${user.uid}/display`) : null);
@@ -48,9 +50,13 @@ const DisplayPage = () => {
     }
 
     if (data && virtualScreenRef.current) {
+      const { background, ...widgetsData } = data;
+      setBackgroundUrl(background || '');
+      setBackgroundInput(background || '');
+      
       const screenRect = virtualScreenRef.current.getBoundingClientRect();
       if (screenRect.width > 0) { // Ensure screen is rendered
-          const loadedWidgets = Object.entries(data).map(([name, coords]) => ({
+          const loadedWidgets = Object.entries(widgetsData).map(([name, coords]) => ({
           id: `${name}-${Date.now()}`,
           name: name,
           x: coords.x,
@@ -62,6 +68,7 @@ const DisplayPage = () => {
       }
     } else {
       setWidgets([]);
+      setBackgroundUrl('');
     }
   }, [data, loading, error, user]);
 
@@ -132,8 +139,26 @@ const DisplayPage = () => {
       acc[widget.name] = { x: widget.x, y: widget.y };
       return acc;
     }, {});
+    if (backgroundUrl) {
+      dataToSend.background = backgroundUrl;
+    }
     setValueToDatabase(`/${user.uid}/display`, dataToSend);
   };
+  
+    const handleBackgroundUpdate = () => {
+    if (user && backgroundInput) {
+        const currentWidgetsData = widgets.reduce((acc, widget) => {
+            acc[widget.name] = { x: widget.x, y: widget.y };
+            return acc;
+        }, {});
+        const dataToSend = {
+            ...currentWidgetsData,
+            background: backgroundInput,
+        };
+        setValueToDatabase(`/${user.uid}/display`, dataToSend);
+    }
+  };
+
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 60px)', color: 'white', backgroundColor: '#1e1e1e' }}>
@@ -158,7 +183,10 @@ const DisplayPage = () => {
             border: '2px dashed #555',
             borderRadius: '10px',
             position: 'relative',
-            backgroundColor: '#333333',
+            backgroundColor: backgroundUrl ? 'transparent' : '#333333',
+            backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             boxShadow: '0 0 20px rgba(0,0,0,0.5) inset'
           }}
         >
@@ -187,6 +215,22 @@ const DisplayPage = () => {
           ))}
         </div>
         <div style={{width: '480px'}}>
+            <h3>Set Background Image:</h3>
+            <div style={{display: 'flex', gap: '10px', margin: '10px 0'}}>
+                <input
+                    type="text"
+                    value={backgroundInput}
+                    onChange={(e) => setBackgroundInput(e.target.value)}
+                    placeholder="Enter image URL"
+                    style={{flex: 1, padding: '8px', borderRadius: '3px', border: '1px solid #555', backgroundColor: '#2a2a2a', color: 'white'}}
+                />
+                <button
+                    onClick={handleBackgroundUpdate}
+                    style={{padding: '8px 12px', borderRadius: '3px', border: 'none', backgroundColor: '#007acc', color: 'white', cursor: 'pointer'}}
+                >
+                    Set
+                </button>
+            </div>
           <h3>Widget Coordinates:</h3>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             {widgets.map(w => (
