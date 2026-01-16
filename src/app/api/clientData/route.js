@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-// Import the client-side db instance and functions
+
 import { db } from '../../firebase/config.js';
 import { ref, get, set, update } from 'firebase/database';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase/config.js';
 
 
 export async function GET(request) {

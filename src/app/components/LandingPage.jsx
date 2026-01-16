@@ -36,6 +36,7 @@ const LandingPage = (props) => {
         <div className='d-flex justify-content-start gap-3 align-items-center flex-wrap'>
           {
             Object.keys(dbData).map(data => {
+              if (data == "display") return;
               return (
                 <Boards
                   key={data}
