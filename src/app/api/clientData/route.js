@@ -29,14 +29,16 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const body = await request.json();
-    const { purpose } = body;
-
     let errors = {};
-    const { path, data } = body;
+
+    const body = await request.json();
+    const { purpose, path, data, feedName, deviceCode } = body;
 
     if (!path) errors.path = "Path is Required";
     if (!data) errors.data = "Data is required";
+    if (!purpose) errors.data = "Piurpose is required";
+    if (!feedName) errors.data = "Feed Name is required";
+    if (!deviceCode) errors.data = "Device Code is required";
 
     if (Object.keys(errors).length > 0) {
       return NextResponse.json({ "error": errors }, { status: 400 });
@@ -50,7 +52,7 @@ export async function POST(request) {
 
     } else if (purpose == "UPDATE") {
 
-      const dbRef = ref(db, path);
+      const dbRef = ref(db, `${path}/${deviceCode}/${feedName}`);
       await update(dbRef, data);
       return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
 

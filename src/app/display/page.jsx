@@ -284,7 +284,6 @@ const DisplayPage = () => {
             >
               {widget.name === 'Clock' && <ClockWidget color={widget.color} fontSize={widget.fontSize} />}
               {widget.name === 'Date' && <DateWidget color={widget.color} fontSize={widget.fontSize} />}
-              {widget.name !== 'Clock' && widget.name !== 'Date' && widget.name}
             </div>
           ))}
         </div>
