@@ -40,7 +40,7 @@ const DisplayPage = () => {
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [data, dataLoading, dataError] = useObjectVal(user && selectedDevice ? databaseRef(db, `/${user.uid}/${selectedDevice}/display`) : null);
   const [allUserData] = useObjectVal(user ? databaseRef(db, `/${user.uid}`) : null);
-  const [selectedWidget, setSelectedWidget] = useState(null); // This will now store the widget name
+  const [selectedWidget, setSelectedWidget] = useState(null);
   const [backgroundColor, setBackgroundColor] = useState('#333333');
 
   useEffect(() => {
@@ -57,7 +57,6 @@ const DisplayPage = () => {
     }
   }, [allUserData, selectedDevice]);
 
-  // this effect reacts to data changes from the hook
   useEffect(() => {
     if (data && virtualScreenRef.current) {
       const { bgColour, ...widgetsData } = data;
@@ -71,7 +70,7 @@ const DisplayPage = () => {
             name: name,
             ...props,
             color: typeof props.color === 'string' ? props.color : '#ffffff',
-            fontSize: props.fontSize || 2, // Default font size
+            fontSize: props.fontSize || 2,
             pixelX: (props.x / 320) * screenRect.width,
             pixelY: (props.y / 240) * screenRect.height,
           }));
@@ -94,23 +93,19 @@ const DisplayPage = () => {
       return <div>Error: {authError?.message || dataError?.message}</div>
   }
 
-  // Handles starting the drag from the sidebar
   const handleDragStart = (e) => {
     e.dataTransfer.setData('widgetName', e.target.id);
   };
 
-  // Handles starting the drag of a widget already on the screen
   const handleWidgetDragStart = (e, widgetName) => {
     e.dataTransfer.setData('widgetName', widgetName);
     setSelectedWidget(widgetName);
   };
 
-  // Allows the virtual screen to be a drop target
   const handleDragOver = (e) => {
     e.preventDefault();
   };
 
-  // Handles dropping a widget onto the virtual screen
   const handleDrop = (e) => {
     e.preventDefault();
     if (!user || !selectedDevice) return;
@@ -171,6 +166,7 @@ const DisplayPage = () => {
     if (widgetToRemove) {
       const newWidgets = widgets.filter(w => w.name !== widgetName);
       setWidgets(newWidgets);
+      setSelectedWidget(null);
       const widgetRef = databaseRef(db, `/${user.uid}/${selectedDevice}/display/${widgetToRemove.name}`);
       remove(widgetRef);
     }
@@ -210,9 +206,14 @@ const DisplayPage = () => {
       updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, { bgColour: backgroundColor });
   };
 
-  const handleDeselect = () => {
+  const handleScreenClick = () => {
     setSelectedWidget(null);
   };
+
+  const handleWidgetClick = (e, widgetName) => {
+    e.stopPropagation();
+    setSelectedWidget(widgetName);
+  }
 
   const selectedWidgetObject = widgets.find(w => w.name === selectedWidget);
 
@@ -238,7 +239,7 @@ const DisplayPage = () => {
       </div>
 
       {/* Main Content (Virtual Screen) */}
-      <div onClick={handleDeselect} style={{ flex: 1, padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div onClick={handleScreenClick} style={{ flex: 1, padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div
           ref={virtualScreenRef}
           onDragOver={handleDragOver}
@@ -261,7 +262,7 @@ const DisplayPage = () => {
               id={widget.name}
               draggable
               onDragStart={(e) => handleWidgetDragStart(e, widget.name)}
-              onClick={(e) => {e.stopPropagation(); setSelectedWidget(widget.name)} }
+              onClick={(e) => handleWidgetClick(e, widget.name)}
               style={{
                 position: 'absolute',
                 left: widget.pixelX,
@@ -270,7 +271,6 @@ const DisplayPage = () => {
                 padding: '8px 12px',
                 border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
                 borderRadius: '5px',
-                // backgroundColor: 'rgba(42, 42, 42, 0.8)',
                 backdropFilter: 'blur(5px)',
                 cursor: 'grab',
                 userSelect: 'none',
@@ -287,18 +287,19 @@ const DisplayPage = () => {
 
       {/* Right Sidebar (Properties & Delete) */}
       <div style={{ width: '200px', borderLeft: '1px solid #444', padding: '20px', backgroundColor: '#252526', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Screen Properties</h3>
-            <label>Background Color</label>
-            <input
-                type="color"
-                value={backgroundColor}
-                onChange={handleBackgroundColorChange}
-                onBlur={handleBackgroundColorSave}
-                style={{ width: '100%' }}
-            />
-        </div>
-        {selectedWidget && (
+        {!selectedWidget ? (
+          <div style={{ marginBottom: '20px' }}>
+              <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Screen Properties</h3>
+              <label>Background Color</label>
+              <input
+                  type="color"
+                  value={backgroundColor}
+                  onChange={handleBackgroundColorChange}
+                  onBlur={handleBackgroundColorSave}
+                  style={{ width: '100%' }}
+              />
+          </div>
+        ) : (
           <div style={{ marginBottom: '20px' }}>
             <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Widget Properties</h3>
             <div>
