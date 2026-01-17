@@ -1,7 +1,8 @@
+
 'use client';
 import React, { useState, useEffect } from 'react';
 
-const ClockWidget = ({ color }) => {
+const ClockWidget = ({ color, fontSize }) => {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -22,7 +23,17 @@ const ClockWidget = ({ color }) => {
     });
   };
 
-  return <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: color || '#ffffff'}}>{formatTime(time)}</div>;
+  const fontSizes = {
+    1: '8px',
+    2: '16px',
+    3: '24px',
+    4: '32px',
+    5: '40px',
+    6: '48px',
+    7: '56px',
+  };
+
+  return <div style={{fontSize: fontSizes[fontSize] || '16px', fontWeight: 'bold', color: color || '#ffffff'}}>{formatTime(time)}</div>;
 };
 
 export default ClockWidget;

@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 
-const DateWidget = ({ color }) => {
+const DateWidget = ({ color, fontSize }) => {
   const [date, setDate] = useState(new Date());
 
   useEffect(() => {
@@ -23,7 +23,17 @@ const DateWidget = ({ color }) => {
     return formattedDate.replace(/ /g, '-'); // Replace spaces with hyphens
   };
 
-  return <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: color || '#ffffff'}}>{formatDate(date)}</div>;
+  const fontSizes = {
+    1: '8px',
+    2: '16px',
+    3: '24px',
+    4: '32px',
+    5: '40px',
+    6: '48px',
+    7: '56px',
+  };
+
+  return <div style={{fontSize: fontSizes[fontSize] || '16px', fontWeight: 'bold', color: color || '#ffffff'}}>{formatDate(date)}</div>;
 };
 
 export default DateWidget;

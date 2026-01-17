@@ -38,11 +38,15 @@ const DisplayPage = () => {
   const [user, authLoading, authError] = useAuthState(auth);
   const [data, dataLoading, dataError] = useObjectVal(user ? databaseRef(db, `/${user.uid}/display`) : null);
   const [selectedWidget, setSelectedWidget] = useState(null); // This will now store the widget name
+  const [backgroundColor, setBackgroundColor] = useState('#333333');
 
   // this effect reacts to data changes from the hook
   useEffect(() => {
     if (data && virtualScreenRef.current) {
-      const { background, ...widgetsData } = data;
+      const { bgColour, ...widgetsData } = data;
+      if (bgColour) {
+        setBackgroundColor(bgColour);
+      }
       
       const screenRect = virtualScreenRef.current.getBoundingClientRect();
       if (screenRect.width > 0) {
@@ -50,6 +54,7 @@ const DisplayPage = () => {
             name: name,
             ...props,
             color: typeof props.color === 'string' ? props.color : '#ffffff',
+            fontSize: props.fontSize || 2, // Default font size
             pixelX: (props.x / 320) * screenRect.width,
             pixelY: (props.y / 240) * screenRect.height,
           }));
@@ -124,7 +129,8 @@ const DisplayPage = () => {
         y: scaledY,
         pixelX: x,
         pixelY: y,
-        color: '#ffffff'
+        color: '#ffffff',
+        fontSize: 2
       };
       newWidgets = [...widgets, newWidget];
     }
@@ -132,7 +138,7 @@ const DisplayPage = () => {
     setSelectedWidget(widgetName);
 
     const dataToSend = newWidgets.reduce((acc, widget) => {
-      acc[widget.name] = { x: widget.x, y: widget.y, color: widget.color };
+      acc[widget.name] = { x: widget.x, y: widget.y, color: widget.color, fontSize: widget.fontSize };
       return acc;
     }, {});
     updateValuesToDatabase(`/${user.uid}/display`, dataToSend);
@@ -153,19 +159,18 @@ const DisplayPage = () => {
     }
   };
 
-  const handleColorChange = (e) => {
+  const handlePropertyChange = (property, value) => {
     if (!selectedWidget) return;
-    const newColor = e.target.value;
     const newWidgets = widgets.map(w => {
         if (w.name === selectedWidget) {
-            return { ...w, color: newColor };
+            return { ...w, [property]: value };
         }
         return w;
     });
     setWidgets(newWidgets);
   };
 
-  const handleColorSave = () => {
+  const handlePropertySave = () => {
     if (!selectedWidget) return;
     const widgetToUpdate = widgets.find(w => w.name === selectedWidget);
     if (widgetToUpdate) {
@@ -173,9 +178,19 @@ const DisplayPage = () => {
             x: widgetToUpdate.x,
             y: widgetToUpdate.y,
             color: widgetToUpdate.color,
+            fontSize: widgetToUpdate.fontSize,
         };
         updateValuesToDatabase(`/${user.uid}/display/${widgetToUpdate.name}`, dataToSend);
     }
+  };
+
+  const handleBackgroundColorChange = (e) => {
+    setBackgroundColor(e.target.value);
+  };
+
+  const handleBackgroundColorSave = () => {
+      if (!user) return;
+      updateValuesToDatabase(`/${user.uid}/display`, { bgColour: backgroundColor });
   };
 
   const handleDeselect = () => {
@@ -183,42 +198,18 @@ const DisplayPage = () => {
   };
 
   const selectedWidgetObject = widgets.find(w => w.name === selectedWidget);
-  const selectedColor = selectedWidgetObject ? selectedWidgetObject.color : '#ffffff';
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 60px)', color: 'white', backgroundColor: '#1e1e1e' }}>
-      {/* Sidebar */}
-      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526', display: 'flex', flexDirection: 'column' }}>
-        <div>
-          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
-          <DraggableWidget name="Clock" onDragStart={handleDragStart} />
-          <DraggableWidget name="Date" onDragStart={handleDragStart} />
-        </div>
-        {selectedWidget && (
-          <div style={{ marginTop: '20px' }}>
-            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Widget Color</h3>
-            <input type="color" value={selectedColor} onChange={handleColorChange} onBlur={handleColorSave} style={{ width: '100%' }} />
-          </div>
-        )}
-        <div
-            onDragOver={handleDragOver}
-            onDrop={handleDeleteDrop}
-            style={{
-              marginTop: 'auto',
-              padding: '20px',
-              border: '2px dashed #dc3545',
-              borderRadius: '5px',
-              textAlign: 'center',
-              color: '#dc3545',
-              cursor: 'pointer'
-            }}
-          >
-            Drag here to delete
-          </div>
+      {/* Left Sidebar (Widgets) */}
+      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
+        <DraggableWidget name="Clock" onDragStart={handleDragStart} />
+        <DraggableWidget name="Date" onDragStart={handleDragStart} />
       </div>
 
-      {/* Main Content */}
-      <div onClick={handleDeselect} style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+      {/* Main Content (Virtual Screen) */}
+      <div onClick={handleDeselect} style={{ flex: 1, padding: '20px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div
           ref={virtualScreenRef}
           onDragOver={handleDragOver}
@@ -229,7 +220,7 @@ const DisplayPage = () => {
             border: '2px dashed #555',
             borderRadius: '10px',
             position: 'relative',
-            backgroundColor: '#333333',
+            backgroundColor: backgroundColor,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             boxShadow: '0 0 20px rgba(0,0,0,0.5) inset'
@@ -250,19 +241,76 @@ const DisplayPage = () => {
                 padding: '8px 12px',
                 border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
                 borderRadius: '5px',
-                backgroundColor: 'rgba(42, 42, 42, 0.8)',
+                // backgroundColor: 'rgba(42, 42, 42, 0.8)',
                 backdropFilter: 'blur(5px)',
                 cursor: 'grab',
                 userSelect: 'none',
-                color: widget.color
+                color: widget.color,
               }}
             >
-              {widget.name === 'Clock' && <ClockWidget color={widget.color} />}
-              {widget.name === 'Date' && <DateWidget color={widget.color} />}
+              {widget.name === 'Clock' && <ClockWidget color={widget.color} fontSize={widget.fontSize} />}
+              {widget.name === 'Date' && <DateWidget color={widget.color} fontSize={widget.fontSize} />}
               {widget.name !== 'Clock' && widget.name !== 'Date' && widget.name}
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Right Sidebar (Properties & Delete) */}
+      <div style={{ width: '200px', borderLeft: '1px solid #444', padding: '20px', backgroundColor: '#252526', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Screen Properties</h3>
+            <label>Background Color</label>
+            <input
+                type="color"
+                value={backgroundColor}
+                onChange={handleBackgroundColorChange}
+                onBlur={handleBackgroundColorSave}
+                style={{ width: '100%' }}
+            />
+        </div>
+        {selectedWidget && (
+          <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Widget Properties</h3>
+            <div>
+                <label>Color</label>
+                <input 
+                    type="color" 
+                    value={selectedWidgetObject?.color || '#ffffff'} 
+                    onChange={(e) => handlePropertyChange('color', e.target.value)}
+                    onBlur={handlePropertySave}
+                    style={{ width: '100%' }} 
+                />
+            </div>
+            <div style={{ marginTop: '10px' }}>
+                <label>Font Size: {selectedWidgetObject?.fontSize}</label>
+                <input 
+                    type="range" 
+                    min="1" 
+                    max="7" 
+                    value={selectedWidgetObject?.fontSize || 2} 
+                    onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value, 10))}
+                    onMouseUp={handlePropertySave}
+                    style={{ width: '100%' }}
+                />
+            </div>
+          </div>
+        )}
+        <div
+            onDragOver={handleDragOver}
+            onDrop={handleDeleteDrop}
+            style={{
+              marginTop: 'auto',
+              padding: '20px',
+              border: '2px dashed #dc3545',
+              borderRadius: '5px',
+              textAlign: 'center',
+              color: '#dc3545',
+              cursor: 'pointer'
+            }}
+          >
+            Drag here to delete
+          </div>
       </div>
     </div>
   );
