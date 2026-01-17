@@ -1,13 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  onAuthStateChanged, updateProfile
+  updateProfile
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { redirect } from 'next/navigation';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -15,19 +14,6 @@ const SignIn = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isSignUp, setIsSignUp] = useState(false);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (user) {
-    redirect('/');
-  }
 
   const handleSignIn = async (e) => {
     e.preventDefault();

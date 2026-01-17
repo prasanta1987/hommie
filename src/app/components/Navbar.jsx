@@ -6,6 +6,7 @@ import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
+import Link from 'next/link';
 
 import ArduinoCode from './ui/ArduinoCode'
 
@@ -43,6 +44,8 @@ const AppNavbar = () => {
             {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
           </Navbar.Brand>
           <Nav className="gap-3 align-items-center flex-row">
+            <Nav.Link as={Link} href="/" className="text-light">Home</Nav.Link>
+            <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>
             {user && (
               <>
                 <ArduinoCode />

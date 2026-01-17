@@ -8,6 +8,7 @@ import { updateValuesToDatabase } from '../miscFunctions/actions';
 import { Spinner } from "react-bootstrap";
 import ClockWidget from './ui/ClockWidget';
 import DateWidget from './ui/DateWidget';
+import SignIn from '../components/sign-in';
 
 // A draggable widget component for the sidebar
 const DraggableWidget = ({ id, name, onDragStart }) => {
@@ -91,6 +92,10 @@ const DisplayPage = () => {
 
   if (authError || dataError) {
       return <div>Error: {authError?.message || dataError?.message}</div>
+  }
+
+  if (!user) {
+    return <SignIn />;
   }
 
   const handleDragStart = (e) => {
