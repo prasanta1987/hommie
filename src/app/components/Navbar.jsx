@@ -3,10 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
-import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
+import { Modal, Form, Button, InputGroup, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
+import './NavBar.css'
 
 import ArduinoCode from './ui/ArduinoCode'
 
@@ -41,29 +42,34 @@ const AppNavbar = () => {
       <Navbar style={{ backgroundColor: '#21344f', boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
         <Container className='d-flex'>
           <Navbar.Brand className='text-info'>
-            {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Guest'}
+            {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Hommie'}
           </Navbar.Brand>
-          <Nav className="gap-3 align-items-center flex-row">
-            <Nav.Link as={Link} href="/" className="text-light">Home</Nav.Link>
-            <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>
-            {user && (
-              <>
-                <ArduinoCode />
+          <Nav className="w-100 d-flex justify-content-between">
+            <div className='d-flex align-items-center'>
+              <Nav.Link as={Link} href="/" className="text-light">Sensors </Nav.Link>
+              <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>
+            </div>
+              <div className='d-flex gap-2 align-items-center'>
+                {user && (
+                  <>
+                    <ArduinoCode />
 
-                <CgProfile
-                  style={{ cursor: 'pointer' }}
-                  color="#54ff9a"
-                  size={28}
-                  onClick={() => setShowModal(true)} />
+                    <CgProfile
+                      style={{ cursor: 'pointer' }}
+                      color="#54ff9a"
+                      size={28}
+                      onClick={() => setShowModal(true)} />
 
-                <FiLogOut
-                  style={{ cursor: 'pointer' }}
-                  color="#d42013"
-                  size={28}
-                  onClick={() => signOut(auth)} />
+                    <FiLogOut
+                      style={{ cursor: 'pointer' }}
+                      color="#d42013"
+                      size={28}
+                      onClick={() => signOut(auth)} />
 
-              </>
-            )}
+                  </>
+                )}
+              </div>
+
           </Nav>
         </Container>
       </Navbar >
