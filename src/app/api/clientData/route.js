@@ -53,6 +53,7 @@ export async function POST(request) {
     } else if (purpose == "FEED_UPDATE") {
 
       const dbRef = ref(db, `${path}/${deviceCode}/devFeeds/${feedName}`);
+      data.time = new Date().getTime();
       await update(dbRef, data);
       return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
 
