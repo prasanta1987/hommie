@@ -36,9 +36,26 @@ const DisplayPage = () => {
   const [widgets, setWidgets] = useState([]);
   const virtualScreenRef = useRef(null);
   const [user, authLoading, authError] = useAuthState(auth);
-  const [data, dataLoading, dataError] = useObjectVal(user ? databaseRef(db, `/${user.uid}/display`) : null);
+  const [devices, setDevices] = useState([]);
+  const [selectedDevice, setSelectedDevice] = useState(null);
+  const [data, dataLoading, dataError] = useObjectVal(user && selectedDevice ? databaseRef(db, `/${user.uid}/${selectedDevice}/display`) : null);
+  const [allUserData] = useObjectVal(user ? databaseRef(db, `/${user.uid}`) : null);
   const [selectedWidget, setSelectedWidget] = useState(null); // This will now store the widget name
   const [backgroundColor, setBackgroundColor] = useState('#333333');
+
+  useEffect(() => {
+    if (allUserData) {
+      const deviceKeys = Object.keys(allUserData).filter(key => key !== 'display' && key.length === 8 && allUserData[key]);
+      const devicesData = deviceKeys.map(key => ({
+        code: key,
+        name: allUserData[key].deviceName || key
+      }));
+      setDevices(devicesData);
+      if (devicesData.length > 0 && !selectedDevice) {
+        setSelectedDevice(devicesData[0].code);
+      }
+    }
+  }, [allUserData, selectedDevice]);
 
   // this effect reacts to data changes from the hook
   useEffect(() => {
@@ -96,7 +113,7 @@ const DisplayPage = () => {
   // Handles dropping a widget onto the virtual screen
   const handleDrop = (e) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !selectedDevice) return;
 
     const widgetName = e.dataTransfer.getData('widgetName');
     const screenRect = virtualScreenRef.current.getBoundingClientRect();
@@ -141,12 +158,12 @@ const DisplayPage = () => {
       acc[widget.name] = { x: widget.x, y: widget.y, color: widget.color, fontSize: widget.fontSize };
       return acc;
     }, {});
-    updateValuesToDatabase(`/${user.uid}/display`, dataToSend);
+    updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, dataToSend);
   };
   
   const handleDeleteDrop = (e) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !selectedDevice) return;
 
     const widgetName = e.dataTransfer.getData('widgetName');
     const widgetToRemove = widgets.find(w => w.name === widgetName);
@@ -154,7 +171,7 @@ const DisplayPage = () => {
     if (widgetToRemove) {
       const newWidgets = widgets.filter(w => w.name !== widgetName);
       setWidgets(newWidgets);
-      const widgetRef = databaseRef(db, `/${user.uid}/display/${widgetToRemove.name}`);
+      const widgetRef = databaseRef(db, `/${user.uid}/${selectedDevice}/display/${widgetToRemove.name}`);
       remove(widgetRef);
     }
   };
@@ -171,7 +188,7 @@ const DisplayPage = () => {
   };
 
   const handlePropertySave = () => {
-    if (!selectedWidget) return;
+    if (!selectedWidget || !selectedDevice) return;
     const widgetToUpdate = widgets.find(w => w.name === selectedWidget);
     if (widgetToUpdate) {
         const dataToSend = {
@@ -180,7 +197,7 @@ const DisplayPage = () => {
             color: widgetToUpdate.color,
             fontSize: widgetToUpdate.fontSize,
         };
-        updateValuesToDatabase(`/${user.uid}/display/${widgetToUpdate.name}`, dataToSend);
+        updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display/${widgetToUpdate.name}`, dataToSend);
     }
   };
 
@@ -189,8 +206,8 @@ const DisplayPage = () => {
   };
 
   const handleBackgroundColorSave = () => {
-      if (!user) return;
-      updateValuesToDatabase(`/${user.uid}/display`, { bgColour: backgroundColor });
+      if (!user || !selectedDevice) return;
+      updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, { bgColour: backgroundColor });
   };
 
   const handleDeselect = () => {
@@ -203,6 +220,18 @@ const DisplayPage = () => {
     <div style={{ display: 'flex', height: 'calc(100vh - 60px)', color: 'white', backgroundColor: '#1e1e1e' }}>
       {/* Left Sidebar (Widgets) */}
       <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526' }}>
+        <div style={{ marginBottom: '20px' }}>
+            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Devices</h3>
+            <select
+              value={selectedDevice || ''}
+              onChange={(e) => setSelectedDevice(e.target.value)}
+              style={{ width: '100%', padding: '5px', backgroundColor: '#333', color: 'white', border: '1px solid #555' }}
+            >
+              {devices.map(device => (
+                <option key={device.code} value={device.code}>{device.name}</option>
+              ))}
+            </select>
+        </div>
         <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
         <DraggableWidget name="Clock" onDragStart={handleDragStart} />
         <DraggableWidget name="Date" onDragStart={handleDragStart} />
