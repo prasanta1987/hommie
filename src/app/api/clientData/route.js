@@ -44,15 +44,15 @@ export async function POST(request) {
       return NextResponse.json({ "error": errors }, { status: 400 });
     }
 
-    if (purpose == "SET") {
+    if (purpose == "FFEED_SET") {
 
       const dbRef = ref(db, path);
       await set(dbRef, data);
       return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
 
-    } else if (purpose == "UPDATE") {
+    } else if (purpose == "FEED_UPDATE") {
 
-      const dbRef = ref(db, `${path}/${deviceCode}/${feedName}`);
+      const dbRef = ref(db, `${path}/${deviceCode}/devFeeds/${feedName}`);
       await update(dbRef, data);
       return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
 
