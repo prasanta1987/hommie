@@ -46,7 +46,8 @@ const DisplayPage = () => {
 
   useEffect(() => {
     if (allUserData) {
-      const deviceKeys = Object.keys(allUserData).filter(key => key !== 'display' && key.length === 8 && allUserData[key]);
+      // const deviceKeys = Object.keys(allUserData).filter(key => key !== 'display' && key.length >= 8 && allUserData[key]);
+      const deviceKeys = Object.keys(allUserData);
       const devicesData = deviceKeys.map(key => ({
         code: key,
         name: allUserData[key].deviceName || key
