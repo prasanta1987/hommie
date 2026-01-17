@@ -3,8 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useObjectVal } from 'react-firebase-hooks/database';
 import { auth, db } from '../firebase/config';
-import { ref } from 'firebase/database';
-import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
+import { ref as databaseRef, remove } from 'firebase/database';
+import { updateValuesToDatabase } from '../miscFunctions/actions';
+import { Spinner } from "react-bootstrap";
+import ClockWidget from './ui/ClockWidget';
 
 // A draggable widget component for the sidebar
 const DraggableWidget = ({ id, name, onDragStart }) => {
@@ -31,46 +33,45 @@ const DraggableWidget = ({ id, name, onDragStart }) => {
 // The main display page component
 const DisplayPage = () => {
   const [widgets, setWidgets] = useState([]);
-  const [backgroundUrl, setBackgroundUrl] = useState('');
-  const [backgroundInput, setBackgroundInput] = useState('');
   const virtualScreenRef = useRef(null);
-  const [user] = useAuthState(auth);
-  const [data, loading, error] = useObjectVal(user ? ref(db, `/${user.uid}/display`) : null);
+  const [user, authLoading, authError] = useAuthState(auth);
+  const [data, dataLoading, dataError] = useObjectVal(user ? databaseRef(db, `/${user.uid}/display`) : null);
+  const [selectedWidget, setSelectedWidget] = useState(null);
 
   // this effect reacts to data changes from the hook
   useEffect(() => {
-    if (loading) {
-      setWidgets([]);
-      return;
-    }
-    if (error) {
-      console.error("Error loading widget data:", error);
-      setWidgets([]);
-      return;
-    }
-
     if (data && virtualScreenRef.current) {
       const { background, ...widgetsData } = data;
-      setBackgroundUrl(background || '');
-      setBackgroundInput(background || '');
       
       const screenRect = virtualScreenRef.current.getBoundingClientRect();
-      if (screenRect.width > 0) { // Ensure screen is rendered
-          const loadedWidgets = Object.entries(widgetsData).map(([name, coords]) => ({
-          id: `${name}-${Date.now()}`,
-          name: name,
-          x: coords.x,
-          y: coords.y,
-          pixelX: (coords.x / 320) * screenRect.width,
-          pixelY: (coords.y / 240) * screenRect.height,
-        }));
+      if (screenRect.width > 0) {
+          const loadedWidgets = Object.entries(widgetsData).map(([name, props]) => ({
+            id: `${name}-${Date.now()}`,
+            name: name,
+            ...props,
+            // Ensure color is a string, default to white if not present
+            color: typeof props.color === 'string' ? props.color : '#ffffff',
+            pixelX: (props.x / 320) * screenRect.width,
+            pixelY: (props.y / 240) * screenRect.height,
+          }));
         setWidgets(loadedWidgets);
       }
     } else {
       setWidgets([]);
-      setBackgroundUrl('');
     }
-  }, [data, loading, error, user]);
+  }, [data, user]);
+
+  if (authLoading || dataLoading) {
+    return (
+      <div className='text-center flex-grow-1 d-flex justify-content-center align-items-center'>
+        <Spinner animation="grow" variant="info" size="lg" />
+      </div>
+    );
+  }
+
+  if (authError || dataError) {
+      return <div>Error: {authError?.message || dataError?.message}</div>
+  }
 
   // Handles starting the drag from the sidebar
   const handleDragStart = (e) => {
@@ -80,6 +81,7 @@ const DisplayPage = () => {
   // Handles starting the drag of a widget already on the screen
   const handleWidgetDragStart = (e, widgetId) => {
     e.dataTransfer.setData('widgetId', widgetId);
+    setSelectedWidget(widgetId);
   };
 
   // Allows the virtual screen to be a drop target
@@ -128,42 +130,105 @@ const DisplayPage = () => {
         x: scaledX,
         y: scaledY,
         pixelX: x,
-        pixelY: y
+        pixelY: y,
+        color: '#ffffff'
       };
       newWidgets = [...widgets, newWidget];
     }
     setWidgets(newWidgets);
+    setSelectedWidget(widgetId);
 
     // Update the database
     const dataToSend = newWidgets.reduce((acc, widget) => {
-      acc[widget.name] = { x: widget.x, y: widget.y };
+      acc[widget.name] = { x: widget.x, y: widget.y, color: widget.color };
       return acc;
     }, {});
-    if (backgroundUrl) {
-      dataToSend.background = backgroundUrl;
-    }
     updateValuesToDatabase(`/${user.uid}/display`, dataToSend);
   };
   
-    const handleBackgroundUpdate = () => {
-    if (user && backgroundInput) {
-      updateValuesToDatabase(`/${user.uid}/display`, {"background": backgroundInput});
+  const handleDeleteDrop = (e) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const widgetId = e.dataTransfer.getData('widgetId');
+    const widgetToRemove = widgets.find(w => w.id === widgetId);
+
+    if (widgetToRemove) {
+      const newWidgets = widgets.filter(w => w.id !== widgetId);
+      setWidgets(newWidgets);
+
+      // Remove the widget from Firebase Realtime Database
+      const widgetRef = databaseRef(db, `/${user.uid}/display/${widgetToRemove.name}`);
+      remove(widgetRef);
     }
   };
 
+  const handleColorChange = (e) => {
+    if (!selectedWidget) return;
+
+    const newColor = e.target.value;
+    
+    const newWidgets = widgets.map(w => {
+        if (w.id === selectedWidget) {
+            return { ...w, color: newColor };
+        }
+        return w;
+    });
+    setWidgets(newWidgets);
+
+    const widgetToUpdate = newWidgets.find(w => w.id === selectedWidget);
+    if (widgetToUpdate) {
+        const dataToSend = {
+            x: widgetToUpdate.x,
+            y: widgetToUpdate.y,
+            color: newColor
+        }
+        updateValuesToDatabase(`/${user.uid}/display/${widgetToUpdate.name}`, dataToSend);
+    }
+  };
+
+  const handleDeselect = () => {
+    setSelectedWidget(null);
+  };
+
+  const selectedWidgetObject = widgets.find(w => w.id === selectedWidget);
+  const selectedColor = selectedWidgetObject ? selectedWidgetObject.color : '#ffffff';
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - 60px)', color: 'white', backgroundColor: '#1e1e1e' }}>
       {/* Sidebar */}
-      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
-        <DraggableWidget id="Clock" name="Clock" onDragStart={handleDragStart} />
-        <DraggableWidget id="Weather" name="Weather" onDragStart={handleDragStart} />
-        <DraggableWidget id="Calendar" name="Calendar" onDragStart={handleDragStart} />
+      <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526', display: 'flex', flexDirection: 'column' }}>
+        <div>
+          <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
+          <DraggableWidget id="Clock" name="Clock" onDragStart={handleDragStart} />
+          <DraggableWidget id="Weather" name="Weather" onDragStart={handleDragStart} />
+          <DraggableWidget id="Calendar" name="Calendar" onDragStart={handleDragStart} />
+        </div>
+        {selectedWidget && (
+          <div style={{ marginTop: '20px' }}>
+            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Widget Color</h3>
+            <input type="color" value={selectedColor} onChange={handleColorChange} style={{ width: '100%' }} />
+          </div>
+        )}
+        <div
+            onDragOver={handleDragOver}
+            onDrop={handleDeleteDrop}
+            style={{
+              marginTop: 'auto',
+              padding: '20px',
+              border: '2px dashed #dc3545',
+              borderRadius: '5px',
+              textAlign: 'center',
+              color: '#dc3545',
+              cursor: 'pointer'
+            }}
+          >
+            Drag here to delete
+          </div>
       </div>
 
       {/* Main Content */}
-      <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
+      <div onClick={handleDeselect} style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
         <div
           ref={virtualScreenRef}
           onDragOver={handleDragOver}
@@ -174,8 +239,7 @@ const DisplayPage = () => {
             border: '2px dashed #555',
             borderRadius: '10px',
             position: 'relative',
-            backgroundColor: backgroundUrl ? 'transparent' : '#333333',
-            backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'none',
+            backgroundColor: '#333333',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             boxShadow: '0 0 20px rgba(0,0,0,0.5) inset'
@@ -187,42 +251,25 @@ const DisplayPage = () => {
               id={widget.id}
               draggable
               onDragStart={(e) => handleWidgetDragStart(e, widget.id)}
+              onClick={(e) => {e.stopPropagation(); setSelectedWidget(widget.id)} }
               style={{
                 position: 'absolute',
                 left: widget.pixelX,
                 top: widget.pixelY,
                 transform: 'translate(-50%, -50%)',
                 padding: '8px 12px',
-                border: '1px solid #666',
+                border: selectedWidget === widget.id ? '2px solid #007bff' : '1px solid #666',
                 borderRadius: '5px',
                 backgroundColor: 'rgba(42, 42, 42, 0.8)',
                 backdropFilter: 'blur(5px)',
                 cursor: 'grab',
-                userSelect: 'none'
+                userSelect: 'none',
+                color: widget.color
               }}
             >
-              {widget.name}
+              {widget.name === 'Clock' ? <ClockWidget color={widget.color} /> : widget.name}
             </div>
           ))}
-        </div>
-        <div style={{width: '480px'}}>
-            <h3>Set Background Image:</h3>
-            <div style={{display: 'flex', gap: '10px', margin: '10px 0'}}>
-                <input
-                    type="text"
-                    value={backgroundInput}
-                    onChange={(e) => setBackgroundInput(e.target.value)}
-                    placeholder="Enter image URL"
-                    style={{flex: 1, padding: '8px', borderRadius: '3px', border: '1px solid #555', backgroundColor: '#2a2a2a', color: 'white'}}
-                />
-                <button
-                    onClick={handleBackgroundUpdate}
-                    style={{padding: '8px 12px', borderRadius: '3px', border: 'none', backgroundColor: '#007acc', color: 'white', cursor: 'pointer'}}
-                >
-                    Set
-                </button>
-            </div>
-
         </div>
       </div>
     </div>
