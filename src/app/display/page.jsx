@@ -7,12 +7,13 @@ import { ref as databaseRef, remove } from 'firebase/database';
 import { updateValuesToDatabase } from '../miscFunctions/actions';
 import { Spinner } from "react-bootstrap";
 import ClockWidget from './ui/ClockWidget';
+import DateWidget from './ui/DateWidget';
 
 // A draggable widget component for the sidebar
 const DraggableWidget = ({ id, name, onDragStart }) => {
   return (
     <div
-      id={id}
+      id={name} // Use name as the draggable id
       draggable
       onDragStart={onDragStart}
       style={{
@@ -36,7 +37,7 @@ const DisplayPage = () => {
   const virtualScreenRef = useRef(null);
   const [user, authLoading, authError] = useAuthState(auth);
   const [data, dataLoading, dataError] = useObjectVal(user ? databaseRef(db, `/${user.uid}/display`) : null);
-  const [selectedWidget, setSelectedWidget] = useState(null);
+  const [selectedWidget, setSelectedWidget] = useState(null); // This will now store the widget name
 
   // this effect reacts to data changes from the hook
   useEffect(() => {
@@ -46,10 +47,8 @@ const DisplayPage = () => {
       const screenRect = virtualScreenRef.current.getBoundingClientRect();
       if (screenRect.width > 0) {
           const loadedWidgets = Object.entries(widgetsData).map(([name, props]) => ({
-            id: `${name}-${Date.now()}`,
             name: name,
             ...props,
-            // Ensure color is a string, default to white if not present
             color: typeof props.color === 'string' ? props.color : '#ffffff',
             pixelX: (props.x / 320) * screenRect.width,
             pixelY: (props.y / 240) * screenRect.height,
@@ -75,13 +74,13 @@ const DisplayPage = () => {
 
   // Handles starting the drag from the sidebar
   const handleDragStart = (e) => {
-    e.dataTransfer.setData('widgetId', e.target.id);
+    e.dataTransfer.setData('widgetName', e.target.id);
   };
 
   // Handles starting the drag of a widget already on the screen
-  const handleWidgetDragStart = (e, widgetId) => {
-    e.dataTransfer.setData('widgetId', widgetId);
-    setSelectedWidget(widgetId);
+  const handleWidgetDragStart = (e, widgetName) => {
+    e.dataTransfer.setData('widgetName', widgetName);
+    setSelectedWidget(widgetName);
   };
 
   // Allows the virtual screen to be a drop target
@@ -92,28 +91,24 @@ const DisplayPage = () => {
   // Handles dropping a widget onto the virtual screen
   const handleDrop = (e) => {
     e.preventDefault();
-    if (!user) return; // a user must be logged in
+    if (!user) return;
 
-    const widgetId = e.dataTransfer.getData('widgetId');
+    const widgetName = e.dataTransfer.getData('widgetName');
     const screenRect = virtualScreenRef.current.getBoundingClientRect();
 
-    // Calculate drop position relative to the screen
     let x = e.clientX - screenRect.left;
     let y = e.clientY - screenRect.top;
 
-    // Ensure the drop is within the screen bounds
     x = Math.max(0, Math.min(x, screenRect.width));
     y = Math.max(0, Math.min(y, screenRect.height));
 
-    // Scale coordinates to the 320x240 system
     const scaledX = Math.round((x / screenRect.width) * 320);
     const scaledY = Math.round((y / screenRect.height) * 240);
     
-    const existingWidgetIndex = widgets.findIndex(w => w.id === widgetId);
+    const existingWidgetIndex = widgets.findIndex(w => w.name === widgetName);
 
     let newWidgets;
     if (existingWidgetIndex > -1) {
-      // Update position of existing widget on screen
       newWidgets = [...widgets];
       newWidgets[existingWidgetIndex] = {
         ...newWidgets[existingWidgetIndex],
@@ -123,10 +118,8 @@ const DisplayPage = () => {
         pixelY: y
       };
     } else {
-      // Add a new widget from the sidebar
       const newWidget = {
-        id: `${widgetId}-${Date.now()}`,
-        name: widgetId,
+        name: widgetName,
         x: scaledX,
         y: scaledY,
         pixelX: x,
@@ -136,9 +129,8 @@ const DisplayPage = () => {
       newWidgets = [...widgets, newWidget];
     }
     setWidgets(newWidgets);
-    setSelectedWidget(widgetId);
+    setSelectedWidget(widgetName);
 
-    // Update the database
     const dataToSend = newWidgets.reduce((acc, widget) => {
       acc[widget.name] = { x: widget.x, y: widget.y, color: widget.color };
       return acc;
@@ -150,14 +142,12 @@ const DisplayPage = () => {
     e.preventDefault();
     if (!user) return;
 
-    const widgetId = e.dataTransfer.getData('widgetId');
-    const widgetToRemove = widgets.find(w => w.id === widgetId);
+    const widgetName = e.dataTransfer.getData('widgetName');
+    const widgetToRemove = widgets.find(w => w.name === widgetName);
 
     if (widgetToRemove) {
-      const newWidgets = widgets.filter(w => w.id !== widgetId);
+      const newWidgets = widgets.filter(w => w.name !== widgetName);
       setWidgets(newWidgets);
-
-      // Remove the widget from Firebase Realtime Database
       const widgetRef = databaseRef(db, `/${user.uid}/display/${widgetToRemove.name}`);
       remove(widgetRef);
     }
@@ -165,24 +155,25 @@ const DisplayPage = () => {
 
   const handleColorChange = (e) => {
     if (!selectedWidget) return;
-
     const newColor = e.target.value;
-    
     const newWidgets = widgets.map(w => {
-        if (w.id === selectedWidget) {
+        if (w.name === selectedWidget) {
             return { ...w, color: newColor };
         }
         return w;
     });
     setWidgets(newWidgets);
+  };
 
-    const widgetToUpdate = newWidgets.find(w => w.id === selectedWidget);
+  const handleColorSave = () => {
+    if (!selectedWidget) return;
+    const widgetToUpdate = widgets.find(w => w.name === selectedWidget);
     if (widgetToUpdate) {
         const dataToSend = {
             x: widgetToUpdate.x,
             y: widgetToUpdate.y,
-            color: newColor
-        }
+            color: widgetToUpdate.color,
+        };
         updateValuesToDatabase(`/${user.uid}/display/${widgetToUpdate.name}`, dataToSend);
     }
   };
@@ -191,7 +182,7 @@ const DisplayPage = () => {
     setSelectedWidget(null);
   };
 
-  const selectedWidgetObject = widgets.find(w => w.id === selectedWidget);
+  const selectedWidgetObject = widgets.find(w => w.name === selectedWidget);
   const selectedColor = selectedWidgetObject ? selectedWidgetObject.color : '#ffffff';
 
   return (
@@ -200,14 +191,13 @@ const DisplayPage = () => {
       <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526', display: 'flex', flexDirection: 'column' }}>
         <div>
           <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
-          <DraggableWidget id="Clock" name="Clock" onDragStart={handleDragStart} />
-          <DraggableWidget id="Weather" name="Weather" onDragStart={handleDragStart} />
-          <DraggableWidget id="Calendar" name="Calendar" onDragStart={handleDragStart} />
+          <DraggableWidget name="Clock" onDragStart={handleDragStart} />
+          <DraggableWidget name="Date" onDragStart={handleDragStart} />
         </div>
         {selectedWidget && (
           <div style={{ marginTop: '20px' }}>
             <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Widget Color</h3>
-            <input type="color" value={selectedColor} onChange={handleColorChange} style={{ width: '100%' }} />
+            <input type="color" value={selectedColor} onChange={handleColorChange} onBlur={handleColorSave} style={{ width: '100%' }} />
           </div>
         )}
         <div
@@ -235,7 +225,7 @@ const DisplayPage = () => {
           onDrop={handleDrop}
           style={{
             width: '480px', 
-            height: '360px', // 4:3 aspect ratio
+            height: '360px',
             border: '2px dashed #555',
             borderRadius: '10px',
             position: 'relative',
@@ -247,18 +237,18 @@ const DisplayPage = () => {
         >
           {widgets.map((widget) => (
             <div
-              key={widget.id}
-              id={widget.id}
+              key={widget.name}
+              id={widget.name}
               draggable
-              onDragStart={(e) => handleWidgetDragStart(e, widget.id)}
-              onClick={(e) => {e.stopPropagation(); setSelectedWidget(widget.id)} }
+              onDragStart={(e) => handleWidgetDragStart(e, widget.name)}
+              onClick={(e) => {e.stopPropagation(); setSelectedWidget(widget.name)} }
               style={{
                 position: 'absolute',
                 left: widget.pixelX,
                 top: widget.pixelY,
                 transform: 'translate(-50%, -50%)',
                 padding: '8px 12px',
-                border: selectedWidget === widget.id ? '2px solid #007bff' : '1px solid #666',
+                border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
                 borderRadius: '5px',
                 backgroundColor: 'rgba(42, 42, 42, 0.8)',
                 backdropFilter: 'blur(5px)',
@@ -267,7 +257,9 @@ const DisplayPage = () => {
                 color: widget.color
               }}
             >
-              {widget.name === 'Clock' ? <ClockWidget color={widget.color} /> : widget.name}
+              {widget.name === 'Clock' && <ClockWidget color={widget.color} />}
+              {widget.name === 'Date' && <DateWidget color={widget.color} />}
+              {widget.name !== 'Clock' && widget.name !== 'Date' && widget.name}
             </div>
           ))}
         </div>
