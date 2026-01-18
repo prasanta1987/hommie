@@ -52,9 +52,26 @@ export async function POST(request) {
 
     } else if (purpose == "FEED_UPDATE") {
 
-      const dbRef = ref(db, `${path}/${deviceCode}/devFeeds/${feedName}`);
-      data.time = new Date().getTime();
-      await update(dbRef, data);
+      try {
+        const dbRef = ref(db, `${path}/${deviceCode}/devFeeds/${feedName}`);
+        data.time = new Date().getTime();
+        await update(dbRef, data);
+      } catch (error) {
+        return NextResponse.json({ "error": "Data Not Set", details: error.message }, { status: 401 });
+      }
+
+      try {
+
+        const dataRef = ref(db, `${path}/${deviceCode}`);
+        const snapshot = await get(dataRef);
+        return NextResponse.json(snapshot.val(), { status: 200 });
+
+      } catch {
+        return NextResponse.json({ error: 'No data available' }, { status: 401 });
+
+      }
+
+
       return NextResponse.json({ "msg": "Data Set" }, { status: 200 });
 
     } else {
