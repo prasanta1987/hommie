@@ -1,8 +1,29 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, memo } from 'react';
 import styles from './Music.module.css';
 import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward } from 'react-icons/fi';
+
+// Memoized Search Component to prevent re-renders
+const Search = memo(function Search({ query, setQuery, searchSong, isLoading }) {
+  return (
+    <div className={styles.searchContainer}>
+      <h1 className={styles.title}>Music Player</h1>
+      <form onSubmit={searchSong} className={styles.searchForm}>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search for a song..."
+          className={styles.searchInput}
+        />
+        <button type="submit" className={styles.searchButton} disabled={isLoading}>
+          {isLoading ? 'Searching...' : <FiSearch />}
+        </button>
+      </form>
+    </div>
+  );
+});
 
 export default function MusicPlayer() {
   const [query, setQuery] = useState('');
@@ -14,21 +35,16 @@ export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef(null);
+  const progressBarMobileRef = useRef(null);
+  const progressBarDesktopRef = useRef(null);
 
   const searchSong = async (e) => {
     e.preventDefault();
     if (!query) return;
 
     setIsLoading(true);
-    setSongs([]);
-    setPlayingSongId(null);
-    setCurrentSong(null);
+    setSongs([]); // Clear previous search results
     setError(null);
-    setIsPlaying(false);
-    if(audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-    }
 
     try {
       const response = await fetch(`https://saavn.sumit.co/api/search/songs?query=${query}`);
@@ -118,30 +134,24 @@ export default function MusicPlayer() {
   };
 
   const handleSeek = (e) => {
-    if (audioRef.current.duration) {
+    const progressBar = e.currentTarget;
+    const clickX = e.clientX - progressBar.getBoundingClientRect().left;
+    const newProgress = (clickX / progressBar.offsetWidth) * 100;
+    
+    if (audioRef.current && audioRef.current.duration) {
         const { duration } = audioRef.current;
-        const seekTime = (e.target.value / 100) * duration;
-        audioRef.current.currentTime = seekTime;
+        audioRef.current.currentTime = (newProgress / 100) * duration;
     }
   };
 
   return (
     <div className={styles.musicContainer}>
-      <div className={styles.searchContainer}>
-        <h1 className={styles.title}>Music Player</h1>
-        <form onSubmit={searchSong} className={styles.searchForm}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for a song..."
-            className={styles.searchInput}
-          />
-          <button type="submit" className={styles.searchButton} disabled={isLoading}>
-            {isLoading ? 'Searching...' : <FiSearch />}
-          </button>
-        </form>
-      </div>
+        <Search 
+            query={query} 
+            setQuery={setQuery} 
+            searchSong={searchSong} 
+            isLoading={isLoading} 
+        />
 
       {error && <p className={styles.error}>{error}</p>}
       
@@ -178,31 +188,33 @@ export default function MusicPlayer() {
 
       {currentSong && (
         <div className={styles.bottomPlayer}>
-            <img src={currentSong.image} alt={currentSong.name} className={styles.bottomPlayerImage} />
-            <div className={styles.bottomPlayerSongInfo}>
-                <p className={styles.bottomPlayerSongName}>{currentSong.name}</p>
-                <p className={styles.bottomPlayerArtistName}>{currentSong.artist}</p>
+            <div ref={progressBarMobileRef} className={styles.progressBarContainerMobile} onClick={handleSeek}>
+                <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
+                    <div className={styles.progressBarThumb}></div>
+                </div>
             </div>
-            <div className={styles.playerControls}>
-                <button onClick={handlePreviousSong} className={styles.controlButton}>
-                    <FiSkipBack size={28} />
-                </button>
-                <button onClick={() => handlePlayPause(currentSong)} className={styles.controlButton}>
-                    {isPlaying ? <FiPauseCircle size={32} /> : <FiPlayCircle size={32} />}
-                </button>
-                <button onClick={handleNextSong} className={styles.controlButton}>
-                    <FiSkipForward size={28} />
-                </button>
-            </div>
-            <div className={styles.progressBarContainer}>
-                <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={progress}
-                    onChange={handleSeek}
-                    className={styles.progressBar}
-                />
+            <div className={styles.playerContent}>
+                <img src={currentSong.image} alt={currentSong.name} className={styles.playerImage} />
+                <div className={styles.playerSongInfo}>
+                    <p className={styles.playerSongName}>{currentSong.name}</p>
+                    <p className={styles.playerArtistName}>{currentSong.artist}</p>
+                </div>
+                <div className={styles.playerControls}>
+                    <button onClick={handlePreviousSong} className={styles.controlButton}>
+                        <FiSkipBack size={28} />
+                    </button>
+                    <button onClick={() => handlePlayPause(currentSong)} className={styles.controlButton}>
+                        {isPlaying ? <FiPauseCircle size={32} /> : <FiPlayCircle size={32} />}
+                    </button>
+                    <button onClick={handleNextSong} className={styles.controlButton}>
+                        <FiSkipForward size={28} />
+                    </button>
+                </div>
+                <div ref={progressBarDesktopRef} className={styles.progressBarContainerDesktop} onClick={handleSeek}>
+                    <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
+                       <div className={styles.progressBarThumb}></div>
+                    </div>
+                </div>
             </div>
         </div>
       )}
