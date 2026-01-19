@@ -1,50 +1,37 @@
-'use client';
+'use client'
+import Link from 'next/link';
+import { FiCpu, FiRss, FiArrowRight } from 'react-icons/fi';
+import './Welcome.css';
 
-import { auth, db } from './firebase/config';
-import SignIn from './components/sign-in';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { useObjectVal } from 'react-firebase-hooks/database';
-import { ref } from 'firebase/database';
-import { Spinner } from 'react-bootstrap';
-import LandingPage from './components/LandingPage';
-import Footer from './components/Footer';
-import NoBoard from './components/ui/NoBoard';
-
-
-export default function Home() {
-
-  const [user, loading, error] = useAuthState(auth);
-  const [dbData, dataLoading, dataError] = useObjectVal(user ? ref(db, user.uid) : null);
-
-  if (loading || dataLoading) {
-    return (
-      <div className='text-center flex-grow-1 d-flex justify-content-center align-items-center'>
-        <Spinner animation="grow" variant="info" size="lg" />
+export default function Welcome() {
+  return (
+    <div className="welcome-container">
+      <div className="hero-section">
+        <h1 className="hero-title">Welcome to Hommie</h1>
+        <p className="hero-subtitle">
+          Your central hub for monitoring real-time data feeds from your IoT devices and microcontrollers like ESP boards.
+        </p>
+        <Link href="/feeds" className="cta-button">
+          Go to Your Feeds <FiArrowRight className="cta-icon" />
+        </Link>
       </div>
-    );
-  }
 
-  if (error || dataError) {
-    return <div>Error: {error?.message || dataError?.message}</div>
-  }
-
-  if (!user) {
-    return <SignIn />;
-  }
-
-  if (user) {
-    return (
-      <>
-        {
-          dbData
-            ? <LandingPage userDbData={dbData} userData={user} />
-            : <NoBoard />
-        }
-
-        <Footer userData={user.uid} />
-      </>
-    );
-  }
-
-  return <SignIn />;
+      <div className="features-section">
+        <div className="feature-card">
+          <FiCpu size={50} className="feature-icon" />
+          <h2 className="feature-title">MCU Integration</h2>
+          <p className="feature-description">
+            Seamlessly connect to your ESP32, ESP8266, and other microcontrollers.
+          </p>
+        </div>
+        <div className="feature-card">
+          <FiRss size={50} className="feature-icon" />
+          <h2 className="feature-title">Real-Time Feeds</h2>
+          <p className="feature-description">
+            View live data streams from your sensors and devices directly in your browser.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
