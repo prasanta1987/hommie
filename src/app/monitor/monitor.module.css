@@ -180,6 +180,23 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
+.inputArea {
+  padding-top: 1.5rem;
+}
+
+.inputForm {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sendInput {
+  flex-grow: 1;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+}
+
 @media (max-width: 768px) {
   .monitorPage {
     flex-direction: column;
