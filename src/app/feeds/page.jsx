@@ -18,7 +18,7 @@ export default function Home() {
 
   if (loading || dataLoading) {
     return (
-      <div className='text-center flex-grow-1 d-flex justify-content-center align-items-center'>
+      <div className='text-center bg-dark flex-grow-1 d-flex justify-content-center align-items-center'>
         <Spinner animation="grow" variant="info" size="lg" />
       </div>
     );
