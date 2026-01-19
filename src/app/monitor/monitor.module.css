@@ -1,0 +1,211 @@
+.monitorPage {
+  display: flex;
+  height: calc(100vh - 80px); /* Adjust based on your navbar height */
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+}
+
+.sidebarHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.controlGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.select {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.select:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.3);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+}
+
+.button svg {
+  margin-right: 4px;
+}
+
+.primaryButton {
+  background: linear-gradient(45deg, #4A90E2, #007BFF);
+  color: white;
+}
+.primaryButton:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.secondaryButton {
+    background-color: #fff;
+    color: #4A90E2;
+    border: 1px solid #4A90E2;
+}
+
+.dangerButton {
+  background: linear-gradient(45deg, #e53e3e, #c53030);
+  color: white;
+}
+
+.mainContent {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  min-width: 0; /* Prevents overflow issues with flexbox */
+}
+
+.mainHeader h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a202c;
+  letter-spacing: -1px;
+  margin: 0 0 1.5rem 0;
+}
+
+.outputContainer {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Crucial for flex-grow in a column */
+}
+
+.output {
+  flex-grow: 1;
+  background-color: #1a202c;
+  color: #e2e8f0;
+  padding: 1.5rem;
+  border-radius: 12px;
+  overflow-y: auto;
+  font-family: 'Fira Code', 'Courier New', monospace;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.output::-webkit-scrollbar {
+  width: 12px;
+}
+.output::-webkit-scrollbar-track {
+  background: #2d3748;
+  border-radius: 10px;
+}
+.output::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 10px;
+}
+.output::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
+.placeholder {
+    color: #718096;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-style: italic;
+}
+
+.unsupportedContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  height: calc(100vh - 80px);
+  gap: 1rem;
+  background-color: #fff;
+  border-radius: 12px;
+  margin: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .monitorPage {
+    flex-direction: column;
+    height: calc(100vh - 80px);
+  }
+
+  .mainContent {
+    order: 1;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 1.5rem;
+  }
+  
+  .sidebar {
+    order: 2;
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid #e2e8f0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  .mainHeader h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}

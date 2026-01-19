@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../firebase/config';
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
-import { Modal, Form, Button, InputGroup, Navbar, Nav, Container } from 'react-bootstrap';
+import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
@@ -40,15 +40,18 @@ const AppNavbar = () => {
   return (
     <>
       <Navbar style={{ backgroundColor: '#21344f', boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
-        <Container className='d-flex'>
-          <Navbar.Brand className='text-info'>
+        <Container>
+          <Navbar.Brand as={Link} href="/" className='text-info'>
             {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Hommie'}
           </Navbar.Brand>
-          <Nav className="w-100 d-flex justify-content-between">
-            <div className='d-flex align-items-center'>
-              <Nav.Link as={Link} href="/" className="text-light">Sensors </Nav.Link>
+          <Navbar.Toggle aria-controls="basic-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="me-auto">
+              <Nav.Link as={Link} href="/" className="text-light">Sensors</Nav.Link>
               <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>
-            </div>
+              <Nav.Link as={Link} href="/monitor" className="text-light">Monitor</Nav.Link>
+            </Nav>
+            <Nav>
               <div className='d-flex gap-2 align-items-center'>
                 {user && (
                   <>
@@ -69,8 +72,8 @@ const AppNavbar = () => {
                   </>
                 )}
               </div>
-
-          </Nav>
+            </Nav>
+          </Navbar.Collapse>
         </Container>
       </Navbar >
 
