@@ -17,6 +17,7 @@ export function MusicPlayerProvider({ children }) {
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [shuffle, setShuffle] = useState(false);
   const audioRef = useRef(null);
 
   const searchSong = useCallback(async (e) => {
@@ -92,6 +93,20 @@ export function MusicPlayerProvider({ children }) {
     
     if (currentIndex === -1) return;
 
+    if (shuffle) {
+      let newIndex = Math.floor(Math.random() * songs.length);
+      while(newIndex === currentIndex) {
+        newIndex = Math.floor(Math.random() * songs.length);
+      }
+      const nextSong = songs[newIndex];
+      if (nextSong.url) {
+        handlePlayPause(nextSong);
+      } else {
+        handleSongNavigation(direction); // try again
+      }
+      return;
+    }
+
     let newIndex = currentIndex;
     for (let i = 0; i < songs.length; i++) {
         newIndex = (newIndex + direction + songs.length) % songs.length;
@@ -102,10 +117,12 @@ export function MusicPlayerProvider({ children }) {
         }
     }
     setError("No other available songs to play.");
-  }, [currentSong, songs, handlePlayPause]);
+  }, [currentSong, songs, handlePlayPause, shuffle]);
 
   const handleNextSong = useCallback(() => handleSongNavigation(1), [handleSongNavigation]);
   const handlePreviousSong = useCallback(() => handleSongNavigation(-1), [handleSongNavigation]);
+
+  const toggleShuffle = () => setShuffle(!shuffle);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -139,12 +156,14 @@ export function MusicPlayerProvider({ children }) {
     error,
     isPlaying,
     progress,
+    shuffle,
     audioRef,
     searchSong,
     handlePlayPause,
     handleNextSong,
     handlePreviousSong,
     handleSeek,
+    toggleShuffle,
   };
 
   return (

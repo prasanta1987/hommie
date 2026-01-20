@@ -1,9 +1,15 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useMusicPlayer } from '../context/MusicPlayerContext.jsx';
 import styles from './Music.module.css';
-import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward } from 'react-icons/fi';
+import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward, FiHeart, FiShuffle, FiTrash2 } from 'react-icons/fi';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { getAuth } from 'firebase/auth';
+import { getDatabase, ref } from 'firebase/database';
+import { useObjectVal } from 'react-firebase-hooks/database';
+import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions.js';
+import { Spinner } from 'react-bootstrap';
 
 const Search = memo(function Search({ query, setQuery, searchSong, isLoading }) {
   return (
@@ -28,6 +34,7 @@ const Search = memo(function Search({ query, setQuery, searchSong, isLoading }) 
 export default function MusicPage() {
   const {
     songs,
+    setSongs,
     query,
     setQuery,
     isLoading,
@@ -36,12 +43,63 @@ export default function MusicPage() {
     playingSongId,
     isPlaying,
     progress,
+    shuffle,
     searchSong,
     handlePlayPause,
     handleNextSong,
     handlePreviousSong,
     handleSeek,
+    toggleShuffle,
   } = useMusicPlayer();
+  const auth = getAuth();
+  const database = getDatabase();
+  const [user] = useAuthState(auth);
+  const [playlist, loading] = useObjectVal(user ? ref(database, 'playlist/' + user.uid) : null);
+
+  useEffect(() => {
+    if (playlist && !query) {
+      const playlistSongs = Object.keys(playlist).map(key => ({ id: key, ...playlist[key] }));
+      setSongs(playlistSongs);
+    } else if (!playlist && !query) {
+      setSongs([]);
+    }
+  }, [playlist, setSongs, query]);
+
+  const isLiked = (songId) => {
+    return playlist && playlist[songId];
+  };
+
+  const handleLike = (song) => {
+    if (user && !isLiked(song.id)) {
+      const path = 'playlist/' + user.uid;
+      const values = {
+        [song.id]: {
+            name: song.name,
+            image: song.image,
+            artist: song.artist,
+            url: song.url,
+        }
+      };
+      updateValuesToDatabase(path, values);
+    } else if (!user) {
+      console.log("You must be logged in to like a song.");
+    }
+  };
+  
+  const handleDelete = (songId) => {
+      if (user) {
+          const path = 'playlist/' + user.uid + '/' + songId;
+          setValueToDatabase(path, null);
+      }
+  };
+
+  if (loading) {
+    return (
+      <div className='text-center bg-dark flex-grow-1 d-flex justify-content-center align-items-center'>
+        <Spinner animation="grow" variant="info" size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.musicContainer}>
@@ -63,9 +121,20 @@ export default function MusicPage() {
               <p className={styles.songListArtist}>{song.artist}</p>
             </div>
             {song.url && (
-              <button onClick={() => handlePlayPause(song)} className={styles.playPauseButton}>
-                {isPlaying && playingSongId === song.id ? <FiPauseCircle size={28} /> : <FiPlayCircle size={28} />}
-              </button>
+              <div className={styles.songActions}>
+                {isLiked(song.id) ? (
+                    <button onClick={() => handleDelete(song.id)} className={styles.likeButton}>
+                        <FiTrash2 size={28} color="#ff6347" />
+                    </button>
+                ) : (
+                    <button onClick={() => handleLike(song)} className={styles.likeButton}>
+                        <FiHeart size={28} />
+                    </button>
+                )}
+                <button onClick={() => handlePlayPause(song)} className={styles.playPauseButton}>
+                  {isPlaying && playingSongId === song.id ? <FiPauseCircle size={28} /> : <FiPlayCircle size={28} />}
+                </button>
+              </div>
             )}
           </div>
         ))}
@@ -100,6 +169,9 @@ export default function MusicPage() {
                     </button>
                     <button onClick={handleNextSong} className={styles.controlButton}>
                         <FiSkipForward size={28} />
+                    </button>
+                    <button onClick={toggleShuffle} className={styles.controlButton}>
+                        <FiShuffle size={28} color={shuffle ? '#1DB954' : 'currentColor'} />
                     </button>
                 </div>
                 <div className={styles.progressBarContainerDesktop} onClick={handleSeek}>

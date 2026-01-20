@@ -138,6 +138,30 @@
   margin: 0;
 }
 
+.songActions {
+  display: flex;
+  align-items: center;
+}
+
+.likeButton {
+  background: none;
+  border: none;
+  color: #6a20c2;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+.likeButton:hover {
+  background-color: rgba(106, 32, 194, 0.2);
+  color: #fff;
+}
+
 .playPauseButton {
   background: none;
   border: none;
