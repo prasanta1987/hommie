@@ -25,46 +25,19 @@ const formatTimestamp = (dateValue) => {
         timeZone: 'Asia/Kolkata'
     }
     )
-
-    // // If the timestamp is a string and doesn't already specify a timezone, treat it as UTC.
-    // if (typeof dateInput === 'string' && !dateInput.endsWith('Z')) {
-    //     // Replace space with 'T' for broader compatibility and append 'Z' for UTC.
-    //     dateInput = dateInput.replace(' ', 'T') + 'Z';
-    // }
-
-    // const date = new Date(dateInput);
-
-    // if (isNaN(date.getTime())) {
-    //     return 'Invalid time';
-    // }
-
-    // return new Intl.DateTimeFormat('en-IN', {
-    //     year: 'numeric',
-    //     day: 'numeric',
-    //     month: 'short',
-    //     hour: 'numeric',
-    //     minute: 'numeric',
-    //     second: 'numeric',
-    //     hour12: true,
-    //     timeZone: 'Asia/Kolkata',
-    // }).format(date);
 };
 
-
-
-
-
-
 const FeedCard = ({ feed, boardName, feedName }) => {
-    if (!feed) return null;
-
-    const [millis, setMillis] = useState(new Date().getTime())
+    const [millis, setMillis] = useState(new Date().getTime());
 
     useEffect(() => {
-        setInterval(() => {
-            setMillis(new Date().getTime())
-        }, 1000)
-    }, [millis]);
+        const interval = setInterval(() => {
+            setMillis(new Date().getTime());
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    if (!feed) return null;
 
     function calculateAgeing(epochMs) {
         const diffMs = millis - epochMs;

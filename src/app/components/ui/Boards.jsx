@@ -16,7 +16,7 @@ export default function Boards(props) {
         console.log(props.boardData)
         setBoardName(props.boardData.deviceName);
         setDeviceCode(props.boardKey);
-    }, [props.boardData.name, props.boardData.deviceCode]);
+    }, [props.boardData, props.boardKey]);
 
 
     const onFeedSelect = (devCode, devFeed) => {

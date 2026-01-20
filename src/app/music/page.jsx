@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useEffect } from 'react';
+import Image from 'next/image';
 import { useMusicPlayer } from '../context/MusicPlayerContext.jsx';
 import styles from './Music.module.css';
 import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward, FiHeart, FiShuffle, FiTrash2 } from 'react-icons/fi';
@@ -116,7 +117,7 @@ export default function MusicPage() {
       <div className={styles.songList}>
         {songs.map(song => (
           <div key={song.id} className={styles.songListItem}>
-            <img src={song.image} alt={song.name} className={styles.songListImage} />
+            <Image src={song.image} alt={song.name} className={styles.songListImage} width={50} height={50} />
             <div className={styles.songListInfo}>
               <p className={styles.songListName}>{song.name}</p>
               <p className={styles.songListArtist}>{song.artist}</p>
@@ -157,7 +158,7 @@ export default function MusicPage() {
                 </div>
             </div>
             <div className={styles.playerContent}>
-                <img src={currentSong.image} alt={currentSong.name} className={styles.playerImage} />
+                <Image src={currentSong.image} alt={currentSong.name} className={styles.playerImage} width={64} height={64} />
                 <div className={styles.playerSongInfo}>
                     <p className={styles.playerSongName}>{currentSong.name}</p>
                     <p className={styles.playerArtistName}>{currentSong.artist}</p>

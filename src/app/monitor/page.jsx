@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Form } from 'react-bootstrap';
 import { FiHardDrive, FiZap, FiXCircle, FiPlus, FiSettings, FiMonitor, FiAlertTriangle, FiSend } from 'react-icons/fi';
 import styles from './monitor.module.css';
@@ -15,6 +15,22 @@ const MonitorPage = () => {
   const [reader, setReader] = useState(null);
   const [writer, setWriter] = useState(null);
   const [inputData, setInputData] = useState('');
+
+  const disconnectFromSerial = useCallback(async () => {
+    if (reader) {
+      await reader.cancel().catch(() => {});
+      setReader(null);
+    }
+    if (writer) {
+      writer.releaseLock();
+      setWriter(null);
+    }
+    if (port) {
+      await port.close().catch(() => {});
+      setPort(null);
+    }
+    setData('');
+  }, [port, reader, writer]);
 
   useEffect(() => {
     if (!('serial' in navigator)) {
@@ -100,22 +116,6 @@ const MonitorPage = () => {
     }
   };
 
-  const disconnectFromSerial = async () => {
-    if (reader) {
-      await reader.cancel().catch(() => {});
-      setReader(null);
-    }
-    if (writer) {
-      writer.releaseLock();
-      setWriter(null);
-    }
-    if (port) {
-      await port.close().catch(() => {});
-      setPort(null);
-    }
-    setData('');
-  };
-
   const handleSendData = async (e) => {
     e.preventDefault();
     if (writer && inputData) {
@@ -136,7 +136,7 @@ const MonitorPage = () => {
         disconnectFromSerial();
       }
     };
-  }, [port]);
+  }, [port, disconnectFromSerial]);
 
   if (!isSupported) {
     return (
