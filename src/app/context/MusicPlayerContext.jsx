@@ -25,7 +25,6 @@ export function MusicPlayerProvider({ children }) {
     if (!query) return;
 
     setIsLoading(true);
-    // Don't clear songs, to keep the list available
     setError(null);
 
     try {
@@ -37,6 +36,7 @@ export function MusicPlayerProvider({ children }) {
           id: song.id,
           name: song.name,
           artist: song.artists.primary[0].name,
+          album: song.album.name,
           image: song.image?.[song.image.length - 1]?.url || 'https://via.placeholder.com/150?text=No+Image',
           url: song.downloadUrl?.[song.downloadUrl.length - 1]?.url,
         }));

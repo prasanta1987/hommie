@@ -16,7 +16,12 @@ This project is a music player application that allows users to search for songs
 * **Shuffle Control:** Users can toggle between random and sequential playback.
 * **Delete from Playlist:** Users can remove songs from their playlist.
 * **Conditional Sign-In Icon:** A sign-in icon is displayed on the navbar for logged-out users, which opens a modal for authentication.
+* **Album Information:** The music player now displays the album name for each song in the playlist and in the player view. The album name is also saved to the user's playlist when they like a song.
+* **Compact Music List:** The music list has been redesigned to be more compact, allowing more songs to be displayed on the screen at once.
+* **Removed Scrollable Container:** The scrollable container for the song list has been removed, allowing the page to scroll naturally with the song list.
+* **Compact Song Card:** The song card has been redesigned to be more compact, with a 100x100px image and song information to the right, to maximize the number of songs visible on the screen.
+* **Responsive Song Grid:** The song list is now a responsive grid, displaying multiple columns on larger screens and a single column on smaller screens, optimizing the layout for all devices.
 
 ## Current Plan
 
-* The user wants to add an email and password sign-in method. The plan is to add a sign-in icon to the navbar that is only visible to logged-out users. This icon will open a modal where they can either sign in or create a new account.
+* The user wants a responsive song list that doesn't appear too long. I have implemented a responsive grid layout that adjusts the number of columns based on the screen size, ensuring an optimal viewing experience on all devices.

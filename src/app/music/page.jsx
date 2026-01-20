@@ -77,6 +77,7 @@ export default function MusicPage() {
             name: song.name,
             image: song.image,
             artist: song.artist,
+            album: song.album,
             url: song.url,
         }
       };
@@ -119,6 +120,7 @@ export default function MusicPage() {
             <div className={styles.songListInfo}>
               <p className={styles.songListName}>{song.name}</p>
               <p className={styles.songListArtist}>{song.artist}</p>
+              <p className={styles.songListAlbum}>{song.album}</p>
             </div>
             {song.url && (
               <div className={styles.songActions}>
@@ -159,6 +161,7 @@ export default function MusicPage() {
                 <div className={styles.playerSongInfo}>
                     <p className={styles.playerSongName}>{currentSong.name}</p>
                     <p className={styles.playerArtistName}>{currentSong.artist}</p>
+                    <p className={styles.playerAlbumName}>{currentSong.album}</p>
                 </div>
                 <div className={styles.playerControls}>
                     <button onClick={handlePreviousSong} className={styles.controlButton}>
