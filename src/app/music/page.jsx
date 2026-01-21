@@ -66,6 +66,27 @@ export default function MusicPage() {
     }
   }, [playlist, setSongs, query]);
 
+  // This useEffect hook will update the metadata
+  useEffect(() => {
+    if (currentSong) {
+      document.title = currentSong.name;
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.name = 'description';
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.content = currentSong.artist;
+    } else {
+        document.title = "Music Player";
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+            metaDescription.content = "Search for and listen to your favorite music.";
+        }
+    }
+  }, [currentSong]);
+
+
   const isLiked = (songId) => {
     return playlist && playlist[songId];
   };
