@@ -41,7 +41,7 @@ export default function Home() {
             : <NoBoard />
         }
 
-        <Footer userData={user.uid} />
+        {/* <Footer userData={user.uid} /> */}
       </>
     );
   }

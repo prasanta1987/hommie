@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import admin from '../../firebase/adminConfig'; // Correctly importing admin
+import admin from '../../firebase/adminConfig';
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
@@ -12,11 +12,12 @@ export async function GET(request) {
 
     const readableStream = new ReadableStream({
         start(controller) {
-            const db = admin.database(); // Getting the database instance correctly
+            const db = admin.database();
             const dbRef = db.ref(`${uid}/${deviceCode}`);
 
             const listener = dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
+                // This is the correct way: convert the object to a string and format for SSE.
                 controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
             }, (error) => {
                 console.error("Firebase listener error:", error);
@@ -24,8 +25,14 @@ export async function GET(request) {
                 controller.close();
             });
 
+            const intervalId = setInterval(() => {
+                // Send a heartbeat to keep the connection alive
+                controller.enqueue(': heartbeat\n\n');
+            }, 10000);
+
             request.signal.addEventListener('abort', () => {
                 dbRef.off('value', listener);
+                clearInterval(intervalId);
                 controller.close();
                 console.log("Client disconnected, stream closed.");
             });
@@ -40,6 +47,7 @@ export async function GET(request) {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache',
             'Connection': 'keep-alive',
+            'X-Accel-Buffering': 'no',
         },
     });
 }
