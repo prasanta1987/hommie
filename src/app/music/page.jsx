@@ -117,7 +117,7 @@ export default function MusicPage() {
       <div className={styles.songList}>
         {songs.map(song => (
           <div key={song.id} className={styles.songListItem}>
-            <Image src={song.image} alt={song.name} className={styles.songListImage} width={50} height={50} />
+            <Image src={song.image} alt={song.name} className={styles.songListImage} width={500} height={500} />
             <div className={styles.songListInfo}>
               <p className={styles.songListName}>{song.name}</p>
               <p className={styles.songListArtist}>{song.artist}</p>
