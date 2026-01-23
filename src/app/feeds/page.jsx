@@ -6,7 +6,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { useObjectVal } from 'react-firebase-hooks/database';
 import { ref } from 'firebase/database';
 import { Spinner } from 'react-bootstrap';
-import LandingPage from '../components/LandingPage';
+import LandingPage from './components/LandingPage';
 import Footer from '../components/Footer';
 import NoBoard from '../components/ui/NoBoard';
 

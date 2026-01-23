@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Boards from './ui/Boards';
-import Feeds from './ui/Feeds';
+import Boards from '../ui/Boards';
+import Feeds from '../ui/Feeds';
 
-import { updateValuesToDatabase } from '../miscFunctions/actions';
+import { updateValuesToDatabase } from '../../miscFunctions/actions';
 import './LandingPage.css'
 
 const LandingPage = (props) => {
