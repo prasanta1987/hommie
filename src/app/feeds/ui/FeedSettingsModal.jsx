@@ -19,15 +19,13 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
     return (
         <Modal show={isOpen} onHide={onClose} centered>
             <Modal.Header closeButton>
-                <Modal.Title>{feedName} Settings</Modal.Title>
+                <Modal.Title>Feed Settings</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <p>Board: {boardName}</p>
-                <p>Current Value: {feed.value}</p>
                 <Form>
                     <Form.Group>
-                        <Form.Label>Display Type</Form.Label>
-                        <div className="mb-3">
+                        <Form.Label>Card Type</Form.Label>
+                        <div className="mb-3 d-flex flex-row justify-content-between">
                             <Form.Check
                                 type="radio"
                                 id="card-radio"
