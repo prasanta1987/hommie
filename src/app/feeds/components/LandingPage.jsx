@@ -51,7 +51,7 @@ const LandingPage = (props) => {
         </div>
       </div>
       <div className='h-100 container justify-content-start pt-2'>
-        {dbData && <Feeds feedData={dbData} />}
+        {dbData && <Feeds feedData={dbData} userUid={userUid}/>}
       </div>
     </div>
 

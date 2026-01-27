@@ -14,13 +14,14 @@ const Feeds = React.memo((props) => {
             const feeds = userDbData.flatMap(board => {
                 if (board.devFeeds) {
                     return Object.keys(board.devFeeds)
-                    .filter(feedName => board.devFeeds[feedName].isSelected)
-                    .map(feedName => ({
-                        ...board.devFeeds[feedName],
-                        boardName: board.deviceName,
-                        feedName: feedName,
-                        id: `${board.deviceCode}-${feedName}`
-                    }));
+                        .filter(feedName => board.devFeeds[feedName].isSelected)
+                        .map(feedName => ({
+                            ...board.devFeeds[feedName],
+                            boardName: board.deviceName,
+                            feedName: feedName,
+                            id: `${board.deviceCode}-${feedName}`,
+                            deviceCode: board.deviceCode
+                        }));
                 }
                 return [];
             });
@@ -37,7 +38,14 @@ const Feeds = React.memo((props) => {
     return (
         <div className="feeds-grid">
             {selectedFeeds.map(feed => (
-                <FeedCard key={feed.id} feed={feed} boardName={feed.boardName} feedName={feed.feedName} />
+                <FeedCard
+                    key={feed.id}
+                    feed={feed}
+                    boardName={feed.boardName}
+                    feedName={feed.feedName}
+                    deviceCode={feed.deviceCode} 
+                    uid={props.userUid}
+                    />
             ))}
         </div>
     );
