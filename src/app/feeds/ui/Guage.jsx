@@ -1,4 +1,4 @@
-<GaugeComponent
+{/* <GaugeComponent
   value={12.859313380452495}
   type="semicircle"
   minValue={0}
@@ -63,4 +63,4 @@
         defaultTickValueConfig: { hide: false }
       }
     }}
-/>
+/> */}
