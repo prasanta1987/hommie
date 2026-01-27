@@ -1,6 +1,6 @@
 'use client';
 
-import { auth, db } from '../firebase/config';
+import { auth, db } from '../../firebaseConfig/config';
 import SignIn from '../components/sign-in';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useObjectVal } from 'react-firebase-hooks/database';

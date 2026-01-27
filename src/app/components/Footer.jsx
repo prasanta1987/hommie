@@ -4,7 +4,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 
 import { useObjectVal } from 'react-firebase-hooks/database';
 import { ref } from 'firebase/database';
-import { db } from '../firebase/config'
+import { db } from '../../firebaseConfig/config'
 import { Spinner } from 'react-bootstrap';
 
 import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';

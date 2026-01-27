@@ -6,7 +6,7 @@ import {
   createUserWithEmailAndPassword,
   updateProfile
 } from 'firebase/auth';
-import { auth } from '../firebase/config';
+import { auth } from '../../firebaseConfig/config';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');

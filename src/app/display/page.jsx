@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useObjectVal } from 'react-firebase-hooks/database';
-import { auth, db } from '../firebase/config';
+import { auth, db } from '../../firebaseConfig/config';
 import { ref as databaseRef, remove } from 'firebase/database';
 import { updateValuesToDatabase } from '../miscFunctions/actions';
 import { Spinner } from "react-bootstrap";

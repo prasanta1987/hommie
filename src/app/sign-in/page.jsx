@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../firebase/config';
+import { auth } from '../../firebaseConfig/config';
 import { redirect } from 'next/navigation';
 import SignIn from '../components/sign-in';
 import { Spinner } from 'react-bootstrap';
