@@ -8,7 +8,7 @@ import { ref } from 'firebase/database';
 import { Spinner } from 'react-bootstrap';
 import LandingPage from './components/LandingPage';
 import Footer from '../components/Footer';
-import NoBoard from '../components/ui/NoBoard';
+import NoBoard from './ui/NoBoard';
 
 
 export default function Home() {

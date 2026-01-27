@@ -15,7 +15,7 @@ import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
 import './NavBar.css'
 
-import ArduinoCode from './ui/ArduinoCode'
+import ArduinoCode from '../feeds/ui/ArduinoCode'
 
 const AppNavbar = () => {
   const [user, setUser] = useState(null);
