@@ -31,7 +31,7 @@ const LandingPage = (props) => {
 
 
   return (
-    <div className='container-fluid bg-dark text-light flex-grow-1 overflow-auto pb-5'>
+    <div className='container-fluid bg-dark text-light flex-grow-1 overflow-auto pb-5 d-flex flex-column'>
       <div className='container d-flex justify-content-between align-items-center pt-2'>
         <div className='d-flex justify-content-start gap-3 align-items-center flex-wrap'>
           {
@@ -50,7 +50,7 @@ const LandingPage = (props) => {
           }
         </div>
       </div>
-      <div className='container justify-content-start pt-2'>
+      <div className='h-100 container justify-content-start pt-2'>
         {dbData && <Feeds feedData={dbData} />}
       </div>
     </div>

@@ -85,3 +85,9 @@
 .feed-timestamp {
     font-style: italic;
 }
+
+.settings-icon {
+    margin-left: auto;
+    cursor: pointer;
+    color: #000;
+}

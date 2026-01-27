@@ -13,7 +13,7 @@ export default function Boards(props) {
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
 
     useEffect(() => {
-        console.log(props.boardData)
+        // console.log(props.boardData)
         setBoardName(props.boardData.deviceName);
         setDeviceCode(props.boardKey);
     }, [props.boardData, props.boardKey]);
