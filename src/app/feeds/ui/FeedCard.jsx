@@ -12,9 +12,6 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid })
 
     const dbTimestamp = feed.time ? feed.time : null;
 
-    console.log(deviceCode)
-    console.log(uid)
-
     useEffect(() => {
         if (longAging) return;
 

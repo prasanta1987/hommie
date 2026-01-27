@@ -1,0 +1,29 @@
+@media only screen and (min-width: 768px) {
+    .gauge-card-body .gauge {
+        width: 190px;
+        margin: 0 auto;
+        height: 190px;
+    }
+
+    .gauge-card-body .gauge-label {
+        font-size: 3em;
+        top: 40%;
+    }
+
+    .gauge-card-body .indicator-container {
+        top: 20%;
+    }
+
+    .gauge-card-body .left-label {
+        left: 5px;
+    }
+
+    .gauge-card-body .right-label {
+        right: 5px;
+    }
+}
+
+.gauge-card-body .gauge {
+    height: 190px;
+    margin: 0 auto;
+}

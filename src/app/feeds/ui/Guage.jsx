@@ -1,66 +1,83 @@
-{/* <GaugeComponent
-  value={12.859313380452495}
-  type="semicircle"
-  minValue={0}
-  maxValue={50}
-  arc={{
-      width: 0.95,
-      cornerRadius: 27,
-      nbSubArcs: 10,
-      colorArray: [
-        "#fa00e5",
-        "#0060fa",
-        "#070fed",
-        "#44ff00",
-        "#f6fa00",
-        "#fa3e00"
-      ],
-      padding: 0,
-      subArcsStrokeWidth: 0,
-      subArcsStrokeColor: "#5e5c64",
-      effects: {
-        glow: true,
-        glowSpread: 0.3,
-        glowBlur: 11,
-        dropShadow: { dy: 2, blur: 9, opacity: 0.6 }
-      },
-      subArcs: [],
-      gradient: false,
-      padEndpoints: false
-    }}
-  pointer={{
-      type: "needle",
-      baseColor: "#ff006f",
-      strokeWidth: 0,
-      strokeColor: "#ff0088",
-      maxFps: 60,
-      color: "#ffffff",
-      length: 0.6,
-      width: 12,
-      animationDelay: 0
-    }}
-  labels={{
-      valueLabel: {
-        matchColorWithArc: true,
-        style: { fontSize: "32px", fontWeight: "bold" },
-        hide: false,
-        offsetX: 0,
-        offsetY: 50
-      },
-      tickLabels: {
-        type: "outer",
-        ticks: [
-          { value: 0 },
-          { value: 10 },
-          { value: 20 },
-          { value: 30 },
-          { value: 40 },
-          { value: 50 }
-        ],
-        autoSpaceTickLabels: false,
-        defaultTickLineConfig: { hide: true },
-        hideMinMax: false,
-        defaultTickValueConfig: { hide: false }
+import React, { useEffect, useState } from 'react';
+import { FiZap, FiCpu, FiClock, FiSettings } from 'react-icons/fi';
+import './FeedCard.css';
+import FeedSettingsModal from './FeedSettingsModal';
+import { calculateAgeing } from '../../miscFunctions/timeCalculation'
+import Gauge from "@nationsinfo/react-simple-gauge";
+
+import './Guage.css';
+
+export default function Guage({ feed, boardName, feedName, deviceCode, uid }) {
+
+  const [showModal, setShowModal] = useState(false);
+  const [longAging, setLongAging] = useState(false);
+  const [millis, setMillis] = useState(0);
+
+  const dbTimestamp = feed.time ? feed.time : null;
+
+  useEffect(() => {
+    if (longAging) return;
+
+    const interval = setInterval(() => {
+      setMillis(new Date().getTime());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [longAging]);
+
+  useEffect(() => {
+    if (dbTimestamp) {
+      const diffMs = new Date().getTime() - dbTimestamp;
+      const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHrs >= 24) {
+        setLongAging(true);
       }
-    }}
-/> */}
+    }
+  }, [dbTimestamp]);
+
+
+  if (!feed) return null;
+
+  return (
+    <>
+      <div className="feed-card">
+        <div className="feed-card-header">
+          <FiZap className="feed-icon" />
+          <span className="feed-name">{feedName}</span>
+          <FiSettings
+            className="settings-icon"
+            onClick={() => setShowModal(true)}
+          />
+        </div>
+        <div className="gauge-card-body">
+          <Gauge
+            className="gauge"
+            value={feed.value}
+            min={0}
+            max={100}
+          />
+        </div>
+        <div className="feed-card-footer">
+          <div className="feed-board-info">
+            <FiCpu className="board-icon" />
+            <span>{boardName}</span>
+          </div>
+          <div className="feed-timestamp d-flex align-items-center">
+            <FiClock className="board-icon" />
+            <span>
+              {dbTimestamp ? calculateAgeing(dbTimestamp) : 'No timestamp'}
+            </span>
+          </div>
+        </div>
+      </div>
+      <FeedSettingsModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        feed={feed}
+        boardName={boardName}
+        feedName={feedName}
+        deviceCode={deviceCode}
+        uid={uid}
+      />
+    </>
+  );
+};

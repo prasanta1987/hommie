@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@nationsinfo/react-simple-gauge": "^2.2.22",
     "bootstrap": "^5.3.8",
     "firebase": "^12.7.0",
     "firebase-admin": "^13.6.0",

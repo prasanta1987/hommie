@@ -60,7 +60,8 @@
         flex-direction: row;
         justify-content: space-between;
     }
-  }
+}
+
 
 .feed-value {
     font-size: 48px;
