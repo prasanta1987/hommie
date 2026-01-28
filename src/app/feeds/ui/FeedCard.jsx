@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { FiZap, FiCpu, FiClock, FiSettings } from 'react-icons/fi';
 import FeedSettingsModal from './FeedSettingsModal';
 import { calculateAgeing } from '../../miscFunctions/timeCalculation';
-import Gauge from "@nationsinfo/react-simple-gauge";
+// import Gauge from "@nationsinfo/react-simple-gauge";
 import './FeedCard.css';
 import { updateValuesToDatabase } from '../../miscFunctions/actions';
+import GaugeUI from '../ui/GaugeUI';
 
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
 
@@ -55,16 +56,10 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 </div>
                 <div className="feed-card-body">
                     {type === 'Gauge' ? (
-                        <Gauge
-                            key={`${deviceCode}-${feedName}`}
+                        <GaugeUI
                             value={feed.value}
                             min={feed.rangeMin}
                             max={feed.rangeMax}
-                            lowRangeColor="#4de774"
-                            midRangeColor="#eeea17"
-                            highRangeColor="#eb4848"
-                            lowRangeBreakpoint={parseInt(feed.rangeMin * 0.35)}
-                            midRangeBreakpoint={parseInt(feed.rangeMin * 0.75)}
                         />
                     ) : type === 'Slider' ? (
                         <div className='w-100'>
