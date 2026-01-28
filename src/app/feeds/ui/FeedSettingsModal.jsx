@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import './FeedSettingsModal.css';
+// import './FeedSettingsModal.css';
 import { updateValuesToDatabase, setValueToDatabase } from '../../miscFunctions/actions';
 
 export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, feedName, deviceCode, uid }) {
@@ -28,7 +28,7 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
 
 
     return (
-        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="light">
+        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark">
             <Modal.Header closeButton>
                 <Modal.Title>Feed Settings</Modal.Title>
             </Modal.Header>
@@ -64,7 +64,7 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
                         </div>
                     </Form.Group>
                     {(feedType === 'Gauge' || feedType === 'Slider') && (
-                        <div className='d-flex gap-2' style={{borderTop: '1px solid #e5e2e2', paddingTop: '5px'}}>
+                        <div className='d-flex gap-2' style={{borderTop: '1px solid #063a3b', paddingTop: '5px'}}>
                             <Form.Group className="">
                                 <Form.Label>Min Value</Form.Label>
                                 <Form.Control

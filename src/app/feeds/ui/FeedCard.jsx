@@ -56,14 +56,14 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 <div className="feed-card-body">
                     {type === 'Gauge' ? (
                         <Gauge
-                            className="gauge"
+                            key={`${deviceCode}-${feedName}`}
                             value={feed.value}
                             min={feed.rangeMin}
                             max={feed.rangeMax}
                             lowRangeColor="#4de774"
                             midRangeColor="#eeea17"
                             highRangeColor="#eb4848"
-                            lowRangeBreakpoint={parseInt(feed.rangeMin * 0.5)}
+                            lowRangeBreakpoint={parseInt(feed.rangeMin * 0.35)}
                             midRangeBreakpoint={parseInt(feed.rangeMin * 0.75)}
                         />
                     ) : type === 'Slider' ? (
