@@ -14,7 +14,7 @@ const GaugeUI = (props) => {
                 gradient: false,
                 subArcs: [],
                 nbSubArcs: 3,
-                colorArray: ["#5BE12C", "#F5CD19", "#EA4228"],
+                colorArray: ["#2ca8e1", "#F5CD19", "#EA4228"],
                 padding: 0.02,
                 effects: { glow: false, glowBlur: 3, glowSpread: 3 },
                 subArcsStrokeWidth: 0
