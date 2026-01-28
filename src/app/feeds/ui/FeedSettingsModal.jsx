@@ -37,9 +37,9 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
                             <Form.Check
                                 type="radio"
                                 id="gauge-radio"
-                                label="Guage"
-                                value="Guage"
-                                checked={feedType === 'Guage'}
+                                label="Gauge"
+                                value="Gauge"
+                                checked={feedType === 'Gauge'}
                                 onChange={(e) => setFeedType(e.target.value)}
                             />
                             <Form.Check

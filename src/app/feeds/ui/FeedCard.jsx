@@ -4,12 +4,14 @@ import FeedSettingsModal from './FeedSettingsModal';
 import { calculateAgeing } from '../../miscFunctions/timeCalculation';
 import Gauge from "@nationsinfo/react-simple-gauge";
 import './FeedCard.css';
+import { updateValuesToDatabase } from '../../miscFunctions/actions';
 
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
 
     const [showModal, setShowModal] = useState(false);
     const [longAging, setLongAging] = useState(false);
     const [millis, setMillis] = useState(0);
+    const [sliderValue, setSliderValue] = useState(feed.value);
 
     const dbTimestamp = feed.time ? feed.time : null;
 
@@ -35,6 +37,11 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
     if (!feed) return null;
 
+    const sliderValueChange = (e) => {
+        console.log(e.target.value);
+        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, { value: e.target.value });
+    }
+
     return (
         <>
             <div className="feed-card">
@@ -58,6 +65,17 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             highRangeColor="#eb4848"
                             lowRangeBreakpoint={30}
                             midRangeBreakpoint={40}
+                        />
+                    ) : type === 'Slider' ? (
+                        <input
+                            type="range"
+                            min={0}
+                            max={100}
+                            value={sliderValue}
+                            className="feed-slider"
+                            onChange={(e) => setSliderValue(e.target.value)}
+                            onMouseUp={(e) => sliderValueChange(e)}
+                            onTouchEnd={(e) => sliderValueChange(e)}
                         />
                     ) : (
                         <div className="feed-value">{feed.value}</div>
