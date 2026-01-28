@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { FiZap, FiCpu, FiClock, FiSettings } from 'react-icons/fi';
-import './FeedCard.css';
 import FeedSettingsModal from './FeedSettingsModal';
-import { calculateAgeing } from '../../miscFunctions/timeCalculation'
+import { calculateAgeing } from '../../miscFunctions/timeCalculation';
+import Gauge from "@nationsinfo/react-simple-gauge";
+import './FeedCard.css';
 
-export default function FeedCard({ feed, boardName, feedName, deviceCode, uid }) {
+export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
 
     const [showModal, setShowModal] = useState(false);
     const [longAging, setLongAging] = useState(false);
@@ -46,7 +47,21 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid })
                     />
                 </div>
                 <div className="feed-card-body">
-                    <div className="feed-value">{feed.value}</div>
+                    {type === 'Gauge' ? (
+                        <Gauge
+                            className="gauge"
+                            value={feed.value}
+                            min={0}
+                            max={100}
+                            lowRangeColor="#18a7d3"
+                            midRangeColor="#eeea17"
+                            highRangeColor="#eb4848"
+                            lowRangeBreakpoint={30}
+                            midRangeBreakpoint={40}
+                        />
+                    ) : (
+                        <div className="feed-value">{feed.value}</div>
+                    )}
                 </div>
                 <div className="feed-card-footer">
                     <div className="feed-board-info">

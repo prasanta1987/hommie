@@ -43,7 +43,8 @@
 .feed-card-body {
     text-align: center;
     flex-grow: 1;
-    margin-bottom: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
 .feed-card-footer {
@@ -91,4 +92,44 @@
     margin-left: auto;
     cursor: pointer;
     color: #000;
+}
+
+@media only screen and (max-width: 768px) {
+    .feed-card-body .gauge {
+        width: 190px;
+        margin: 0 auto;
+        height: 190px;
+    }
+
+    .feed-card-body .gauge-label {
+        font-size: 3em;
+        top: 35%;
+    }
+
+    .feed-card-body .indicator-container {
+        top: 20%;
+    }
+
+    .feed-card-body .left-label {
+        left: 5px;
+    }
+
+    .feed-card-body .right-label {
+        right: 5px;
+    }
+}
+
+.feed-card-body {
+    display: flex;
+    color: #2931a1;
+}
+
+.feed-card-body .gauge {
+    height: 175px;
+    margin: 0 auto;
+}
+
+.feed-card-body .gauge-label {
+    font-size: 4em;
+    top: 30%;
 }

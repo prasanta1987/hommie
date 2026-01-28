@@ -2,9 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { FiZap, FiCpu, FiClock } from 'react-icons/fi';
 import NoFeed from '../ui/NoFeed'
 import FeedCard from '../ui/FeedCard'
-import Guage from '../ui/Guage'
-
-
 
 const Feeds = React.memo((props) => {
     const [selectedFeeds, setSelectedFeeds] = useState([]);
@@ -40,32 +37,16 @@ const Feeds = React.memo((props) => {
     return (
         <div className="feeds-grid">
             {selectedFeeds.map(feed => {
-                switch (feed.type) {
-                    case "Guage":
-                        return (
-                            <Guage
-                                key={feed.id}
-                                feed={feed}
-                                boardName={feed.boardName}
-                                feedName={feed.feedName}
-                                deviceCode={feed.deviceCode}
-                                uid={props.userUid}
-                            />
-                        );
-                    case "Card":
-                        return (
-                            <FeedCard
-                                key={feed.id}
-                                feed={feed}
-                                boardName={feed.boardName}
-                                feedName={feed.feedName}
-                                deviceCode={feed.deviceCode}
-                                uid={props.userUid}
-                            />
-                        );
-                    default:
-                        return <></>;
-                }
+                return <FeedCard
+                    key={feed.id}
+                    type={feed.type}
+                    feed={feed}
+                    boardName={feed.boardName}
+                    feedName={feed.feedName}
+                    deviceCode={feed.deviceCode}
+                    uid={props.userUid}
+                />
+
             })}
         </div>
     );
