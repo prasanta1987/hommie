@@ -1,4 +1,4 @@
-@media only screen and (min-width: 768px) {
+@media only screen and (max-width: 768px) {
     .gauge-card-body .gauge {
         width: 190px;
         margin: 0 auto;
@@ -7,7 +7,7 @@
 
     .gauge-card-body .gauge-label {
         font-size: 3em;
-        top: 40%;
+        top: 35%;
     }
 
     .gauge-card-body .indicator-container {
@@ -23,7 +23,17 @@
     }
 }
 
+.gauge-card-body {
+    display: flex;
+    color: #2931a1;
+}
+
 .gauge-card-body .gauge {
-    height: 190px;
+    height: 175px;
     margin: 0 auto;
+}
+
+.gauge-card-body .gauge-label {
+    font-size: 4em;
+    top: 30%;
 }

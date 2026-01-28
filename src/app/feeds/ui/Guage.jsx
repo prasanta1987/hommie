@@ -7,6 +7,64 @@ import Gauge from "@nationsinfo/react-simple-gauge";
 
 import './Guage.css';
 
+
+function GaugeUi({ value, min, max }) {
+  return (
+    <GaugeComponent
+      value={84.94938709948751}
+      type="grafana"
+      minValue={0}
+      maxValue={108}
+      arc={{
+        width: 0.55,
+        cornerRadius: 0,
+        nbSubArcs: 52,
+        colorArray: ["#ff00ff", "#00ffff", "#ffff00", "#ff0080"],
+        padding: 0,
+        subArcsStrokeWidth: 1,
+        subArcsStrokeColor: "#000000",
+        effects: { glow: true, glowBlur: 1, glowSpread: 2 }
+      }}
+      pointer={{
+        type: "needle",
+        elastic: false,
+        animationDelay: 200,
+        animationDuration: 1000,
+        length: 0.87,
+        width: 24,
+        baseColor: "#ffffff",
+        strokeWidth: 2,
+        strokeColor: "#000000",
+        maxFps: 60,
+        animationThreshold: 0.0096
+      }}
+      labels={{
+        valueLabel: {
+          matchColorWithArc: true,
+          style: { fontSize: "29px", fontWeight: "bold" },
+          offsetY: 25,
+          animateValue: true
+        },
+        tickLabels: {
+          type: "outer",
+          hideMinMax: false,
+          autoSpaceTickLabels: true,
+          ticks: [
+            { value: 0 },
+            { value: 4 },
+            { value: 8 },
+            { value: 15 },
+            { value: 16 },
+            { value: 23 },
+            { value: 42 },
+            { value: 108 }
+          ]
+        }
+      }}
+    />
+  )
+}
+
 export default function Guage({ feed, boardName, feedName, deviceCode, uid }) {
 
   const [showModal, setShowModal] = useState(false);
@@ -54,6 +112,11 @@ export default function Guage({ feed, boardName, feedName, deviceCode, uid }) {
             value={feed.value}
             min={0}
             max={100}
+            lowRangeColor="#18a7d3"
+            midRangeColor="#eeea17"
+            highRangeColor="#eb4848"
+            lowRangeBreakpoint={30}
+            midRangeBreakpoint={40}
           />
         </div>
         <div className="feed-card-footer">
