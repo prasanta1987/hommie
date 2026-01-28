@@ -58,25 +58,32 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                         <Gauge
                             className="gauge"
                             value={feed.value}
-                            min={0}
-                            max={100}
-                            lowRangeColor="#18a7d3"
+                            min={feed.rangeMin}
+                            max={feed.rangeMax}
+                            lowRangeColor="#4de774"
                             midRangeColor="#eeea17"
                             highRangeColor="#eb4848"
-                            lowRangeBreakpoint={30}
-                            midRangeBreakpoint={40}
+                            lowRangeBreakpoint={parseInt(feed.rangeMin * 0.5)}
+                            midRangeBreakpoint={parseInt(feed.rangeMin * 0.75)}
                         />
                     ) : type === 'Slider' ? (
-                        <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            value={sliderValue}
-                            className="feed-slider"
-                            onChange={(e) => setSliderValue(e.target.value)}
-                            onMouseUp={(e) => sliderValueChange(e)}
-                            onTouchEnd={(e) => sliderValueChange(e)}
-                        />
+                        <div className='w-100'>
+                            <div className="feed-value">{sliderValue}</div>
+                            <div className="d-flex w-100 justify-content-between align-items-center">
+                                <span>{feed.rangeMin}</span>
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={100}
+                                    value={sliderValue}
+                                    className="feed-slider"
+                                    onChange={(e) => setSliderValue(e.target.value)}
+                                    onMouseUp={(e) => sliderValueChange(e)}
+                                    onTouchEnd={(e) => sliderValueChange(e)}
+                                />
+                                <span>{feed.rangeMax}</span>
+                            </div>
+                        </div>
                     ) : (
                         <div className="feed-value">{feed.value}</div>
                     )}
