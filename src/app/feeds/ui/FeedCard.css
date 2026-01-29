@@ -1,3 +1,10 @@
+.feed-card {
+    --header-font-color: #57b5f9;
+    --footer-font-color: #527daf;
+    --text-font-color: #99c5f3;
+    --settings-icon-color: #c19a24;
+}
+
 .feeds-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -36,7 +43,7 @@
 .feed-name {
     font-size: 18px;
     font-weight: 600;
-    color: #57b5f9;
+    color: var(--header-font-color);
     text-transform: capitalize;
 }
 
@@ -50,7 +57,7 @@
 
 .feed-card-footer {
     font-size: 12px;
-    color: #57b5f9;
+    color: var(--footer-font-color);
     border-top: 1px solid #dddce7;
     padding-top: 5px;
     display: flex;
@@ -68,7 +75,7 @@
 .feed-value {
     font-size: 48px;
     font-weight: 700;
-    color: #2931a1;
+    color: var(--text-font-color);
     line-height: 1.2;
 }
 
@@ -92,7 +99,7 @@
 .settings-icon {
     margin-left: auto;
     cursor: pointer;
-    color: #e6e3e3;
+    color: var(--settings-icon-color);
 }
 
 @media only screen and (max-width: 768px) {
@@ -127,13 +134,19 @@
 
 /* For Input Slider */
 
+.input-slider{
+    --slider-height: 41px;
+    --slider-knob-size: calc(var(--slider-height) - 10px);
+}
 
 .input-slider {
     -webkit-appearance: none;
     width: 100%;
-    height: 25px;
-    background: #d3d3d3;
+    height: var(--slider-height);
+    background: #42484d;
     outline: none;
+    border: 2px solid #04AA6D;
+    box-shadow: inset 0px 0px 4px #000000;
     opacity: 0.7;
     border-radius: 25px;
     -webkit-transition: .2s;
@@ -147,8 +160,8 @@
 .input-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 25px;
-    height: 25px;
+    width: var(--slider-knob-size);
+    height: var(--slider-knob-size);
     border-radius: 25px;
     background: #04AA6D;
     cursor: pointer;
@@ -177,6 +190,7 @@
     outline: none;
     border-radius: 25px;
     box-shadow: inset 0 0 7px 3px rgb(0 0 0);
+    border: 2px solid #75898d;
     transition: .3s;
     cursor: pointer;
 }
@@ -191,8 +205,8 @@
     width: var(--toggler-height);
     height: var(--toggler-height);
     border-radius: 50%;
-    top: 0px;
-    left: 0px;
+    top: -2px;
+    left: -2px;
     background: #307197;
     box-shadow: -2px 0px 7px 1px rgb(0 0 0);
     transition: .3s;

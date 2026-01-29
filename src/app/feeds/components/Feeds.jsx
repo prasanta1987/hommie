@@ -116,7 +116,7 @@ const Feeds = React.memo((props) => {
                 <FiPlus size={24} />
             </button>
 
-            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+            <Modal show={showModal} onHide={() => setShowModal(false)} centered data-bs-theme="dark">
                 <Modal.Header closeButton>
                     <Modal.Title>Create New Feed</Modal.Title>
                 </Modal.Header>
