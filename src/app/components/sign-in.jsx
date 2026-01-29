@@ -42,8 +42,8 @@ const SignIn = () => {
 
       try {
         const apiKey = randomBytes(16).toString('hex');
-        updateValuesToDatabase(`userCred/${apiKey}`, { uid: userCredential.user.uid });
-      } catch {
+        updateValuesToDatabase(`userCred/${userCredential.user.uid}`, { apiKey: apiKey });
+      } catch (error) {
         deleteUser(userCredential.user);
         setError('An error occurred while generating the API key.');
       }

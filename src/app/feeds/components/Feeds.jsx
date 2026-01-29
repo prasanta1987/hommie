@@ -18,7 +18,7 @@ const Feeds = React.memo((props) => {
     const [devices, setDevices] = useState([]);
 
     useEffect(() => {
-        console.log(props.feedData);
+        // console.log(props.feedData);
 
         if (props.feedData) {
             const userDbData = Object.values(props.feedData);

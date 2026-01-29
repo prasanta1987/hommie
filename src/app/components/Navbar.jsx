@@ -15,7 +15,8 @@ import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
 import { randomBytes } from 'crypto';
 import { db } from '../../firebaseConfig/config'
-import { getDatabase, ref, get } from 'firebase/database'
+import { ref, get } from 'firebase/database'
+import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
 import './NavBar.css'
 
 import ArduinoCode from '../feeds/ui/ArduinoCode'
@@ -30,42 +31,28 @@ const AppNavbar = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [apiKeyBTN, setIsApiKeyBTN] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        get(ref(db, `userCred`)).then((snapshot) => {
+        get(ref(db, `userCred/${user.uid}`)).then((snapshot) => {
           if (snapshot.exists()) {
-            Object.keys(snapshot.val()).forEach((key) => {
-              if (snapshot.val()[key].uid === user.uid) {
-                console.log(key)
-                setApiKey(key)
-              }
-            })
+            setApiKey(snapshot.val().apiKey);
           }
         }).catch((error) => {
           console.log(error);
         });
+        setDisplayName(user.displayName || user.email);
         setShowSignInModal(false);
+      } else {
+        console.log('No user is signed in');
+        setApiKey('');
       }
     });
     return () => unsubscribe();
   }, []);
-
-  // useEffect(() => {
-  //   get(ref(db, `userCred`)).then((snapshot) => {
-  //     if (snapshot.exists()) {
-  //       Object.keys(snapshot.val()).forEach((key) => {
-  //         if (snapshot.val()[key] === user.uid) {
-  //           setApiKey(key)
-  //         }
-  //       })
-  //     }
-  //   }).catch((error) => {
-  //     console.log(error);
-  //   });
-  // }, [])
 
   const updateDisplayName = () => {
     updateProfile(user, {
@@ -97,6 +84,13 @@ const AppNavbar = () => {
       await updateProfile(userCredential.user, {
         displayName: displayName,
       });
+      try {
+        const apiKey = randomBytes(16).toString('hex');
+        updateValuesToDatabase(`userCred/${userCredential.user.uid}`, { apiKey: apiKey });
+      } catch (error) {
+        deleteUser(userCredential.user);
+        setError('An error occurred while generating the API key.');
+      }
     } catch (error) {
       setError(getFirebaseErrorMessage(error.code));
       console.error(error);
@@ -129,6 +123,17 @@ const AppNavbar = () => {
       handleSignIn(e);
     }
   };
+
+  const regenerateApiKey = (e) => {
+    e.preventDefault();
+    setIsApiKeyBTN(true);
+    const newApiKey = randomBytes(16).toString('hex');
+    updateValuesToDatabase(`userCred/${user.uid}`, { apiKey: newApiKey });
+    setApiKey(newApiKey);
+    setTimeout(() => {
+      setIsApiKeyBTN(false);
+    }, 60000);
+  }
 
   return (
     <>
@@ -197,6 +202,14 @@ const AppNavbar = () => {
                 value={apiKey}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
+
+              <button
+                className='btn btn-sm btn-warning mt-2'
+                onClick={(e) => regenerateApiKey(e)}
+                disabled={apiKeyBTN}
+              >
+                Generate New API Key
+              </button>
 
             </Form.Group>
           </Form>
