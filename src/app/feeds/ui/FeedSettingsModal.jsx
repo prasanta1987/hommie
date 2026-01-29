@@ -28,7 +28,7 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
 
 
     return (
-        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark">
+        <Modal size="md" show={isOpen} onHide={onClose} centered data-bs-theme="dark">
             <Modal.Header closeButton>
                 <Modal.Title>Feed Settings</Modal.Title>
             </Modal.Header>
