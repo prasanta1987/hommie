@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 // import './FeedSettingsModal.css';
 import { updateValuesToDatabase, setValueToDatabase } from '../../miscFunctions/actions';
+import FeedTypes from './FeedTypes';
 
 export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, feedName, deviceCode, uid }) {
     const [feedType, setFeedType] = useState(feed.type || 'Card');
@@ -36,40 +37,10 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
                 <Form>
                     <Form.Group>
                         <Form.Label>Feed Type</Form.Label>
-                        <div className="mb-3 d-flex flex-row justify-content-between">
-                            <Form.Check
-                                type="radio"
-                                id="card-radio"
-                                label="Card"
-                                value="Card"
-                                checked={feedType === 'Card'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                            <Form.Check
-                                type="radio"
-                                id="gauge-radio"
-                                label="Gauge"
-                                value="Gauge"
-                                checked={feedType === 'Gauge'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                            <Form.Check
-                                type="radio"
-                                id="slider-radio"
-                                label="Slider"
-                                value="Slider"
-                                checked={feedType === 'Slider'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                            <Form.Check
-                                type="checkbox"
-                                id="toggle-checkbox"
-                                label="Toggle"
-                                value="Toggle"
-                                checked={feedType === 'Toggle'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                        </div>
+                        <FeedTypes
+                            feedType={feedType}
+                            setFeedType={setFeedType}
+                        />
                     </Form.Group>
                     {(feedType === 'Gauge' || feedType === 'Slider') && (
                         <div className='d-flex gap-2' style={{ borderTop: '1px solid #063a3b', paddingTop: '5px' }}>

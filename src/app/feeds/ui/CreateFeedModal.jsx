@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 // import './FeedSettingsModal.css';
 import { updateValuesToDatabase, setValueToDatabase } from '../../miscFunctions/actions';
+import FeedTypes from './FeedTypes';
 
 export default function CreateFeedModal({
     isOpen,
@@ -55,40 +56,10 @@ export default function CreateFeedModal({
 
                     <Form.Group className="mb-3">
                         <Form.Label>Feed Type</Form.Label>
-                        <div className="d-flex flex-row justify-content-between">
-                            <Form.Check
-                                type="radio"
-                                id="card-type"
-                                label="Card"
-                                value="Card"
-                                checked={feedType === 'Card'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                            <Form.Check
-                                type="radio"
-                                id="gauge-type"
-                                label="Gauge"
-                                value="Gauge"
-                                checked={feedType === 'Gauge'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                            <Form.Check
-                                type="radio"
-                                id="slider-type"
-                                label="Slider"
-                                value="Slider"
-                                checked={feedType === 'Slider'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                            <Form.Check
-                                type="checkbox"
-                                id="toggle-checkbox"
-                                label="Toggle"
-                                value="Toggle"
-                                checked={feedType === 'Toggle'}
-                                onChange={(e) => setFeedType(e.target.value)}
-                            />
-                        </div>
+                        <FeedTypes
+                            feedType={feedType}
+                            setFeedType={setFeedType}
+                        />
                     </Form.Group>
 
                     {(feedType === 'Gauge' || feedType === 'Slider') && (
