@@ -125,16 +125,41 @@
     color: #2931a1;
 }
 
-.feed-card-body .gauge {
-    height: 175px;
-    margin: 0 auto;
+/* For Input Slider */
+
+
+.input-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    border-radius: 25px;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
 }
 
-.feed-card-body .gauge-label {
-    font-size: 4em;
-    top: 30%;
+.input-slider:hover {
+    opacity: 1;
 }
 
+.input-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+}
+
+.input-slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+}
 
 
 /* For Toggle Switch */

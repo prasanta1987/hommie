@@ -68,6 +68,8 @@ const Feeds = React.memo((props) => {
         const reference = `${props.userUid}/${selectedDeviceCode}/devFeeds/${feedName}`;
         const newFeed = {
             type: feedType,
+            value: 0,
+            time: new Date().getTime(),
             isSelected: true
         };
 
