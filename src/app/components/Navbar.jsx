@@ -13,6 +13,9 @@ import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut, FiLogIn } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
+import { randomBytes } from 'crypto';
+import { db } from '../../firebaseConfig/config'
+import { getDatabase, ref, get } from 'firebase/database'
 import './NavBar.css'
 
 import ArduinoCode from '../feeds/ui/ArduinoCode'
@@ -22,6 +25,7 @@ const AppNavbar = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [apiKey, setApiKey] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -31,11 +35,37 @@ const AppNavbar = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
+        get(ref(db, `userCred`)).then((snapshot) => {
+          if (snapshot.exists()) {
+            Object.keys(snapshot.val()).forEach((key) => {
+              if (snapshot.val()[key].uid === user.uid) {
+                console.log(key)
+                setApiKey(key)
+              }
+            })
+          }
+        }).catch((error) => {
+          console.log(error);
+        });
         setShowSignInModal(false);
       }
     });
     return () => unsubscribe();
   }, []);
+
+  // useEffect(() => {
+  //   get(ref(db, `userCred`)).then((snapshot) => {
+  //     if (snapshot.exists()) {
+  //       Object.keys(snapshot.val()).forEach((key) => {
+  //         if (snapshot.val()[key] === user.uid) {
+  //           setApiKey(key)
+  //         }
+  //       })
+  //     }
+  //   }).catch((error) => {
+  //     console.log(error);
+  //   });
+  // }, [])
 
   const updateDisplayName = () => {
     updateProfile(user, {
@@ -159,6 +189,15 @@ const AppNavbar = () => {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
+
+              <Form.Label>API Key</Form.Label>
+              <Form.Control
+                type="text"
+                disabled
+                value={apiKey}
+                onChange={(e) => setDisplayName(e.target.value)}
+              />
+
             </Form.Group>
           </Form>
         </Modal.Body>

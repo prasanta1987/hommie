@@ -4,9 +4,12 @@ import React, { useState } from 'react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updateProfile
+  updateProfile,
+  deleteUser
 } from 'firebase/auth';
 import { auth } from '../../firebaseConfig/config';
+import { updateValuesToDatabase } from '../miscFunctions/actions';
+import { randomBytes } from 'crypto';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -36,6 +39,14 @@ const SignIn = () => {
           displayName: displayName,
         }
       )
+
+      try {
+        const apiKey = randomBytes(16).toString('hex');
+        updateValuesToDatabase(`userCred/${apiKey}`, { uid: userCredential.user.uid });
+      } catch {
+        deleteUser(userCredential.user);
+        setError('An error occurred while generating the API key.');
+      }
 
     } catch (error) {
       setError(getFirebaseErrorMessage(error.code));

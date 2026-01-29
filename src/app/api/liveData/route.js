@@ -3,21 +3,30 @@ import admin from '../../../firebaseConfig/adminConfig';
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
-    const uid = searchParams.get('uid');
+    const apiKey = searchParams.get('apiKey');
     const deviceCode = searchParams.get('deviceCode');
 
-    if (!uid || !deviceCode) {
-        return NextResponse.json({ error: 'Missing uid or deviceCode' }, { status: 400 });
+    if (!apiKey || !deviceCode) {
+        return NextResponse.json({ error: 'Missing apiKey or deviceCode' }, { status: 400 });
     }
+
+    const db = admin.database();
+    const userCredRef = db.ref(`userCred/${apiKey}`);
+    const userCredSnapshot = await userCredRef.once('value');
+    const userCredData = userCredSnapshot.val();
+
+    if (!userCredData || !userCredData.uid) {
+        return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
+    }
+
+    const uid = userCredData.uid;
 
     const readableStream = new ReadableStream({
         start(controller) {
-            const db = admin.database();
             const dbRef = db.ref(`${uid}/${deviceCode}`);
 
             const listener = dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                // This is the correct way: convert the object to a string and format for SSE.
                 controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
             }, (error) => {
                 console.error("Firebase listener error:", error);
@@ -26,7 +35,6 @@ export async function GET(request) {
             });
 
             const intervalId = setInterval(() => {
-                // Send a heartbeat to keep the connection alive
                 controller.enqueue(': heartbeat\n\n');
             }, 10000);
 
