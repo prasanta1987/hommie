@@ -134,3 +134,80 @@
     font-size: 4em;
     top: 30%;
 }
+
+
+
+/* For Toggle Switch */
+.feed-toggler {
+    --toggler-height: 50px;
+    --toggler-width: calc(var(--toggler-height) * 2);
+}
+
+.feed-toggler {
+    width: var(--toggler-width);
+    height: var(--toggler-height);
+    position: relative;
+    appearance: none;
+    background: #cb3729;
+    outline: none;
+    border-radius: 25px;
+    box-shadow: inset 0 0 7px 3px rgb(0 0 0);
+    transition: .3s;
+    cursor: pointer;
+}
+
+.feed-toggler:checked {
+    background: #6fb351;
+}
+
+.feed-toggler::before {
+    content: '';
+    position: absolute;
+    width: var(--toggler-height);
+    height: var(--toggler-height);
+    border-radius: 50%;
+    top: 0px;
+    left: 0px;
+    background: #307197;
+    box-shadow: -2px 0px 7px 1px rgb(0 0 0);
+    transition: .3s;
+}
+
+.feed-toggler:checked::before {
+    transition: .3s;
+    left: calc(var(--toggler-width) - var(--toggler-height));
+}
+
+.feed-slider {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.feed-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: var(--toggler-width);
+    height: var(--toggler-height);
+    background: #4A90E2;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    transition: background .3s;
+}
+
+.feed-slider::-webkit-slider-thumb:hover {
+    background: #357ABD;
+}
+
+.feed-slider::-moz-range-thumb {
+    width: var(--toggler-width);
+    height: var(--toggler-height);
+    background: #4A90E2;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    transition: background .3s;
+}
+
+.feed-slider::-moz-range-thumb:hover {
+    background: #357ABD;
+}
