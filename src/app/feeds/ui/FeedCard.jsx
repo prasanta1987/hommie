@@ -6,6 +6,8 @@ import { calculateAgeing } from '../../miscFunctions/timeCalculation';
 import './FeedCard.css';
 import { updateValuesToDatabase } from '../../miscFunctions/actions';
 import GaugeUI from '../ui/GaugeUI';
+import SliderUI from '../ui/SliderUI';
+import ToggleUI from '../ui/ToggleUI';
 
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
 
@@ -15,6 +17,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [sliderValue, setSliderValue] = useState(feed.value);
 
     const dbTimestamp = feed.time ? feed.time : null;
+
 
     useEffect(() => {
         if (longAging) return;
@@ -40,7 +43,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
     const sliderValueChange = (e) => {
         console.log(e.target.value);
-        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, { value: e.target.value });
+        // updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, { value: e.target.value });
     }
 
     return (
@@ -58,27 +61,27 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                     {type === 'Gauge' ? (
                         <GaugeUI
                             value={feed.value}
-                            min={feed.rangeMin}
-                            max={feed.rangeMax}
+                            minValue={feed.rangeMin}
+                            maxValue={feed.rangeMax}
                         />
                     ) : type === 'Slider' ? (
-                        <div className='w-100'>
-                            <div className="feed-value">{sliderValue}</div>
-                            <div className="d-flex w-100 justify-content-between align-items-center">
-                                <span>{feed.rangeMin}</span>
-                                <input
-                                    type="range"
-                                    min={0}
-                                    max={100}
-                                    value={sliderValue}
-                                    className="feed-slider"
-                                    onChange={(e) => setSliderValue(e.target.value)}
-                                    onMouseUp={(e) => sliderValueChange(e)}
-                                    onTouchEnd={(e) => sliderValueChange(e)}
-                                />
-                                <span>{feed.rangeMax}</span>
-                            </div>
-                        </div>
+                        <SliderUI
+                            value={sliderValue}
+                            rangeMin={feed.rangeMin}
+                            rangeMax={feed.rangeMax}
+                            onChange={(value) => setSliderValue(value)}
+                            onMouseUp={(value) => sliderValueChange({ target: { value } })}
+                            onTouchEnd={(value) => sliderValueChange({ target: { value } })}
+                        />
+
+                    ) : type === 'Toggle' ? (
+                        <ToggleUI
+                            value={sliderValue}
+                            onChange={(checked) => {
+                                setSliderValue(checked)
+                                sliderValueChange({ target: { value: checked } })
+                            }}
+                        />
                     ) : (
                         <div className="feed-value">{feed.value}</div>
                     )}

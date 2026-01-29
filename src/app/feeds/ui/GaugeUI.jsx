@@ -1,21 +1,22 @@
 import React from 'react';
 import GaugeComponent from 'react-gauge-component';
 
-const GaugeUI = (props) => {
+const GaugeUI = ({value, minValue, maxValue}) => {
+
     return (
         <GaugeComponent
-            value={props.value}
+            value={value}
             type="semicircle"
-            minValue={props.minValue}
-            maxValue={props.maxValue}
+            minValue={minValue}
+            maxValue={maxValue}
             arc={{
                 width: 0.22,
                 cornerRadius: 6,
                 gradient: false,
                 subArcs: [],
-                nbSubArcs: 3,
+                nbSubArcs: 4,
                 colorArray: ["#2ca8e1", "#F5CD19", "#EA4228"],
-                padding: 0.02,
+                padding: 0.01,
                 effects: { glow: false, glowBlur: 3, glowSpread: 3 },
                 subArcsStrokeWidth: 0
             }}
@@ -25,18 +26,18 @@ const GaugeUI = (props) => {
                 animationDelay: 0,
                 animationDuration: 1141,
                 length: 0.8558179773268897,
-                width: 14,
-                color: "#48cae4",
-                baseColor: "#ffffff",
-                strokeWidth: 1,
-                strokeColor: "rgba(255,255,255,0.5)",
+                width: 24,
+                // color: "#48cae4",
+                // baseColor: "#ffffff",
+                // strokeWidth: 1,
+                // strokeColor: "rgba(255,255,255,0.5)",
                 maxFps: 60
             }}
             labels={{
                 valueLabel: {
                     formatTextValue: e => "".concat(e, ""),
                     matchColorWithArc: true,
-                    style: { fontSize: "72px", fontWeight: "bold", fill: "#b31919" },
+                    style: { fontSize: "72px", fontWeight: "bold", stroke: '#2f6ae9', strokeWidth: '0.1px' },
                     hide: false,
                     animateValue: false,
                     offsetX: 0,

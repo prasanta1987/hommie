@@ -18,7 +18,7 @@ const Feeds = React.memo((props) => {
 
     useEffect(() => {
         console.log(props.feedData);
-        
+
         if (props.feedData) {
             const userDbData = Object.values(props.feedData);
             const feeds = userDbData.flatMap(board => {
@@ -66,7 +66,7 @@ const Feeds = React.memo((props) => {
         });
 
         const reference = `${props.userUid}/${selectedDeviceCode}/devFeeds/${feedName}`;
-        const newFeed = { 
+        const newFeed = {
             type: feedType,
             isSelected: true
         };
@@ -106,8 +106,8 @@ const Feeds = React.memo((props) => {
                 />
 
             })}
-            <button 
-                className="plus-button" 
+            <button
+                className="plus-button"
                 onClick={() => setShowModal(true)}
                 title="Add new feed"
             >
@@ -169,6 +169,14 @@ const Feeds = React.memo((props) => {
                                     label="Slider"
                                     value="Slider"
                                     checked={feedType === 'Slider'}
+                                    onChange={(e) => setFeedType(e.target.value)}
+                                />
+                                <Form.Check
+                                    type="radio"
+                                    id="toggle-type"
+                                    label="Toggle"
+                                    value="Toggle"
+                                    checked={feedType === 'Toggle'}
                                     onChange={(e) => setFeedType(e.target.value)}
                                 />
                             </div>

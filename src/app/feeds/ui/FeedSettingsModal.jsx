@@ -5,8 +5,8 @@ import { updateValuesToDatabase, setValueToDatabase } from '../../miscFunctions/
 
 export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, feedName, deviceCode, uid }) {
     const [feedType, setFeedType] = useState(feed.type || 'Card');
-    const [minValue, setMinValue] = useState(feed.min || 0);
-    const [maxValue, setMaxValue] = useState(feed.max || 100);
+    const [minValue, setMinValue] = useState(feed.rangeMin || 0);
+    const [maxValue, setMaxValue] = useState(feed.rangeMax || 100);
 
     if (!isOpen) return null;
 
@@ -61,10 +61,18 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
                                 checked={feedType === 'Slider'}
                                 onChange={(e) => setFeedType(e.target.value)}
                             />
+                            <Form.Check
+                                type="checkbox"
+                                id="toggle-checkbox"
+                                label="Toggle"
+                                value="Toggle"
+                                checked={feedType === 'Toggle'}
+                                onChange={(e) => setFeedType(e.target.value)}
+                            />
                         </div>
                     </Form.Group>
                     {(feedType === 'Gauge' || feedType === 'Slider') && (
-                        <div className='d-flex gap-2' style={{borderTop: '1px solid #063a3b', paddingTop: '5px'}}>
+                        <div className='d-flex gap-2' style={{ borderTop: '1px solid #063a3b', paddingTop: '5px' }}>
                             <Form.Group className="">
                                 <Form.Label>Min Value</Form.Label>
                                 <Form.Control
