@@ -43,7 +43,11 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
     const sliderValueChange = (e) => {
         console.log(e.target.value);
-        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, { value: e.target.value });
+        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, 
+            { 
+                value: e.target.value, 
+                time: new Date().getTime()
+            });
     }
 
     return (
