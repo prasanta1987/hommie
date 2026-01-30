@@ -15,6 +15,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [longAging, setLongAging] = useState(false);
     const [millis, setMillis] = useState(0);
     const [sliderValue, setSliderValue] = useState(feed.value);
+    const [GPIO, setGPIO] = useState(feed.GPIO || 0);
 
     const dbTimestamp = feed.time ? feed.time : null;
 
@@ -111,6 +112,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 feedName={feedName}
                 deviceCode={deviceCode}
                 uid={uid}
+                setGPIO={setGPIO}
+                GPIO={GPIO}
             />
         </>
     );

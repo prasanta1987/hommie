@@ -25,7 +25,7 @@
 
 .feed-card:hover {
     /* transform: translateY(-8px); */
-    /* box-shadow: 0 12px 40px 0 rgba(20, 19, 19, 0.171); */
+    box-shadow: 0 12px 40px 0 rgba(20, 19, 19, 0.171);
 }
 
 .feed-card-header {
@@ -140,7 +140,7 @@
 }
 
 .input-slider {
-    -webkit-appearance: none;
+    appearance: none;
     width: 100%;
     height: var(--slider-height);
     background: #42484d;

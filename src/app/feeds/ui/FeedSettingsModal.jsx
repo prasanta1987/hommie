@@ -4,7 +4,7 @@ import { Modal, Button, Form } from 'react-bootstrap';
 import { updateValuesToDatabase, setValueToDatabase } from '../../miscFunctions/actions';
 import FeedTypes from './FeedTypes';
 
-export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, feedName, deviceCode, uid }) {
+export default function FeedSettingsModal({ isOpen, onClose, feed, setGPIO, GPIO, feedName, deviceCode, uid }) {
     const [feedType, setFeedType] = useState(feed.type || 'Card');
     const [minValue, setMinValue] = useState(feed.rangeMin || 0);
     const [maxValue, setMaxValue] = useState(feed.rangeMax || 100);
@@ -18,6 +18,11 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
             updatedFeed.rangeMin = parseFloat(minValue);
             updatedFeed.rangeMax = parseFloat(maxValue);
         }
+
+        if (feedType === 'Toggle') {
+            updatedFeed.GPIO = parseInt(GPIO);
+        }
+
         updateValuesToDatabase(reference, updatedFeed);
         onClose();
     }
@@ -61,6 +66,16 @@ export default function FeedSettingsModal({ isOpen, onClose, feed, boardName, fe
                                 />
                             </Form.Group>
                         </div>
+                    )}
+                    {(feedType === 'Toggle') && (
+                        <Form.Group className="mb-3">
+                            <Form.Label>Select GPIO Pin Number</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={GPIO}
+                                onChange={(e) => setGPIO(e.target.value)}
+                            />
+                        </Form.Group>
                     )}
                 </Form>
             </Modal.Body>

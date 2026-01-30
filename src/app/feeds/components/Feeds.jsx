@@ -16,6 +16,7 @@ const Feeds = React.memo((props) => {
     const [maxValue, setMaxValue] = useState(100);
     const [selectedDeviceCode, setSelectedDeviceCode] = useState('');
     const [devices, setDevices] = useState([]);
+    const [GPIO, setGPIO] = useState(0);
 
     useEffect(() => {
         // console.log(props.feedData);
@@ -63,7 +64,8 @@ const Feeds = React.memo((props) => {
             minValue: parseFloat(minValue),
             maxValue: parseFloat(maxValue),
             deviceCode: selectedDeviceCode,
-            deviceName: selectedDevice?.deviceName
+            deviceName: selectedDevice?.deviceName,
+            GPIO: GPIO
         });
 
         const reference = `${props.userUid}/${selectedDeviceCode}/devFeeds/${feedName}`;
@@ -77,6 +79,10 @@ const Feeds = React.memo((props) => {
         if (feedType === 'Gauge' || feedType === 'Slider') {
             newFeed.rangeMin = parseFloat(minValue);
             newFeed.rangeMax = parseFloat(maxValue);
+        }
+
+        if (feedType === 'Toggle') {
+            newFeed.GPIO = parseInt(GPIO);
         }
 
         updateValuesToDatabase(reference, newFeed);
@@ -131,6 +137,7 @@ const Feeds = React.memo((props) => {
                 maxValue={maxValue}
                 setMaxValue={setMaxValue}
                 handleCreateFeed={handleCreateFeed}
+                setGPIO={setGPIO}
             />
 
         </div>

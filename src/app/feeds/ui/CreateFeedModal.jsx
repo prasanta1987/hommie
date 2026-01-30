@@ -18,7 +18,9 @@ export default function CreateFeedModal({
     setMinValue,
     maxValue,
     setMaxValue,
-    handleCreateFeed
+    handleCreateFeed,
+    GPIO,
+    setGPIO
 }) {
 
     if (!isOpen) return null;
@@ -63,7 +65,7 @@ export default function CreateFeedModal({
                     </Form.Group>
 
                     {(feedType === 'Gauge' || feedType === 'Slider') && (
-                        <>
+                        <div className='d-flex gap-5'>
                             <Form.Group className="mb-3">
                                 <Form.Label>Min Value</Form.Label>
                                 <Form.Control
@@ -80,7 +82,18 @@ export default function CreateFeedModal({
                                     onChange={(e) => setMaxValue(e.target.value)}
                                 />
                             </Form.Group>
-                        </>
+                        </div>
+                    )}
+
+                    {(feedType === 'Toggle') && (
+                        <Form.Group className="mb-3">
+                            <Form.Label>Select GPIO Pin Number</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={GPIO}
+                                onChange={(e) => setGPIO(e.target.value)}
+                            />
+                        </Form.Group>
                     )}
                 </Form>
             </Modal.Body>
