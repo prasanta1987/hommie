@@ -1,6 +1,7 @@
 import React from 'react';
 
-const ToggleUI = ({ value, onChange, onMouseUp, onTouchEnd }) => {
+const ToggleUI = ({ value, onChange }) => {
+
     return (
         <div className='toggle-switch'>
             <input

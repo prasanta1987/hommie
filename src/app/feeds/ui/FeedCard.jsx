@@ -25,6 +25,14 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
 
     useEffect(() => {
+        setSliderValue(feed.value);
+        setGPIO(feed.GPIO || 0);
+        setFeedType(feed.type || 'Card');
+        setMinValue(feed.rangeMin || 0);
+        setMaxValue(feed.rangeMax || 100);
+    }, [feed.value, feed.type, feed.rangeMin, feed.rangeMax]);
+
+    useEffect(() => {
         if (longAging) return;
 
         const interval = setInterval(() => {
@@ -42,7 +50,6 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
             }
         }
     }, [dbTimestamp]);
-
 
     if (!feed) return null;
 

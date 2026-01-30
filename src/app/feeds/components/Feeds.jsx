@@ -36,6 +36,7 @@ const Feeds = React.memo((props) => {
         return <NoFeed />
     }
 
+
     return (
         <div className="feeds-grid">
             {selectedFeeds.map(feed => {
