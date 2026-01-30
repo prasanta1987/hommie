@@ -29,15 +29,48 @@ export async function GET(request) {
 
     const readableStream = new ReadableStream({
         start(controller) {
-            if (feedName) {
-                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
-            } else {
+            if (!feedName) {
                 dbRef = db.ref(`${userUID}/${deviceCode}`);
+            } else if (feedName === "display") {
+                dbRef = db.ref(`${userUID}/${deviceCode}/display/`);
+            } else if (feedName !== "all" && feedName !== "display") {
+                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
+            }
+            else {
+                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/`);
             }
 
             const listener = dbRef.on('value', (snapshot) => {
-                const data = snapshot.val();
+                let data = snapshot.val();
+
+                if (feedName !== "all" && feedName !== "display" && data !== null) {
+                    let feedData = {};
+                    feedData.value = data.value;
+                    feedData.GPIO = data?.GPIO;
+                    data = feedData;
+                }
+
+                if (feedName === "all") {
+                    const filtered = Object.fromEntries(
+                        Object.entries(data).map(([key, details]) => {
+
+                            const cleaned = {
+                                value: details.value,
+                                GPIO: details?.GPIO
+                            };
+
+                            return [key, cleaned];
+                        })
+                    );
+
+                    data = filtered;
+                }
+
+
                 controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
+
+
+
             }, (error) => {
                 console.error("Firebase listener error:", error);
                 controller.error(error);

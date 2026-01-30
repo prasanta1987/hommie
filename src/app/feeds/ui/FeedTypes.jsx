@@ -7,18 +7,6 @@ export default function FeedTypes({ feedType, setFeedType }) {
 
             <div className="form-check">
                 <input
-                    id="gauge-type"
-                    className="form-check-input"
-                    type="radio"
-                    value="Gauge"
-                    checked={feedType === 'Gauge'}
-                    onChange={(e) => setFeedType(e.target.value)}
-                />
-                <label title="" htmlFor="gauge-type" className="form-check-label">Gauge</label>
-            </div>
-
-            <div className="form-check">
-                <input
                     type="radio"
                     className="form-check-input"
                     id="card-type"
@@ -28,6 +16,18 @@ export default function FeedTypes({ feedType, setFeedType }) {
                     onChange={(e) => setFeedType(e.target.value)}
                 />
                 <label title="" htmlFor="card-type" className="form-check-label">Card</label>
+            </div>
+            
+            <div className="form-check">
+                <input
+                    id="gauge-type"
+                    className="form-check-input"
+                    type="radio"
+                    value="Gauge"
+                    checked={feedType === 'Gauge'}
+                    onChange={(e) => setFeedType(e.target.value)}
+                />
+                <label title="" htmlFor="gauge-type" className="form-check-label">Gauge</label>
             </div>
 
             <div className="form-check">
