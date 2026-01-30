@@ -27,16 +27,19 @@ export async function GET(request) {
 
 
     // Check if device exists under the user
-    const deviceRef = db.ref(`${userUID}/${deviceCode}`);
-    const deviceSnapshot = await deviceRef.once('value');
+    // const deviceRef = db.ref(`${userUID}/${deviceCode}`);
+    // const deviceSnapshot = await deviceRef.once('value');
 
-    if (!deviceSnapshot.exists()) {
-        deviceRef.update(
-            {
-                deviceCode: deviceCode,
-                deviceName: "Unnamed Device"
-            });
-    }
+    // if (!deviceSnapshot.exists()) {
+    //     deviceRef.update(
+    //         {
+    //             deviceCode: deviceCode,
+    //             deviceName: "Unnamed Device"
+    //         });
+    // }
+
+    const deviceRef = db.ref(`${userUID}/${deviceCode}`);
+    deviceRef.update({ deviceCode: deviceCode });
 
     let dbRef;
 
