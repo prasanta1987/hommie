@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-// import './FeedSettingsModal.css';
 import { updateValuesToDatabase, setValueToDatabase } from '../../miscFunctions/actions';
 import FeedTypes from './FeedTypes';
 
-export default function CreateFeedModal({
+export default function FeedModal({
+    purpose,
     isOpen,
     onClose,
     feedName,
@@ -19,8 +19,10 @@ export default function CreateFeedModal({
     maxValue,
     setMaxValue,
     handleCreateFeed,
+    uid, deviceCode,
     GPIO,
-    setGPIO
+    setGPIO,
+    handleDeleteFeed
 }) {
 
     if (!isOpen) return null;
@@ -28,23 +30,30 @@ export default function CreateFeedModal({
     return (
         <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark">
             <Modal.Header closeButton>
-                <Modal.Title>Create New Feed</Modal.Title>
+                <Modal.Title>
+                    {purpose === "create" ? "Create New Feed" : "Edit Feed"}
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
-                    <Form.Group className="mb-3">
-                        <Form.Label>Device</Form.Label>
-                        <Form.Select
-                            value={selectedDeviceCode}
-                            onChange={(e) => setSelectedDeviceCode(e.target.value)}
-                        >
-                            {devices.map((device) => (
-                                <option key={device.deviceCode} value={device.deviceCode}>
-                                    {device.deviceName} ({device.deviceCode})
-                                </option>
-                            ))}
-                        </Form.Select>
-                    </Form.Group>
+                    {
+                        purpose === "create" && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Device</Form.Label>
+                                <Form.Select
+                                    value={selectedDeviceCode}
+                                    onChange={(e) => setSelectedDeviceCode(e.target.value)}
+                                >
+                                    {devices.map((device) => (
+                                        <option key={device.deviceCode} value={device.deviceCode}>
+                                            {device.deviceName} ({device.deviceCode})
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </Form.Group>
+                        )
+                    }
+
 
                     <Form.Group className="mb-3">
                         <Form.Label>Feed Name</Form.Label>
@@ -98,11 +107,16 @@ export default function CreateFeedModal({
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
-                    Cancel
-                </Button>
+
+                {
+                    purpose === "settings" && (
+                        <Button variant="danger" onClick={() => handleDeleteFeed(feedName, uid, deviceCode)}>
+                            Delete Feed
+                        </Button>
+                    )
+                }
                 <Button variant="primary" onClick={handleCreateFeed}>
-                    Create Feed
+                    {purpose === "create" ? "Create Feed" : "Update Feed"}
                 </Button>
             </Modal.Footer>
         </Modal>

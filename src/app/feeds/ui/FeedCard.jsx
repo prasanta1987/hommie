@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { FiZap, FiCpu, FiClock, FiSettings } from 'react-icons/fi';
-import FeedSettingsModal from './FeedSettingsModal';
 import { calculateAgeing } from '../../miscFunctions/timeCalculation';
 // import Gauge from "@nationsinfo/react-simple-gauge";
 import './FeedCard.css';
-import { updateValuesToDatabase } from '../../miscFunctions/actions';
+import { setValueToDatabase, updateValuesToDatabase } from '../../miscFunctions/actions';
 import GaugeUI from '../ui/GaugeUI';
 import SliderUI from '../ui/SliderUI';
 import ToggleUI from '../ui/ToggleUI';
+import FeedModal from './FeedModal';
+
 
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
 
@@ -16,6 +17,9 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [millis, setMillis] = useState(0);
     const [sliderValue, setSliderValue] = useState(feed.value);
     const [GPIO, setGPIO] = useState(feed.GPIO || 0);
+    const [feedType, setFeedType] = useState(feed.type || 'Card');
+    const [minValue, setMinValue] = useState(feed.rangeMin || 0);
+    const [maxValue, setMaxValue] = useState(feed.rangeMax || 100);
 
     const dbTimestamp = feed.time ? feed.time : null;
 
@@ -42,11 +46,33 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
     if (!feed) return null;
 
+    const handleCreateFeed = () => {
+        const reference = `${uid}/${deviceCode}/devFeeds/${feedName}`;
+        const updatedFeed = { type: feedType };
+        if (feedType === 'Gauge' || feedType === 'Slider') {
+            updatedFeed.rangeMin = parseFloat(minValue);
+            updatedFeed.rangeMax = parseFloat(maxValue);
+        }
+
+        if (feedType === 'Toggle') {
+            updatedFeed.GPIO = parseInt(GPIO);
+        }
+
+        updateValuesToDatabase(reference, updatedFeed);
+        setShowModal(false);
+    }
+
+    const handleDeleteFeed = (feedName, uid, deviceCode) => {
+        setValueToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, null);
+        setShowModal(false);
+    }
+
+
     const sliderValueChange = (e) => {
         console.log(e.target.value);
-        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, 
-            { 
-                value: e.target.value, 
+        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
+            {
+                value: e.target.value,
                 time: new Date().getTime()
             });
     }
@@ -84,7 +110,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             value={sliderValue}
                             onChange={(checked) => {
                                 setSliderValue(checked)
-                                sliderValueChange({ target: { value: checked?1:0 } })
+                                sliderValueChange({ target: { value: checked ? 1 : 0 } })
                             }}
                         />
                     ) : (
@@ -104,7 +130,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                     </div>
                 </div>
             </div>
-            <FeedSettingsModal
+            <FeedModal
+                purpose={"settings"}
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 feed={feed}
@@ -114,6 +141,14 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 uid={uid}
                 setGPIO={setGPIO}
                 GPIO={GPIO}
+                handleDeleteFeed={handleDeleteFeed}
+                handleCreateFeed={handleCreateFeed}
+                feedType={feedType}
+                setFeedType={setFeedType}
+                minValue={minValue}
+                setMinValue={setMinValue}
+                maxValue={maxValue}
+                setMaxValue={setMaxValue}
             />
         </>
     );

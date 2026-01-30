@@ -3,7 +3,7 @@ import { FiZap, FiCpu, FiClock, FiPlus } from 'react-icons/fi';
 import { Modal, Button, Form } from 'react-bootstrap';
 import NoFeed from '../ui/NoFeed'
 import FeedCard from '../ui/FeedCard'
-import CreateFeedModal from '../ui/CreateFeedModal';
+import FeedModal from '../ui/FeedModal';
 import './LandingPage.css'
 import { updateValuesToDatabase } from '../../miscFunctions/actions';
 
@@ -123,7 +123,8 @@ const Feeds = React.memo((props) => {
                 <FiPlus size={24} />
             </button>
 
-            <CreateFeedModal
+            <FeedModal
+                purpose={"create"}
                 isOpen={showModal}
                 onClose={() => setShowModal(false)}
                 feedName={feedName}
