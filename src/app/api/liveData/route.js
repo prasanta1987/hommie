@@ -31,7 +31,11 @@ export async function GET(request) {
     const deviceSnapshot = await deviceRef.once('value');
 
     if (!deviceSnapshot.exists()) {
-        deviceRef.update({ status: 'offline' });
+        deviceRef.update(
+            {
+                deviceCode: deviceCode,
+                deviceName: "Unnamed Device"
+            });
     }
 
     let dbRef;
