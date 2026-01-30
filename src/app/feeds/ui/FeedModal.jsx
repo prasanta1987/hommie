@@ -25,6 +25,7 @@ export default function FeedModal({
     handleDeleteFeed
 }) {
 
+
     if (!isOpen) return null;
 
     return (

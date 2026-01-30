@@ -131,6 +131,7 @@ const LandingPage = (props) => {
         setMaxValue={setMaxValue}
         handleCreateFeed={handleCreateFeed}
         setGPIO={setGPIO}
+        setSelectedDeviceCode={setSelectedDeviceCode}
       />
     </div>
 
