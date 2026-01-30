@@ -97,8 +97,34 @@ const Feeds = React.memo((props) => {
         setShowModal(false);
     }
 
+    const handleTrigger = () => {
+        console.log("triggered");
+        setShowModal(true);
+    }
+
     if (selectedFeeds.length === 0) {
-        return <NoFeed />;
+        return (
+            <>
+                <NoFeed onTrigger={handleTrigger} />
+                <FeedModal
+                    purpose={"create"}
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                    feedName={feedName}
+                    setFeedName={setFeedName}
+                    selectedDeviceCode={selectedDeviceCode}
+                    devices={devices}
+                    feedType={feedType}
+                    setFeedType={setFeedType}
+                    minValue={minValue}
+                    setMinValue={setMinValue}
+                    maxValue={maxValue}
+                    setMaxValue={setMaxValue}
+                    handleCreateFeed={handleCreateFeed}
+                    setGPIO={setGPIO}
+                />
+            </>
+        );
     }
 
     return (
