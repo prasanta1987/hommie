@@ -31,7 +31,7 @@ export default function FeedModal({
         <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark">
             <Modal.Header closeButton>
                 <Modal.Title>
-                    {purpose === "create" ? "Create New Feed" : "Edit Feed"}
+                    {purpose === "create" ? "Create New Feed" : `${feedName} Settings`}
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -55,18 +55,23 @@ export default function FeedModal({
                     }
 
 
-                    <Form.Group className="mb-3">
-                        <Form.Label>Feed Name</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Enter feed name"
-                            value={feedName}
-                            onChange={(e) => setFeedName(e.target.value)}
-                        />
-                    </Form.Group>
+                    {
+                        purpose === "create" && (
+                            <Form.Group className="mb-3">
+                                <Form.Label>Feed Name</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Enter feed name"
+                                    value={feedName}
+                                    disabled={purpose === "settings"}
+                                    onChange={(e) => setFeedName(e.target.value)}
+                                />
+                            </Form.Group>
+                        )
+                    }
 
                     <Form.Group className="mb-3">
-                        <Form.Label>Feed Type</Form.Label>
+                        <Form.Label>Select Feed Type</Form.Label>
                         <FeedTypes
                             feedType={feedType}
                             setFeedType={setFeedType}

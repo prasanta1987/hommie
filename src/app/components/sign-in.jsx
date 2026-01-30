@@ -10,6 +10,7 @@ import {
 import { auth } from '../../firebaseConfig/config';
 import { updateValuesToDatabase } from '../miscFunctions/actions';
 import { randomBytes } from 'crypto';
+import { handleSignIn } from '../miscFunctions/actions';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -18,16 +19,15 @@ const SignIn = () => {
   const [error, setError] = useState(null);
   const [isSignUp, setIsSignUp] = useState(false);
 
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
+  const singInHandler = async (e) => {
+    handleSignIn(e, email, password)
+    .then(() => {
+      setError(null);
+    })
+    .catch((error) => {
       setError(getFirebaseErrorMessage(error.code));
-      console.error(error);
-    }
-  };
+    });
+  }
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -77,7 +77,7 @@ const SignIn = () => {
     if (isSignUp) {
       handleSignUp(e);
     } else {
-      handleSignIn(e);
+      singInHandler(e);
     }
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { auth } from '../../firebaseConfig/config';
 import {
   onAuthStateChanged,
@@ -37,13 +37,6 @@ const AppNavbar = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        get(ref(db, `userCred/${user.uid}`)).then((snapshot) => {
-          if (snapshot.exists()) {
-            setApiKey(snapshot.val().apiKey);
-          }
-        }).catch((error) => {
-          console.log(error);
-        });
         setDisplayName(user.displayName || user.email);
         setShowSignInModal(false);
       } else {
@@ -53,6 +46,19 @@ const AppNavbar = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      get(ref(db, `userCred/${user.uid}`)).then((snapshot) => {
+        if (snapshot.exists()) {
+          setApiKey(snapshot.val().apiKey);
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    }
+  }, [user]);
+
 
   const updateDisplayName = () => {
     updateProfile(user, {
@@ -194,7 +200,9 @@ const AppNavbar = () => {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
               />
+            </Form.Group>
 
+            <Form.Group className="mb-3">
               <Form.Label>API Key</Form.Label>
               <Form.Control
                 type="text"
