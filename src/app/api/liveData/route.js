@@ -14,29 +14,14 @@ export async function GET(request) {
     const db = admin.database();
 
     // Verify API key and get user UID
-    const userCredRef = db.ref(`userCred`);
-    const userCredSnapshot = await userCredRef.once('value');
-    const userCredData = userCredSnapshot.val();
+    const apiKeyRef = db.ref(`apiKeys/${apiKey}`);
+    const apiKeySnapshot = await apiKeyRef.once('value');
+    const userUID = apiKeySnapshot.val();
 
-    const userCredEntries = Object.entries(userCredData || {});
-    const userCredDataEntry = userCredEntries.find(([key, value]) => value.apiKey === apiKey);
-    const userUID = userCredDataEntry ? userCredDataEntry[0] : null;
-
-    if (!userUID)
+    if (!userUID) {
         return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
+    }
 
-
-    // Check if device exists under the user
-    // const deviceRef = db.ref(`${userUID}/${deviceCode}`);
-    // const deviceSnapshot = await deviceRef.once('value');
-
-    // if (!deviceSnapshot.exists()) {
-    //     deviceRef.update(
-    //         {
-    //             deviceCode: deviceCode,
-    //             deviceName: "Unnamed Device"
-    //         });
-    // }
 
     const deviceRef = db.ref(`${userUID}/${deviceCode}`);
     deviceRef.update({ deviceCode: deviceCode });

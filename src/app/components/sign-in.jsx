@@ -21,12 +21,12 @@ const SignIn = () => {
 
   const singInHandler = async (e) => {
     handleSignIn(e, email, password)
-    .then(() => {
-      setError(null);
-    })
-    .catch((error) => {
-      setError(getFirebaseErrorMessage(error.code));
-    });
+      .then(() => {
+        setError(null);
+      })
+      .catch((error) => {
+        setError(getFirebaseErrorMessage(error.code));
+      });
   }
 
   const handleSignUp = async (e) => {
@@ -40,9 +40,15 @@ const SignIn = () => {
         }
       )
 
+
       try {
         const apiKey = randomBytes(16).toString('hex');
-        updateValuesToDatabase(`userCred/${userCredential.user.uid}`, { apiKey: apiKey });
+        const multiUpdate = {
+          [`userCred/${userCredential.user.uid}/apiKey`]: apiKey,
+          [`apiKeys/${apiKey}`]: userCredential.user.uid
+        };
+        
+        updateValuesToDatabase(`/`, multiUpdate);
       } catch (error) {
         deleteUser(userCredential.user);
         setError('An error occurred while generating the API key.');

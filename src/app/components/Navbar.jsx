@@ -92,7 +92,12 @@ const AppNavbar = () => {
       });
       try {
         const apiKey = randomBytes(16).toString('hex');
-        updateValuesToDatabase(`userCred/${userCredential.user.uid}`, { apiKey: apiKey });
+        const multiUpdate = {
+          [`userCred/${userCredential.user.uid}/apiKey`]: apiKey,
+          [`apiKeys/${apiKey}`]: userCredential.user.uid
+        };
+
+        updateValuesToDatabase(`/`, multiUpdate);
       } catch (error) {
         deleteUser(userCredential.user);
         setError('An error occurred while generating the API key.');
@@ -134,7 +139,14 @@ const AppNavbar = () => {
     e.preventDefault();
     setIsApiKeyBTN(true);
     const newApiKey = randomBytes(16).toString('hex');
-    updateValuesToDatabase(`userCred/${user.uid}`, { apiKey: newApiKey });
+
+    const multiUpdate = {
+      [`userCred/${user.uid}/apiKey`]: newApiKey,
+      [`apiKeys/${newApiKey}`]: user.uid
+    };
+
+    updateValuesToDatabase(`/`, multiUpdate);
+
     setApiKey(newApiKey);
     setTimeout(() => {
       setIsApiKeyBTN(false);
