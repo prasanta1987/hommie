@@ -16,16 +16,18 @@
     border-radius: 16px;
     padding: 10px 20px;
     width: 100%;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); */
     /* border: 1px solid rgba(255, 255, 255, 0.18); */
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* transition: transform 0.3s ease, box-shadow 0.3s ease; */
+    transition: 0.2s;
 }
 
 .feed-card:hover {
     /* transform: translateY(-8px); */
-    box-shadow: 0 12px 40px 0 rgba(20, 19, 19, 0.171);
+    scale: 1.02;
+    box-shadow: 3px 3px 5px 0px rgb(0 0 0);
 }
 
 .feed-card-header {
@@ -249,4 +251,18 @@
 
 .feed-slider::-moz-range-thumb:hover {
     background: #357ABD;
+}
+
+
+/* For Colour Picker */
+
+.colourPicker {
+    height: 100px;
+    width: 100px;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    box-shadow: 0 0 5px 3px #000000;
+    border: 2px solid #cdc9b2;
 }

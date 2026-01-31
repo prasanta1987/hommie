@@ -4,10 +4,12 @@ import { calculateAgeing } from '../../miscFunctions/timeCalculation';
 // import Gauge from "@nationsinfo/react-simple-gauge";
 import './FeedCard.css';
 import { setValueToDatabase, updateValuesToDatabase } from '../../miscFunctions/actions';
+import FeedModal from './FeedModal';
+
 import GaugeUI from '../ui/GaugeUI';
 import SliderUI from '../ui/SliderUI';
 import ToggleUI from '../ui/ToggleUI';
-import FeedModal from './FeedModal';
+import ColourPickerUI from '../ui/ColourPickerUI';
 
 
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
@@ -118,6 +120,14 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             onChange={(checked) => {
                                 setSliderValue(checked)
                                 sliderValueChange({ target: { value: checked ? 1 : 0 } })
+                            }}
+                        />
+                    ) : type === 'Colour' ? (
+                        <ColourPickerUI
+                            value={sliderValue}
+                            onBlur={(value) => {
+                                setSliderValue(value)
+                                sliderValueChange({ target: { value } })
                             }}
                         />
                     ) : (

@@ -17,7 +17,7 @@ export default function FeedTypes({ feedType, setFeedType }) {
                 />
                 <label title="" htmlFor="card-type" className="form-check-label">Card</label>
             </div>
-            
+
             <div className="form-check">
                 <input
                     id="gauge-type"
@@ -54,6 +54,19 @@ export default function FeedTypes({ feedType, setFeedType }) {
                     onChange={(e) => setFeedType(e.target.value)}
                 />
                 <label title="" htmlFor="toggle-type" className="form-check-label">Toggle</label>
+            </div>
+
+            <div className="form-check">
+                <input
+                    type="radio"
+                    id="colour-type"
+                    className="form-check-input"
+                    label="Colour"
+                    value="Colour"
+                    checked={feedType === 'Colour'}
+                    onChange={(e) => setFeedType(e.target.value)}
+                />
+                <label title="" htmlFor="colour-type" className="form-check-label">Colour</label>
             </div>
 
         </div>
