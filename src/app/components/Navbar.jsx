@@ -161,7 +161,7 @@ const AppNavbar = () => {
               <div className='d-flex gap-2 align-items-center'>
                 {user ? (
                   <>
-                    <ArduinoCode />
+                    <ArduinoCode apiKey={apiKey} />
                     <CgProfile
                       style={{ cursor: 'pointer' }}
                       color="#54ff9a"

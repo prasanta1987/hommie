@@ -1,13 +1,13 @@
 'use client'
-import { Modal, Navbar, Nav, Container, Button } from 'react-bootstrap';
+import { Modal, Navbar, Tabs, Tab, Nav, Container, Button } from 'react-bootstrap';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SiArduino } from "react-icons/si";
 import { useState } from 'react';
 
-import { esp32Code, esp8266Code } from '../../miscFunctions/arduinoCode';
+import { esp32Imports, esp32Code, esp8266Imports, esp8266Code } from '../../miscFunctions/arduinoCode';
 
-export default function ArduinoCode() {
+export default function ArduinoCode({ apiKey }) {
 
     const [showModal, setShowModal] = useState(false);
     const [codeSelectedText, setCodeSelectedText] = useState('ESP32');
@@ -23,7 +23,6 @@ export default function ArduinoCode() {
     const codeSelected = (code) => {
         setCodeSelectedText(code);
     }
-
 
     const handleCopyCode = () => {
 
@@ -49,9 +48,24 @@ export default function ArduinoCode() {
                     <Modal.Title>Arduino Configuration for {codeSelectedText}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
-                        {codeSelectedText == 'ESP32' ? esp32Code : esp8266Code}
-                    </SyntaxHighlighter>
+                    <Tabs
+                        defaultActiveKey="SSE"
+                        id="uncontrolled-tab-example"
+                        className="mb-3 d-flex flex-row"
+                        justify
+                        fill
+                    >
+                        <Tab className="w-100" eventKey="SSE" title="SSE">
+                            <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
+                                {codeSelectedText == 'ESP32'
+                                    ? esp32Imports + `String apiKey = "${apiKey}";` + esp32Code
+                                    : esp8266Imports + `String apiKey = "${apiKey}";` + esp8266Code}
+                            </SyntaxHighlighter>
+                        </Tab>
+                        <Tab className="w-100" eventKey="Data Send" title="Data Send">
+                            Coming Soon...
+                        </Tab>
+                    </Tabs>
                 </Modal.Body>
                 <Modal.Footer className='d-flex justify-content-between'>
                     <Button variant='secondary' onClick={handleCloseModal}>

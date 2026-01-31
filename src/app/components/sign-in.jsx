@@ -82,7 +82,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className='d-flex justify-content-center align-items-center vh-100'>
+    <div className='bg-dark d-flex justify-content-center align-items-center vh-100'>
       <div className="card p-4" style={{ width: '100%', maxWidth: '400px' }}>
         <form onSubmit={handleSubmit}>
           <h2 className="text-center mb-4">{isSignUp ? 'Create an Account' : 'Sign In'}</h2>
