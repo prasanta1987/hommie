@@ -92,10 +92,10 @@ const AppNavbar = () => {
       });
       try {
         const apiKey = randomBytes(16).toString('hex');
-        const multiUpdate = {
-          [`userCred/${userCredential.user.uid}/apiKey`]: apiKey,
-          [`apiKeys/${apiKey}`]: userCredential.user.uid
-        };
+        const multiUpdate = {};
+
+        multiUpdate[`userCred/UIDtoAPI/${userCredential.user.uid}`] = apiKey;
+        multiUpdate[`userCred/APItoUID/${apiKey}`] = userCredential.user.uid;
 
         updateValuesToDatabase(`/`, multiUpdate);
       } catch (error) {
@@ -138,21 +138,26 @@ const AppNavbar = () => {
   const regenerateApiKey = (e) => {
     e.preventDefault();
     setIsApiKeyBTN(true);
-    const oldApiKey = apiKey;
-    const newApiKey = randomBytes(16).toString('hex');
 
-    const multiUpdate = {
-      [`userCred/${user.uid}/apiKey`]: newApiKey,
-      [`apiKeys/${newApiKey}`]: user.uid,
-      [`apiKeys/${oldApiKey}`]: null
-    };
+    const oldKey = apiKey;
+    const newKey = randomBytes(16).toString('hex');
 
-    updateValuesToDatabase(`/`, multiUpdate);
+    const multiUpdate = {};
 
-    setApiKey(newApiKey);
+    multiUpdate[`userCred/UIDtoAPI/${user.uid}`] = newKey;
+    multiUpdate[`userCred/APItoUID/${newKey}`] = user.uid;
+
+    if (oldKey) {
+      multiUpdate[`userCred/APItoUID/${oldKey}`] = null;
+    }
+
+    // CRITICAL: Call the update on the root of the database
+    updateValuesToDatabase("/", multiUpdate);
+
+    setApiKey(newKey);
     setTimeout(() => {
       setIsApiKeyBTN(false);
-    }, 60000);
+    }, 5000);
   }
 
   return (

@@ -14,7 +14,7 @@ export async function GET(request) {
     const db = admin.database();
 
     // Verify API key and get user UID
-    const apiKeyRef = db.ref(`apiKeys/${apiKey}`);
+    const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}`);
     const apiKeySnapshot = await apiKeyRef.once('value');
     const userUID = apiKeySnapshot.val();
 

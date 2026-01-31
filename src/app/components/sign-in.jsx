@@ -43,11 +43,12 @@ const SignIn = () => {
 
       try {
         const apiKey = randomBytes(16).toString('hex');
-        const multiUpdate = {
-          [`userCred/${userCredential.user.uid}/apiKey`]: apiKey,
-          [`apiKeys/${apiKey}`]: userCredential.user.uid
-        };
-        
+
+        const multiUpdate = {};
+
+        multiUpdate[`userCred/UIDtoAPI/${userCredential.user.uid}`] = apiKey;
+        multiUpdate[`userCred/APItoUID/${apiKey}`] = userCredential.user.uid;
+
         updateValuesToDatabase(`/`, multiUpdate);
       } catch (error) {
         deleteUser(userCredential.user);
