@@ -138,11 +138,13 @@ const AppNavbar = () => {
   const regenerateApiKey = (e) => {
     e.preventDefault();
     setIsApiKeyBTN(true);
+    const oldApiKey = apiKey;
     const newApiKey = randomBytes(16).toString('hex');
 
     const multiUpdate = {
       [`userCred/${user.uid}/apiKey`]: newApiKey,
-      [`apiKeys/${newApiKey}`]: user.uid
+      [`apiKeys/${newApiKey}`]: user.uid,
+      [`apiKeys/${oldApiKey}`]: null
     };
 
     updateValuesToDatabase(`/`, multiUpdate);
