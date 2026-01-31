@@ -1,7 +1,7 @@
 import { set } from 'firebase/database';
 import React, { useEffect } from 'react';
 
-const ColourPickerUI = ({ value, onBlur, onChange }) => {
+const ColourPickerUI = ({ value, onBlur }) => {
     const [color, setColor] = React.useState(value || '#ffffff');
 
     useEffect(() => {

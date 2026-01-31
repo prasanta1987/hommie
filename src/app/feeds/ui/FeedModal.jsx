@@ -22,7 +22,13 @@ export default function FeedModal({
     uid, deviceCode,
     GPIO,
     setGPIO,
-    handleDeleteFeed
+    handleDeleteFeed,
+    rPIN,
+    setRPIN,
+    gPIN,
+    setGPIN,
+    bPIN,
+    setBPIN
 }) {
 
 
@@ -109,6 +115,35 @@ export default function FeedModal({
                                 onChange={(e) => setGPIO(e.target.value)}
                             />
                         </Form.Group>
+                    )}
+
+                    {(feedType === 'Colour') && (
+                        <div className='d-flex gap-5'>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Red Pin</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    value={rPIN}
+                                    onChange={(e) => setRPIN(e.target.value)}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Green Pin</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    value={gPIN}
+                                    onChange={(e) => setGPIN(e.target.value)}
+                                />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Blue Pin</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    value={bPIN}
+                                    onChange={(e) => setBPIN(e.target.value)}
+                                />
+                            </Form.Group>
+                        </div>
                     )}
                 </Form>
             </Modal.Body>

@@ -7,8 +7,8 @@ export async function GET(request) {
     const deviceCode = searchParams.get('deviceCode');
     const feedName = searchParams.get('feedName');
 
-    if (!apiKey || !deviceCode) {
-        return NextResponse.json({ error: 'Missing apiKey or deviceCode' }, { status: 400 });
+    if (!apiKey || !deviceCode || !feedName) {
+        return NextResponse.json({ error: 'Missing apiKey or deviceCode or feedName' }, { status: 400 });
     }
 
     const db = admin.database();
@@ -45,43 +45,32 @@ export async function GET(request) {
 
     const readableStream = new ReadableStream({
         start(controller) {
-            if (!feedName) {
-                dbRef = db.ref(`${userUID}/${deviceCode}`);
-            } else if (feedName === "display") {
+            if (feedName === "display") {
                 dbRef = db.ref(`${userUID}/${deviceCode}/display/`);
-            } else if (feedName !== "all" && feedName !== "display") {
+            } else if (feedName !== "all") {
                 dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
-            }
-            else {
+            } else {
                 dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/`);
             }
 
             const listener = dbRef.on('value', (snapshot) => {
                 let data = snapshot.val();
+                const keysToRemove = ['isSelected', "time"];
 
-                if (feedName !== "all" && feedName !== "display" && data !== null) {
-                    let feedData = {};
-                    feedData.value = data.value;
-                    feedData.GPIO = data?.GPIO;
-                    data = feedData;
-                }
 
                 if (feedName === "all") {
-                    const filtered = Object.fromEntries(
-                        Object.entries(data).map(([key, details]) => {
 
-                            const cleaned = {
-                                value: details.value,
-                                GPIO: details?.GPIO
-                            };
-
-                            return [key, cleaned];
+                    data = Object.fromEntries(
+                        Object.entries(data).map(([key, value]) => {
+                            const filteredValue = Object.fromEntries(
+                                Object.entries(value).filter(([innerKey]) => !keysToRemove.includes(innerKey))
+                            );
+                            return [key, filteredValue];
                         })
                     );
-
-                    data = filtered;
+                } else {
+                    data && typeof data === 'object' && keysToRemove.forEach(key => delete data[key]);
                 }
-
 
                 controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
 

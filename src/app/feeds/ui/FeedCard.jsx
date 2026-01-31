@@ -22,6 +22,9 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [feedType, setFeedType] = useState(feed.type || 'Card');
     const [minValue, setMinValue] = useState(feed.rangeMin || 0);
     const [maxValue, setMaxValue] = useState(feed.rangeMax || 100);
+    const [rPIN, setRPIN] = useState(0);
+    const [gPIN, setGPIN] = useState(0);
+    const [bPIN, setBPIN] = useState(0);
 
     const dbTimestamp = feed.time ? feed.time : null;
 
@@ -29,6 +32,9 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     useEffect(() => {
         setSliderValue(feed.value);
         setGPIO(feed.GPIO || 0);
+        setRPIN(feed.rPIN || 0);
+        setGPIN(feed.gPIN || 0);
+        setBPIN(feed.bPIN || 0);
         setFeedType(feed.type || 'Card');
         setMinValue(feed.rangeMin || 0);
         setMaxValue(feed.rangeMax || 100);
@@ -67,6 +73,12 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
             updatedFeed.GPIO = parseInt(GPIO);
         }
 
+        if (feedType === 'Colour') {
+            updatedFeed.rPIN = parseInt(rPIN);
+            updatedFeed.gPIN = parseInt(gPIN);
+            updatedFeed.bPIN = parseInt(bPIN);
+        }
+
         updateValuesToDatabase(reference, updatedFeed);
         setShowModal(false);
     }
@@ -78,12 +90,12 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
 
     const sliderValueChange = (e) => {
-        // console.log(e.target.value);
-        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
-            {
-                value: e.target.value,
-                time: new Date().getTime()
-            });
+        console.log(e.target.value);
+        // updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
+        //     {
+        //         value: e.target.value,
+        //         time: new Date().getTime()
+        //     });
     }
 
     return (
@@ -125,6 +137,9 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                     ) : type === 'Colour' ? (
                         <ColourPickerUI
                             value={sliderValue}
+                            rPIN={rPIN}
+                            gPIN={gPIN}
+                            bPIN={bPIN}
                             onBlur={(value) => {
                                 setSliderValue(value)
                                 sliderValueChange({ target: { value } })
@@ -157,6 +172,12 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 deviceCode={deviceCode}
                 uid={uid}
                 setGPIO={setGPIO}
+                setBPIN={setBPIN}
+                setGPIN={setGPIN}
+                setRPIN={setRPIN}
+                rPIN={rPIN}
+                gPIN={gPIN}
+                bPIN={bPIN}
                 GPIO={GPIO}
                 handleDeleteFeed={handleDeleteFeed}
                 handleCreateFeed={handleCreateFeed}
