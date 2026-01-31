@@ -49,9 +49,9 @@ const AppNavbar = () => {
 
   useEffect(() => {
     if (user) {
-      get(ref(db, `userCred/${user.uid}`)).then((snapshot) => {
+      get(ref(db, `userCred/UIDtoAPI/${user.uid}`)).then((snapshot) => {
         if (snapshot.exists()) {
-          setApiKey(snapshot.val().apiKey);
+          setApiKey(snapshot.val());
         }
       }).catch((error) => {
         console.log(error);
