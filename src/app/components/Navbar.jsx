@@ -6,17 +6,15 @@ import {
   onAuthStateChanged,
   signOut,
   updateProfile,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
 } from 'firebase/auth';
 import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut, FiLogIn } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
-import { randomBytes } from 'crypto';
 import { db } from '../../firebaseConfig/config'
 import { ref, get } from 'firebase/database'
-import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions';
+import { regenerateApiKey, deleteUserAccount } from '../miscFunctions/actions';
+import SignIn from './sign-in';
 import './NavBar.css'
 
 import ArduinoCode from '../feeds/ui/ArduinoCode'
@@ -27,9 +25,6 @@ const AppNavbar = () => {
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
   const [isSignUp, setIsSignUp] = useState(false);
   const [apiKeyBTN, setIsApiKeyBTN] = useState(false);
 
@@ -70,129 +65,6 @@ const AppNavbar = () => {
       console.log(error);
     });
   }
-
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-      setError(getFirebaseErrorMessage(error.code));
-      console.error(error);
-    }
-  };
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setError(null);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, {
-        displayName: displayName,
-      });
-      try {
-        const apiKey = randomBytes(16).toString('hex');
-        const multiUpdate = {};
-
-        multiUpdate[`userCred/UIDtoAPI/${userCredential.user.uid}`] = apiKey;
-        multiUpdate[`userCred/APItoUID/${apiKey}`] = userCredential.user.uid;
-
-        updateValuesToDatabase(`/`, multiUpdate);
-      } catch (error) {
-        deleteUser(userCredential.user);
-        setError('An error occurred while generating the API key.');
-      }
-    } catch (error) {
-      setError(getFirebaseErrorMessage(error.code));
-      console.error(error);
-    }
-  };
-
-  const getFirebaseErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case 'auth/invalid-email':
-        return 'Invalid email address.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/wrong-password':
-        return 'Incorrect password.';
-      case 'auth/email-already-in-use':
-        return 'This email is already in use.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters.';
-      default:
-        return 'An unexpected error occurred. Please try again.';
-    }
-  };
-
-  const handleSubmit = (e) => {
-    if (isSignUp) {
-      handleSignUp(e);
-    } else {
-      handleSignIn(e);
-    }
-  };
-
-  const regenerateApiKey = (e) => {
-    e.preventDefault();
-    setIsApiKeyBTN(true);
-
-    const oldKey = apiKey;
-    const newKey = randomBytes(16).toString('hex');
-
-    const multiUpdate = {};
-
-    multiUpdate[`userCred/UIDtoAPI/${user.uid}`] = newKey;
-    multiUpdate[`userCred/APItoUID/${newKey}`] = user.uid;
-
-    if (oldKey) {
-      multiUpdate[`userCred/APItoUID/${oldKey}`] = null;
-    }
-
-    // CRITICAL: Call the update on the root of the database
-    updateValuesToDatabase("/", multiUpdate);
-
-    setApiKey(newKey);
-    setTimeout(() => {
-      setIsApiKeyBTN(false);
-    }, 5000);
-  }
-
-  const deleteUserAccount = () => {
-    if (user) {
-      const uid = user.uid;
-      const keyRef = ref(db, `userCred/UIDtoAPI/${uid}`);
-
-      get(keyRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          const apiKey = snapshot.val();
-          const multiUpdate = {};
-          multiUpdate[`userCred/UIDtoAPI/${uid}`] = null;
-          multiUpdate[`userCred/APItoUID/${apiKey}`] = null;
-
-          updateValuesToDatabase(`/`, multiUpdate);
-        } else {
-          console.log('No API key found for this user.');
-        }
-      }).catch((error) => {
-        console.log(error);
-      });
-
-      user.delete().then(() => {
-        console.log('User account deleted successfully.');
-      }).catch((error) => {
-        console.log('Error deleting user account:', error);
-      });
-
-
-      setShowProfileModal(false);
-    }
-  };
-
-
-
 
 
   return (
@@ -267,7 +139,10 @@ const AppNavbar = () => {
 
               <button
                 className='btn btn-sm btn-warning mt-2'
-                onClick={(e) => regenerateApiKey(e)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  regenerateApiKey(apiKey, setIsApiKeyBTN, setApiKey, user);
+                }}
                 disabled={apiKeyBTN}
               >
                 Generate New API Key
@@ -277,7 +152,10 @@ const AppNavbar = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className='d-flex justify-content-between'>
-          <Button variant='danger' onClick={deleteUserAccount}>
+          <Button variant='danger' onClick={(e) => {
+            e.preventDefault();
+            deleteUserAccount(user, setShowProfileModal, setUser);
+          }}>
             Delete Account
           </Button>
           <Button variant='success' onClick={updateDisplayName}>
@@ -288,55 +166,10 @@ const AppNavbar = () => {
 
       <Modal show={showSignInModal} onHide={() => setShowSignInModal(false)} centered data-bs-theme="dark">
         <Modal.Header closeButton>
-          <Modal.Title>{isSignUp ? 'Create an Account' : 'Sign In'}</Modal.Title>
+          {/* <Modal.Title>{isSignUp ? 'Create an Account' : 'Sign In'}</Modal.Title> */}
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={handleSubmit}>
-            {isSignUp && (
-              <Form.Group className="mb-3">
-                <Form.Label>Display Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Display Name"
-                  required
-                />
-              </Form.Group>
-            )}
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                required
-              />
-            </Form.Group>
-            {error && <p className="text-danger text-center mb-3">{error}</p>}
-            <div className="d-grid">
-              <Button type="submit" variant='primary'>
-                {isSignUp ? 'Sign Up' : 'Sign In'}
-              </Button>
-            </div>
-            <p className="mt-3 text-center">
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsSignUp(!isSignUp); }}>
-                {isSignUp ? 'Sign In' : 'Sign Up'}
-              </a>
-            </p>
-          </Form>
+          <SignIn />
         </Modal.Body>
       </Modal>
     </>

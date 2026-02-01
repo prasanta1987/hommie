@@ -1,16 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  deleteUser
-} from 'firebase/auth';
-import { auth } from '../../firebaseConfig/config';
-import { updateValuesToDatabase } from '../miscFunctions/actions';
-import { randomBytes } from 'crypto';
-import { handleSignIn } from '../miscFunctions/actions';
+import { useState } from 'react';
+import { handleSignIn, handleSignUp, getFirebaseErrorMessage } from '../miscFunctions/actions';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -20,7 +11,8 @@ const SignIn = () => {
   const [isSignUp, setIsSignUp] = useState(false);
 
   const singInHandler = async (e) => {
-    handleSignIn(e, email, password)
+    e.preventDefault();
+    handleSignIn(email, password)
       .then(() => {
         setError(null);
       })
@@ -29,60 +21,22 @@ const SignIn = () => {
       });
   }
 
-  const handleSignUp = async (e) => {
+  const singUpHandler = async (e) => {
     e.preventDefault();
-    setError(null);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user,
-        {
-          displayName: displayName,
-        }
-      )
+    handleSignUp(email, password, displayName, setError)
+      .then(() => {
+        setError(null);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError(getFirebaseErrorMessage(error.code));
+      });
+  }
 
-
-      try {
-        const apiKey = randomBytes(16).toString('hex');
-
-        const multiUpdate = {};
-
-        multiUpdate[`userCred/UIDtoAPI/${userCredential.user.uid}`] = apiKey;
-        multiUpdate[`userCred/APItoUID/${apiKey}`] = userCredential.user.uid;
-
-        updateValuesToDatabase(`/`, multiUpdate);
-      } catch (error) {
-        deleteUser(userCredential.user);
-        setError('An error occurred while generating the API key.');
-      }
-
-    } catch (error) {
-      setError(getFirebaseErrorMessage(error.code));
-      console.error(error);
-    }
-  };
-
-  const getFirebaseErrorMessage = (errorCode) => {
-    switch (errorCode) {
-      case 'auth/invalid-email':
-        return 'Invalid email address.';
-      case 'auth/user-disabled':
-        return 'This account has been disabled.';
-      case 'auth/user-not-found':
-        return 'No account found with this email.';
-      case 'auth/wrong-password':
-        return 'Incorrect password.';
-      case 'auth/email-already-in-use':
-        return 'This email is already in use.';
-      case 'auth/weak-password':
-        return 'Password should be at least 6 characters.';
-      default:
-        return 'An unexpected error occurred. Please try again.';
-    }
-  };
 
   const handleSubmit = (e) => {
     if (isSignUp) {
-      handleSignUp(e);
+      singUpHandler(e);
     } else {
       singInHandler(e);
     }
