@@ -160,6 +160,41 @@ const AppNavbar = () => {
     }, 5000);
   }
 
+  const deleteUserAccount = () => {
+    if (user) {
+      const uid = user.uid;
+      const keyRef = ref(db, `userCred/UIDtoAPI/${uid}`);
+
+      get(keyRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const apiKey = snapshot.val();
+          const multiUpdate = {};
+          multiUpdate[`userCred/UIDtoAPI/${uid}`] = null;
+          multiUpdate[`userCred/APItoUID/${apiKey}`] = null;
+
+          updateValuesToDatabase(`/`, multiUpdate);
+        } else {
+          console.log('No API key found for this user.');
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+
+      user.delete().then(() => {
+        console.log('User account deleted successfully.');
+      }).catch((error) => {
+        console.log('Error deleting user account:', error);
+      });
+
+
+      setShowProfileModal(false);
+    }
+  };
+
+
+
+
+
   return (
     <>
       <Navbar style={{ backgroundColor: '#21344f', boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
@@ -242,8 +277,8 @@ const AppNavbar = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className='d-flex justify-content-between'>
-          <Button variant='secondary' onClick={() => setShowProfileModal(false)}>
-            Close
+          <Button variant='danger' onClick={deleteUserAccount}>
+            Delete Account
           </Button>
           <Button variant='success' onClick={updateDisplayName}>
             Save
