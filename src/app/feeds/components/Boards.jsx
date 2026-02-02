@@ -12,7 +12,7 @@ export default function Boards(props) {
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(props.boardData.deviceName);
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
-    const [lastSeen, setLastSeen] = useState(props.boardData.lastSeen);
+
 
     useEffect(() => {
         // console.log(props.boardData)
@@ -59,9 +59,19 @@ export default function Boards(props) {
         setShowModal(false);
     }
 
+    const [lastSeen, setLastSeen] = useState(props.boardData.lastSeen);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLastSeen(t=>!t);
+        }, 2000); // Check every 10 seconds
+        return () => clearInterval(interval);
+    }, []);
+
     const isOnline = (lastSeen) => {
-        const threshold = 1 * 60 * 60 * 1000; // 45 seconds (30s interval + 15s buffer)
-        return (Date.now() - lastSeen) < threshold;
+        const threshold = 1 * 60 * 1000; // 45 seconds (30s interval + 15s buffer)
+        const isDevOnline = (Date.now() - lastSeen) < threshold;
+        return (isDevOnline);
     };
 
     return (
