@@ -62,14 +62,18 @@ export default function Boards(props) {
     const [lastSeen, setLastSeen] = useState(props.boardData.lastSeen);
 
     useEffect(() => {
+        setLastSeen(props.boardData.lastSeen);
+
         const interval = setInterval(() => {
-            setLastSeen(t=>!t);
-        }, 20000); // Check every 10 seconds
+            setLastSeen(prev => !prev);
+
+        }, 5000);
         return () => clearInterval(interval);
     }, [props.boardData.lastSeen]);
 
     const isOnline = (lastSeen) => {
-        const threshold = 1 * 60 * 1000; // 45 seconds (30s interval + 15s buffer)
+        if (!lastSeen) return false;
+        const threshold = 20 * 1000; // 45 seconds (30s interval + 15s buffer)
         const isDevOnline = (Date.now() - lastSeen) < threshold;
         return (isDevOnline);
     };
