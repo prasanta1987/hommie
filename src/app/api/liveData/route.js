@@ -27,7 +27,6 @@ export async function GET(request) {
     deviceRef.update(
         {
             deviceCode: deviceCode,
-            lastSeen: new Date().getTime()
         }
     );
 

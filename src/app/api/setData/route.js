@@ -31,7 +31,6 @@ export async function POST(request) {
         await deviceRef.update(
             { 
                 deviceCode: deviceCode,
-                lastSeen: new Date().getTime()
              }
         );
 
