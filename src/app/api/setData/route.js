@@ -5,102 +5,58 @@ export async function POST(request) {
     try {
 
         const bodyData = await request.json();
-        const { uid, purpose, data } = bodyData;
+        const { apiKey, deviceCode, purpose } = bodyData;
 
-        if (!uid || !purpose ) {
-            return NextResponse.json({ "error": "Missing Key Parameters" }, { status: 400 });
-        }
-
-        await admin.auth().getUser(uid);
-
-        const db = admin.database();
-
-        if (purpose == "FEED") {
-
-            const { deviceCode, feedName, data } = bodyData;
+        if (!apiKey || !purpose || !deviceCode) {
             let errors = {};
 
             if (!deviceCode) errors.deviceCode = "Device Code is required";
+            if (!apiKey) errors.apiKey = "API Key is required";
+            if (!purpose) errors.purpose = "Purpose is required";
+
+            return NextResponse.json({ "error": errors }, { status: 400 });
+        }
+
+        const db = admin.database();
+
+        // Verify API key and get user UID
+        const userUID = (await db.ref(`userCred/APItoUID/${apiKey}`).once('value')).val();
+
+        if (!userUID) {
+            return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
+        }
+
+
+        const deviceRef = db.ref(`${userUID}/${deviceCode}`);
+        await deviceRef.update({ deviceCode: deviceCode });
+
+
+
+        if (purpose == "FEED") {
+
+            const { feedName, data } = bodyData;
+            let errors = {};
+
             if (!feedName) errors.feedName = "Feed Name is required";
             if (!data) errors.data = "Data is required";
 
-
-            if (Object.keys(errors).length > 0) {
+            if (!feedName || !data) {
                 return NextResponse.json({ "error": errors }, { status: 400 });
             }
 
             data.time = new Date().getTime();
 
-            const dbRef = db.ref(`${uid}/${deviceCode}/devFeeds/${feedName}`);
+            const dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
             await dbRef.update(data);
 
-            const ref = db.ref(`${uid}/${deviceCode}`);
-            const snapshot = await ref.once('value');
+            const snapshot = await dbRef.once('value');
             const snapShotData = snapshot.val();
 
             return NextResponse.json(snapShotData, { status: 200 });
 
-        } else if (purpose == "deviceAuth") {
-
-            const { deviceName, deviceCode } = bodyData
-
-            let errors = {};
-
-            if (!deviceCode) errors.deviceCode = "Device Code is required";
-
-            if (Object.keys(errors).length > 0) {
-                return NextResponse.json({ "error": errors }, { status: 400 });
-            }
-
-            const dbRef = db.ref("nextDevice");
-
-            let newDevice = {
-                [deviceCode]: {
-                    uid: uid,
-                    deviceName: deviceName || null,
-                    deviceCode: deviceCode
-                }
-            }
-
-            await dbRef.update(newDevice);
-            return NextResponse.json({ "msg": "Addition Request Sent" }, { status: 200 });
-
-        } else if (purpose == "setDeviceProfile") {
-
-            const { deviceName, deviceCode } = bodyData
-
-            let errors = {};
-
-            if (!deviceCode) errors.deviceCode = "Device Code is required";
-
-            if (Object.keys(errors).length > 0) {
-                return NextResponse.json({ "error": errors }, { status: 400 });
-            }
-
-            const dbRef = db.ref(`${uid}/${deviceCode}`);
-            await dbRef.update({
-                deviceName: deviceName || null,
-                deviceCode: deviceCode
-            });
-
-            const oldRef = db.ref(`nextDevice/${deviceCode}`);
-            await oldRef.remove();
-
-            return NextResponse.json({ "msg": "Data Updated" }, { status: 200 });
-
         } else if (purpose == "delDeviceProfile") {
 
-            const { deviceCode } = bodyData;
-
-            let errors = {};
-
-            if (!deviceCode) errors.deviceCode = "Device Code is required";
-
-            if (Object.keys(errors).length > 0) {
-                return NextResponse.json({ "error": errors }, { status: 400 });
-            }
-
-            const dbRef = db.ref(uid);
+            const dbRef = db.ref(`${userUID}/${deviceCode}`);
             await dbRef.remove();
 
             return NextResponse.json({ "msg": "Device Deleted" }, { status: 200 });
@@ -110,7 +66,6 @@ export async function POST(request) {
         }
 
 
-        // return NextResponse.json({ "error": "Wrong Parameters" }, { status: 200 });
 
     } catch (error) {
         console.error('Error:', error);
