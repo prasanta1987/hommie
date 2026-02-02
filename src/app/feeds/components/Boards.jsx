@@ -64,9 +64,9 @@ export default function Boards(props) {
     useEffect(() => {
         const interval = setInterval(() => {
             setLastSeen(t=>!t);
-        }, 2000); // Check every 10 seconds
+        }, 20000); // Check every 10 seconds
         return () => clearInterval(interval);
-    }, []);
+    }, [props.boardData.lastSeen]);
 
     const isOnline = (lastSeen) => {
         const threshold = 1 * 60 * 1000; // 45 seconds (30s interval + 15s buffer)
