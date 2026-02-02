@@ -24,7 +24,12 @@ export async function GET(request) {
 
 
     const deviceRef = db.ref(`${userUID}/${deviceCode}`);
-    deviceRef.update({ deviceCode: deviceCode });
+    deviceRef.update(
+        {
+            deviceCode: deviceCode,
+            lastSeen: new Date().getTime()
+        }
+    );
 
     let dbRef;
 

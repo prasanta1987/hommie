@@ -28,7 +28,12 @@ export async function POST(request) {
 
 
         const deviceRef = db.ref(`${userUID}/${deviceCode}`);
-        await deviceRef.update({ deviceCode: deviceCode });
+        await deviceRef.update(
+            { 
+                deviceCode: deviceCode,
+                lastSeen: new Date().getTime()
+             }
+        );
 
 
 
