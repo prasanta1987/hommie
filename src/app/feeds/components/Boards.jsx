@@ -59,25 +59,6 @@ export default function Boards(props) {
         setShowModal(false);
     }
 
-    const [lastSeen, setLastSeen] = useState(props.boardData.lastSeen);
-
-    useEffect(() => {
-        setLastSeen(props.boardData.lastSeen);
-
-        const interval = setInterval(() => {
-            setLastSeen(prev => !prev);
-
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [props.boardData.lastSeen]);
-
-    const isOnline = (lastSeen) => {
-        if (!lastSeen) return false;
-        const threshold = 20 * 1000; // 45 seconds (30s interval + 15s buffer)
-        const isDevOnline = (Date.now() - lastSeen) < threshold;
-        return (isDevOnline);
-    };
-
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
         (typeof props.boardData == 'object')
@@ -85,7 +66,7 @@ export default function Boards(props) {
         <>
             <div className={"boards-dropdown"}>
                 <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${props.boardData.isDeleted && "bg-warning"}`}>
-                    <BiSolidBoltCircle size={20} color={isOnline(props.boardData.lastSeen) ? "#41c741" : "#d94f4e"} className="boards-dropdown-item-icon" />
+                    <BiSolidBoltCircle size={20} color="#ebf1eb" className="boards-dropdown-item-icon" />
                     <span>{boardName || props.boardKey}</span>
                     {isOpen ? <FiChevronUp /> : <FiChevronDown />}
                 </button>
