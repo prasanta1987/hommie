@@ -6,7 +6,7 @@ const esp32Imports = `
 const esp8266Imports = `
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClientSecureBearSSL.h>
+#include <WiFiClientSecure.h>
 #include <Arduino_JSON.h>
 
 
@@ -27,16 +27,30 @@ void loop() {
 
 const esp8266Code = `
 
-const char *ssid = "YOUR_SSID";
-const char *password = "YOUR_PASSWORD";
 
-const String host = "https://hommily.vercel.app/api/liveData";
+const String baseUrl = "https://hommily.vercel.app/api";
 
-String url = "";
+const char *ssid = "PK_NEO";
+const char *password = "cxa1619bs";
+
+// 1. State & Timing Variables
+String streamUrl = "";
+String deviceCode = "";
+unsigned long lastPostTime = 0;
+const unsigned long postInterval = 30000; // 30s Sensor Update
+
+// 2. Heartbeat Watchdog Variables
+unsigned long lastStreamActivity = 0;
+const unsigned long streamTimeout = 12000; // 35s (Vercel heartbeats every 10s)
+
+WiFiClientSecure streamClient;
+HTTPClient sseHttp;
+bool isStreamConnected = false;
 
 void connectToWiFi();
-void handleData(JSONVar data);
-void refreshData();
+void handleSSEStream();
+void sendSensorData();
+void processHardwareCommands(JSONVar data);
 
 void setup()
 {
@@ -47,98 +61,150 @@ void setup()
 
 void loop()
 {
-  refreshData();
-  delay(1000);
-}
+  handleSSEStream();
 
-void refreshData()
-{
-
-  WiFiClientSecure client;
-  client.setInsecure();
-
-  HTTPClient https;
-
-  if (https.begin(client, url))
+  if (millis() - lastPostTime >= postInterval)
   {
-    https.addHeader("Accept", "text/event-stream");
-
-    int httpCode = https.GET();
-    if (httpCode == HTTP_CODE_OK)
-    {
-      WiFiClient *stream = https.getStreamPtr();
-
-      while (https.connected())
-      {
-        if (stream->available())
-        {
-          String line = stream->readStringUntil('\n');
-          line.trim();
-
-          if (line.startsWith("data:"))
-          {
-            JSONVar data = JSON.parse(line.substring(5));
-            if (JSON.typeof(data) == "object")
-            {
-              handleData(data);
-            }
-          }
-
-          if (line == "0")
-          {
-            Serial.println("Reconnecting...");
-            break;
-          }
-        }
-        yield();
-      }
-    }
-    else
-    {
-      Serial.printf("Error: %s\n", https.errorToString(httpCode).c_str());
-    }
-    https.end();
+    lastPostTime = millis();
+    sendSensorData();
   }
-  else
-  {
-    Serial.println("Unable to connect");
-  }
+
+  yield();
 }
 
 void connectToWiFi()
 {
-  Serial.println("Connecting to SSID: " + String(ssid));
+  Serial.print("Connecting to WiFi");
   WiFi.begin(ssid, password);
-
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
     Serial.print(".");
   }
 
-  String deviceCode = WiFi.macAddress();
+  // Generate Unique Device Code from MAC Address
+  deviceCode = WiFi.macAddress();
   deviceCode.replace(":", "");
-  url = "https://hommily.vercel.app/api/liveData?feedName=all&apiKey=" + API + "&deviceCode=" + deviceCode;
 
-  Serial.println("WiFi connected!");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  // Build URL for the SSE Route
+  streamUrl = baseUrl + "/liveData?feedName=all&apiKey=" + apiKey + "&deviceCode=" + deviceCode;
 }
 
-void handleData(JSONVar data)
+void handleSSEStream()
 {
+  if (!isStreamConnected)
+  {
+    streamClient.setInsecure();
+    if (sseHttp.begin(streamClient, streamUrl))
+    {
+      sseHttp.addHeader("Accept", "text/event-stream");
+      int httpCode = sseHttp.GET();
+      if (httpCode == 200 || httpCode == 307)
+      {
+        isStreamConnected = true;
+        streamClient.setTimeout(100);
+        lastStreamActivity = millis();
+        Serial.println(">>> SSE Stream Connected");
+      }
+    }
+  }
 
+  if (isStreamConnected)
+  {
+    WiFiClient *stream = sseHttp.getStreamPtr();
+
+    if (stream->available())
+    {
+      String line = stream->readStringUntil('\n');
+      lastStreamActivity = millis(); // Reset Watchdog on data or heartbeat
+
+      line.trim();
+
+      if (line == "0")
+      {
+        Serial.println("0 String Detected.");
+        isStreamConnected = false;
+        sseHttp.end();
+      }
+
+      if (line.startsWith("data:"))
+      {
+        String jsonStr = line.substring(line.indexOf(':') + 1);
+        jsonStr.trim();
+        JSONVar data = JSON.parse(jsonStr);
+        if (JSON.typeof(data) == "object")
+        {
+          processHardwareCommands(data);
+        }
+      }
+    }
+
+    if (millis() - lastStreamActivity > streamTimeout)
+    {
+      Serial.println("!!! Stream Watchdog Timeout. Force Reconnecting...");
+      isStreamConnected = false;
+      sseHttp.end();
+    }
+
+    if (!sseHttp.connected())
+    {
+      Serial.println("!!! Stream Socket Closed. Reconnecting...");
+      isStreamConnected = false;
+      sseHttp.end();
+    }
+  }
+}
+
+void sendSensorData()
+{
+  WiFiClientSecure postClient;
+  postClient.setInsecure();
+  postClient.setBufferSizes(512, 512); // Reduce memory footprint
+
+  HTTPClient http;
+  String postUrl = baseUrl + "/setData"; // Your POST route
+
+  if (http.begin(postClient, postUrl))
+  {
+    http.addHeader("Content-Type", "application/json");
+
+    JSONVar payload;
+    payload["apiKey"] = apiKey;
+    payload["deviceCode"] = deviceCode;
+    payload["purpose"] = "FEED";
+    payload["feedName"] = "wemos_status";
+
+    JSONVar data;
+    data["value"] = random(0, 1024); // Example analog value
+    payload["data"] = data;
+
+    Serial.println("Sending POST update...");
+    int httpResponseCode = http.POST(JSON.stringify(payload));
+
+    if (httpResponseCode > 0)
+    {
+      Serial.printf("POST Success: %d\n", httpResponseCode);
+    }
+    else
+    {
+      Serial.printf("POST Error: %s\n", http.errorToString(httpResponseCode).c_str());
+    }
+    http.end();
+  }
+}
+
+void processHardwareCommands(JSONVar data)
+{
   JSONVar keys = data.keys();
-  for (int i = 0; i < data.keys().length(); i++)
+  for (int i = 0; i < keys.length(); i++)
   {
     if (data[keys[i]].hasOwnProperty("GPIO"))
     {
-
-      int pin = int(data[keys[i]]["GPIO"]);
-      int value = int(data[keys[i]]["value"]);
-
+      int pin = (int)data[keys[i]]["GPIO"];
+      int value = (int)data[keys[i]]["value"];
       pinMode(pin, OUTPUT);
       digitalWrite(pin, value);
+      Serial.printf("GPIO %d -> %d\n", pin, value);
     }
   }
 }
