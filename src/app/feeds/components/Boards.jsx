@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Modal, Button, Form } from 'react-bootstrap';
 import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit } from 'react-icons/fi';
+import { BiSolidBoltCircle } from "react-icons/bi"
 
 import './Boards.css';
 
@@ -11,6 +12,7 @@ export default function Boards(props) {
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(props.boardData.deviceName);
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
+    const [lastSeen, setLastSeen] = useState(props.boardData.lastSeen);
 
     useEffect(() => {
         // console.log(props.boardData)
@@ -57,6 +59,10 @@ export default function Boards(props) {
         setShowModal(false);
     }
 
+    const isOnline = (lastSeen) => {
+        const threshold = 1 * 60 * 60 * 1000; // 45 seconds (30s interval + 15s buffer)
+        return (Date.now() - lastSeen) < threshold;
+    };
 
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
@@ -65,7 +71,7 @@ export default function Boards(props) {
         <>
             <div className={"boards-dropdown"}>
                 <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${props.boardData.isDeleted && "bg-warning"}`}>
-                    <FiHardDrive className="boards-dropdown-item-icon" />
+                    <BiSolidBoltCircle size={20} color={isOnline(props.boardData.lastSeen) ? "#41c741" : "#d94f4e"} className="boards-dropdown-item-icon" />
                     <span>{boardName || props.boardKey}</span>
                     {isOpen ? <FiChevronUp /> : <FiChevronDown />}
                 </button>

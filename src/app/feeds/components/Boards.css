@@ -5,7 +5,7 @@
 }
 
 .boards-dropdown-toggle {
-    background-color: #4A90E2;
+    background-color: #055b5a;
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -21,7 +21,7 @@
 }
 
 .boards-dropdown-toggle:hover {
-    background-color: #4281CB;
+    background-color: #153b68;
 }
 
 .boards-dropdown-menu {
@@ -58,7 +58,7 @@
 }
 
 .boards-dropdown-item-icon {
-    margin-right: 10px;
+    margin-right: 0px;
 }
 
 .boards-dropdown-header {
