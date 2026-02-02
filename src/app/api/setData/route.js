@@ -29,9 +29,9 @@ export async function POST(request) {
 
         const deviceRef = db.ref(`${userUID}/${deviceCode}`);
         await deviceRef.update(
-            { 
+            {
                 deviceCode: deviceCode,
-             }
+            }
         );
 
 
@@ -53,10 +53,10 @@ export async function POST(request) {
             const dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
             await dbRef.update(data);
 
-            const snapshot = await dbRef.once('value');
-            const snapShotData = snapshot.val();
+            // const snapshot = await dbRef.once('value');
+            // const snapShotData = snapshot.val();
 
-            return NextResponse.json(snapShotData, { status: 200 });
+            return NextResponse.json({ "msg": "Data Updated Successfully" }, { status: 200 });
 
         } else if (purpose == "delDeviceProfile") {
 
