@@ -76,11 +76,21 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
         }
 
         if (feedType === 'Toggle') {
-            updatedFeed.GPIO = parseInt(GPIO) || 2;
+
+            if (isNaN(parseInt(GPIO))) {
+                alert("GPIO must be a number.");
+                return;
+            }
+
+            updatedFeed.GPIO = parseInt(GPIO);
             updatedFeed.mcu = mcuType;
         }
 
         if (feedType === 'Colour') {
+            if (isNaN(parseInt(rPIN)) || isNaN(parseInt(gPIN)) || isNaN(parseInt(bPIN))) {
+                alert("PINs must be numbers.");
+                return;
+            }
             updatedFeed.rPIN = parseInt(rPIN);
             updatedFeed.gPIN = parseInt(gPIN);
             updatedFeed.bPIN = parseInt(bPIN);

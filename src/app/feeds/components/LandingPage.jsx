@@ -75,11 +75,20 @@ const LandingPage = (props) => {
     }
 
     if (feedType === 'Toggle') {
-      newFeed.GPIO = parseInt(GPIO) || 2;
+      if (GPIO == 0) {
+        alert("GPIO must be a number.");
+        return;
+      }
+      newFeed.GPIO = parseInt(GPIO);
+      newFeed.value = 0;
       newFeed.mcu = mcuType;
     }
 
     if (feedType === 'Colour') {
+      if (rPIN == 0 || gPIN == 0 || bPIN == 0) {
+        alert("PINs must be numbers.");
+        return;
+      }
       newFeed.rPIN = parseInt(rPIN);
       newFeed.gPIN = parseInt(gPIN);
       newFeed.bPIN = parseInt(bPIN);
