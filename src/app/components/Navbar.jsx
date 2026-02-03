@@ -80,7 +80,6 @@ const AppNavbar = () => {
               <Nav.Link as={Link} href="/" className="text-light">Home</Nav.Link>
               <Nav.Link as={Link} href="/feeds" className="text-light">Feeds</Nav.Link>
               <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>
-              <Nav.Link as={Link} href="/monitor" className="text-light">Monitor</Nav.Link>
               <Nav.Link as={Link} href="/music" className="text-light">Music</Nav.Link>
             </Nav>
             <Nav>
