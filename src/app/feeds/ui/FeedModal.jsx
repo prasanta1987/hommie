@@ -28,10 +28,12 @@ export default function FeedModal({
     gPIN,
     setGPIN,
     bPIN,
-    setBPIN
+    setBPIN,
+    mcuType,
+    setMcuType
+    
 }) {
-    const [deviceType, setDeviceType] = useState('ESP32');
-    const currentSafePins = deviceType === 'ESP8266' ? ESP8266SafeGPIOs : ESP32SafeGPIOs;
+    const currentSafePins = mcuType === 'ESP8266' ? ESP8266SafeGPIOs : ESP32SafeGPIOs;
 
     if (!isOpen) return null;
 
@@ -114,9 +116,9 @@ export default function FeedModal({
                             <Form.Group className="w-100 mb-3">
                                 <Form.Label>Select Device Type</Form.Label>
                                 <Form.Select
-                                    value={deviceType}
+                                    value={mcuType}
                                     onChange={(e) => {
-                                        setDeviceType(e.target.value);
+                                        setMcuType(e.target.value);
                                         setGPIO(''); // Reset pin when device changes
                                     }}
                                 >
@@ -127,7 +129,7 @@ export default function FeedModal({
 
                             {/* Dynamic GPIO Dropdown */}
                             <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select {deviceType} GPIO Pin</Form.Label>
+                                <Form.Label>Select {mcuType} GPIO Pin</Form.Label>
                                 <Form.Select
                                     value={GPIO}
                                     onChange={(e) => setGPIO(e.target.value)}

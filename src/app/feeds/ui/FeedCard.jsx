@@ -22,6 +22,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [feedType, setFeedType] = useState(feed.type || 'Card');
     const [minValue, setMinValue] = useState(feed.rangeMin || 0);
     const [maxValue, setMaxValue] = useState(feed.rangeMax || 100);
+    const [mcuType, setMcuType] = useState(feed.mcu || 'ESP32');
     const [rPIN, setRPIN] = useState(0);
     const [gPIN, setGPIN] = useState(0);
     const [bPIN, setBPIN] = useState(0);
@@ -30,6 +31,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
 
     useEffect(() => {
+        setMcuType(feed.mcu || 'ESP32');
         setSliderValue(feed.value);
         setGPIO(feed.GPIO || 0);
         setRPIN(feed.rPIN || 0);
@@ -71,6 +73,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
         if (feedType === 'Toggle') {
             updatedFeed.GPIO = parseInt(GPIO);
+            updatedFeed.mcu = mcuType;
         }
 
         if (feedType === 'Colour') {
@@ -187,6 +190,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 setMinValue={setMinValue}
                 maxValue={maxValue}
                 setMaxValue={setMaxValue}
+                mcuType={mcuType}
+                setMcuType={setMcuType}
             />
         </>
     );
