@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import FeedTypes from './FeedTypes';
-import { ESP8266SafeGPIOs, ESP32SafeGPIOs } from '../../miscFunctions/espSafeGPIOs';
+import { mcuTypes } from '../../miscFunctions/espSafeGPIOs';
 
 export default function FeedModal({
     purpose,
@@ -31,9 +31,9 @@ export default function FeedModal({
     setBPIN,
     mcuType,
     setMcuType
-    
+
 }) {
-    const currentSafePins = mcuType === 'ESP8266' ? ESP8266SafeGPIOs : ESP32SafeGPIOs;
+    const currentSafePins = mcuTypes[mcuType || "ESP8266"].safeGPIOs;
 
     if (!isOpen) return null;
 
@@ -112,32 +112,34 @@ export default function FeedModal({
                     {(feedType === 'Toggle') && (
 
                         <div className='gap-2 justify-content-between d-flex'>
-                            {/* Device Selection Dropdown */}
-                            <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select Device Type</Form.Label>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Select Microcontroller</Form.Label>
                                 <Form.Select
                                     value={mcuType}
                                     onChange={(e) => {
                                         setMcuType(e.target.value);
-                                        setGPIO(''); // Reset pin when device changes
+                                        setGPIO(''); // Reset pin selection on MCU change
                                     }}
                                 >
-                                    <option value="ESP32">ESP32</option>
-                                    <option value="ESP8266">ESP8266</option>
+                                    {Object.keys(mcuTypes).map((key) => (
+                                        <option key={key} value={key}>
+                                            {mcuTypes[key].name}
+                                        </option>
+                                    ))}
                                 </Form.Select>
                             </Form.Group>
 
-                            {/* Dynamic GPIO Dropdown */}
-                            <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select {mcuType} GPIO Pin</Form.Label>
+                            {/* Dynamic GPIO Dropdown (mapping objects) */}
+                            <Form.Group className="mb-3">
+                                <Form.Label>Select {mcuTypes[mcuType||"ESP8266"].name} GPIO Pin</Form.Label>
                                 <Form.Select
                                     value={GPIO}
                                     onChange={(e) => setGPIO(e.target.value)}
                                 >
                                     <option value="">-- Choose a Pin --</option>
                                     {currentSafePins.map((pin) => (
-                                        <option key={pin} value={pin}>
-                                            GPIO {pin}
+                                        <option key={pin.value} value={pin.value}>
+                                            {pin.name} (Pin {pin.value})
                                         </option>
                                     ))}
                                 </Form.Select>

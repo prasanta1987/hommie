@@ -1,14 +1,26 @@
 const ESP8266SafeGPIOs = [
-    0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16
+    { name: "D5", value: 5 },
 ];
 
 const ESP32SafeGPIOs = [
-    0, 1, 2, 3, 4, 5, 12, 13, 14, 15, 16, 17, 18, 19,
-    21, 22, 23, 25, 26, 27, 32, 33, 34, 35, 36, 39
+    { name: "GPIO 2", value: 2 },
 ];
 
-const boardName={
+const boardName = {
     ESP8266: "ESP8266",
     ESP32: "ESP32"
 };
-export { ESP8266SafeGPIOs, ESP32SafeGPIOs, boardName };
+
+const mcuTypes = {
+    ESP8266: {
+        name: "ESP8266",
+        safeGPIOs: ESP8266SafeGPIOs
+    },
+    ESP32: {
+        name: "ESP32",
+        safeGPIOs: ESP32SafeGPIOs
+    }
+};
+
+
+export { mcuTypes };
