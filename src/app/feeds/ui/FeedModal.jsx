@@ -38,7 +38,7 @@ export default function FeedModal({
     if (!isOpen) return null;
 
     return (
-        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark">
+        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark" size='md'>
             <Modal.Header closeButton>
                 <Modal.Title>
                     {purpose === "create" ? "Create New Feed" : `${feedName} Settings`}
@@ -132,7 +132,7 @@ export default function FeedModal({
 
                             {/* Dynamic GPIO Dropdown (mapping objects) */}
                             <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select {mcuTypes[mcuType||"ESP8266"].name} GPIO Pin</Form.Label>
+                                <Form.Label>Select {mcuTypes[mcuType || "ESP8266"].name} GPIO Pin</Form.Label>
                                 <Form.Select
                                     value={GPIO}
                                     onChange={(e) => setGPIO(e.target.value)}
@@ -149,32 +149,64 @@ export default function FeedModal({
                     )}
 
                     {(feedType === 'Colour') && (
-                        <div className='d-flex gap-5'>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Red Pin</Form.Label>
-                                <Form.Control
-                                    type="number"
+                        <>
+                            <div className='gap-2 justify-content-between d-flex'>
+                                <Form.Group className="w-100 mb-3">
+                                    <Form.Label>Select Microcontroller</Form.Label>
+                                    <Form.Select
+                                        value={mcuType}
+                                        onChange={(e) => {
+                                            setMcuType(e.target.value);
+                                            setGPIO(''); // Reset pin selection on MCU change
+                                        }}
+                                    >
+                                        {Object.keys(mcuTypes).map((key) => (
+                                            <option key={key} value={key}>
+                                                {mcuTypes[key].name}
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                </Form.Group>
+                            </div>
+                            <div className='d-flex gap-1'>
+                                <Form.Select
                                     value={rPIN}
                                     onChange={(e) => setRPIN(e.target.value)}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Green Pin</Form.Label>
-                                <Form.Control
-                                    type="number"
+                                >
+                                    <option value="">-- Choose a Pin --</option>
+                                    {currentSafePins.map((pin) => (
+                                        <option key={pin.value} value={pin.value}>
+                                            {pin.name} (Pin {pin.value})
+                                        </option>
+                                    ))}
+                                </Form.Select>
+
+                                <Form.Select
                                     value={gPIN}
                                     onChange={(e) => setGPIN(e.target.value)}
-                                />
-                            </Form.Group>
-                            <Form.Group className="mb-3">
-                                <Form.Label>Blue Pin</Form.Label>
-                                <Form.Control
-                                    type="number"
+                                >
+                                    <option value="">-- Choose a Pin --</option>
+                                    {currentSafePins.map((pin) => (
+                                        <option key={pin.value} value={pin.value}>
+                                            {pin.name} (Pin {pin.value})
+                                        </option>
+                                    ))}
+                                </Form.Select>
+
+                                <Form.Select
                                     value={bPIN}
                                     onChange={(e) => setBPIN(e.target.value)}
-                                />
-                            </Form.Group>
-                        </div>
+                                >
+                                    <option value="">-- Choose a Pin --</option>
+                                    {currentSafePins.map((pin) => (
+                                        <option key={pin.value} value={pin.value}>
+                                            {pin.name} (Pin {pin.value})
+                                        </option>
+                                    ))}
+                                </Form.Select>
+                            </div>
+                        </>
+
                     )}
                 </Form>
             </Modal.Body>
@@ -191,7 +223,7 @@ export default function FeedModal({
                     {purpose === "create" ? "Create Feed" : "Update Feed"}
                 </Button>
             </Modal.Footer>
-        </Modal>
+        </Modal >
     )
 
 }

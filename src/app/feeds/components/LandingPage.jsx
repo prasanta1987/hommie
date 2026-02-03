@@ -19,8 +19,11 @@ const LandingPage = (props) => {
   const [feedType, setFeedType] = useState('Card');
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(100);
-  const [GPIO, setGPIO] = useState(0);
   const [mcuType, setMcuType] = useState('ESP32');
+  const [GPIO, setGPIO] = useState(0);
+  const [rPIN, setRPIN] = useState(0);
+  const [gPIN, setGPIN] = useState(0);
+  const [bPIN, setBPIN] = useState(0);
 
 
   const boardSelection = (devCode, devFeed) => {
@@ -54,7 +57,7 @@ const LandingPage = (props) => {
 
   const handleCreateFeed = () => {
 
-    if(!feedName) {
+    if (!feedName) {
       alert("Feed name is required.");
       return;
     }
@@ -74,6 +77,14 @@ const LandingPage = (props) => {
     if (feedType === 'Toggle') {
       newFeed.GPIO = parseInt(GPIO);
       newFeed.mcu = mcuType;
+    }
+
+    if (feedType === 'Colour') {
+      newFeed.rPIN = parseInt(rPIN);
+      newFeed.gPIN = parseInt(gPIN);
+      newFeed.bPIN = parseInt(bPIN);
+      newFeed.mcu = mcuType;
+      newFeed.value = "#2576b9";
     }
 
     updateValuesToDatabase(reference, newFeed);
@@ -140,6 +151,12 @@ const LandingPage = (props) => {
         setSelectedDeviceCode={setSelectedDeviceCode}
         mcuType={mcuType}
         setMcuType={setMcuType}
+        rPIN={rPIN}
+        gPIN={gPIN}
+        bPIN={bPIN}
+        setRPIN={setRPIN}
+        setGPIN={setGPIN}
+        setBPIN={setBPIN}
       />
     </div>
 
