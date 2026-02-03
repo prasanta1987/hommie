@@ -75,7 +75,7 @@ const LandingPage = (props) => {
     }
 
     if (feedType === 'Toggle') {
-      newFeed.GPIO = parseInt(GPIO);
+      newFeed.GPIO = parseInt(GPIO) || 2;
       newFeed.mcu = mcuType;
     }
 

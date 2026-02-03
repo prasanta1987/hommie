@@ -76,7 +76,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
         }
 
         if (feedType === 'Toggle') {
-            updatedFeed.GPIO = parseInt(GPIO);
+            updatedFeed.GPIO = parseInt(GPIO) || 2;
             updatedFeed.mcu = mcuType;
         }
 
