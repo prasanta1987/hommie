@@ -53,6 +53,10 @@ const LandingPage = (props) => {
 
   const handleCreateFeed = () => {
 
+    if(!feedName) {
+      alert("Feed name is required.");
+      return;
+    }
     const reference = `${props.userData.uid}/${selectedDeviceCode}/devFeeds/${feedName}`;
     const newFeed = {
       type: feedType,

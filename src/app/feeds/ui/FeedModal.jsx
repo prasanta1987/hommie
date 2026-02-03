@@ -71,6 +71,7 @@ export default function FeedModal({
                                 <Form.Label>Feed Name</Form.Label>
                                 <Form.Control
                                     type="text"
+                                    required
                                     placeholder="Enter feed name"
                                     value={feedName}
                                     disabled={purpose === "settings"}

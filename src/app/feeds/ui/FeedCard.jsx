@@ -64,6 +64,10 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     if (!feed) return null;
 
     const handleCreateFeed = () => {
+        if (!feedName) {
+            alert("Feed name is required.");
+            return;
+        }
         const reference = `${uid}/${deviceCode}/devFeeds/${feedName}`;
         const updatedFeed = { type: feedType };
         if (feedType === 'Gauge' || feedType === 'Slider') {
