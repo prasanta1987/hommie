@@ -113,7 +113,7 @@ export default function FeedModal({
                     {(feedType === 'Toggle') && (
 
                         <div className='gap-2 justify-content-between d-flex'>
-                            <Form.Group className="mb-3">
+                            <Form.Group className="w-100 mb-3">
                                 <Form.Label>Select Microcontroller</Form.Label>
                                 <Form.Select
                                     value={mcuType}
@@ -131,7 +131,7 @@ export default function FeedModal({
                             </Form.Group>
 
                             {/* Dynamic GPIO Dropdown (mapping objects) */}
-                            <Form.Group className="mb-3">
+                            <Form.Group className="w-100 mb-3">
                                 <Form.Label>Select {mcuTypes[mcuType||"ESP8266"].name} GPIO Pin</Form.Label>
                                 <Form.Select
                                     value={GPIO}

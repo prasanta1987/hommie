@@ -20,6 +20,7 @@ const LandingPage = (props) => {
   const [minValue, setMinValue] = useState(0);
   const [maxValue, setMaxValue] = useState(100);
   const [GPIO, setGPIO] = useState(0);
+  const [mcuType, setMcuType] = useState('ESP32');
 
 
   const boardSelection = (devCode, devFeed) => {
@@ -72,6 +73,7 @@ const LandingPage = (props) => {
 
     if (feedType === 'Toggle') {
       newFeed.GPIO = parseInt(GPIO);
+      newFeed.mcu = mcuType;
     }
 
     updateValuesToDatabase(reference, newFeed);
@@ -136,6 +138,8 @@ const LandingPage = (props) => {
         handleCreateFeed={handleCreateFeed}
         setGPIO={setGPIO}
         setSelectedDeviceCode={setSelectedDeviceCode}
+        mcuType={mcuType}
+        setMcuType={setMcuType}
       />
     </div>
 
