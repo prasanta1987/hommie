@@ -1,0 +1,19 @@
+.midi-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+}
+
+@media (max-width: 768px) {
+    .midi-container {
+        justify-content: center;
+    }
+}
+
+.midi-slot {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 200px;
+    /* margin: 5px; */
+}
