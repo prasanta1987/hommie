@@ -6,7 +6,7 @@ import './midi.css'
 const Midi = () => {
   const [status, setStatus] = useState("Connect Keyboard via USB");
   const [lastIncoming, setLastIncoming] = useState(null);
-  const [slots, setSlots] = useState(Array(10).fill(null));
+  const [slots, setSlots] = useState(Array(5).fill(null));
   const midiAccessRef = useRef(null);
   const currentBank = useRef({ msb: 0, lsb: 0 });
 
