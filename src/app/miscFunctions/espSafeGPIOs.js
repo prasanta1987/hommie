@@ -1,9 +1,12 @@
 const ESP8266SafeGPIOs = [
-    { name: "D1", value: 5 },
-    { name: "D2", value: 4 },
-    { name: "D5", value: 14 },
-    { name: "D6", value: 12 },
-    { name: "D7", value: 13 },
+    { name: "D1", value: 5 ,desc:"SCL (I2C)"},
+    { name: "D2", value: 4 ,desc:"SDA (I2C)"},
+    { name: "D3", value: 0 ,desc:"Connected to FLASH button, boot fails if pulled LOW"},
+    { name: "D4", value: 2 ,desc:"HIGH at boot Connected to on-board LED, boot fails if pulled LOW"},
+    { name: "D5", value: 14 ,desc:"SPI (SCLK)"},
+    { name: "D6", value: 12 , desc:"SPI (MISO)"},
+    { name: "D7", value: 13 ,desc:"SPI (MOSI)"},
+    { name: "D8", value: 15 ,desc:"	SPI (CS) - Boot fails if pulled HIGH"},
 ];
 
 const ESP32SafeGPIOs = [

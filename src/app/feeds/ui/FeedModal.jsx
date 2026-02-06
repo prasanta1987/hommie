@@ -33,6 +33,8 @@ export default function FeedModal({
     setMcuType
 
 }) {
+
+    const [pinDescription, setPinDescription] = useState('');
     const currentSafePins = mcuTypes[mcuType || "ESP8266"].safeGPIOs;
 
     if (!isOpen) return null;
@@ -135,15 +137,25 @@ export default function FeedModal({
                                 <Form.Label>Select {mcuTypes[mcuType || "ESP8266"].name} GPIO Pin</Form.Label>
                                 <Form.Select
                                     value={GPIO}
-                                    onChange={(e) => setGPIO(e.target.value)}
+                                    onChange={
+                                        (e) => {
+                                            setGPIO(e.target.value)
+                                            const selectedOption = e.target.selectedOptions[0];
+
+                                            const description = selectedOption.getAttribute("desc");
+
+                                            setPinDescription(description);
+                                        }
+                                    }
                                 >
                                     <option value="">-- Choose a Pin --</option>
                                     {currentSafePins.map((pin) => (
-                                        <option key={pin.value} value={pin.value}>
+                                        <option key={pin.value} value={pin.value} desc={pin.desc}>
                                             {pin.name} (Pin {pin.value})
                                         </option>
                                     ))}
                                 </Form.Select>
+                                {/* <Form.Label>{pinDescription}</Form.Label> */}
                             </Form.Group>
                         </div>
                     )}
@@ -218,6 +230,7 @@ export default function FeedModal({
 
                     )}
                 </Form>
+                <small>{pinDescription}</small>
             </Modal.Body>
             <Modal.Footer>
 
