@@ -141,9 +141,7 @@ export default function FeedModal({
                                         (e) => {
                                             setGPIO(e.target.value)
                                             const selectedOption = e.target.selectedOptions[0];
-
                                             const description = selectedOption.getAttribute("desc");
-
                                             setPinDescription(description);
                                         }
                                     }
@@ -151,7 +149,7 @@ export default function FeedModal({
                                     <option value="">-- Choose a Pin --</option>
                                     {currentSafePins.map((pin) => (
                                         <option key={pin.value} value={pin.value} desc={pin.desc}>
-                                            {pin.name} (Pin {pin.value})
+                                            {pin.name} (GPIO {pin.value})
                                         </option>
                                     ))}
                                 </Form.Select>
@@ -180,46 +178,61 @@ export default function FeedModal({
                                     </Form.Select>
                                 </Form.Group>
                             </div>
-                            <div className='d-flex gap-1 text-center'>
-                                <div className='d-flex flex-column'>
+                            <div className='d-flex justify-content-between gap-1 text-center mb-3'>
+                                <div className='d-flex flex-column w-100'>
                                     <Form.Label>Select Red PIN</Form.Label>
                                     <Form.Select
                                         value={rPIN}
-                                        onChange={(e) => setRPIN(e.target.value)}
+                                        onChange={(e) => {
+                                            setRPIN(e.target.value)
+                                            const selectedOption = e.target.selectedOptions[0];
+                                            const description = selectedOption.getAttribute("desc");
+                                            setPinDescription(description);
+                                        }}
                                     >
                                         <option value="">-- Choose a Pin --</option>
                                         {currentSafePins.map((pin) => (
-                                            <option key={pin.value} value={pin.value}>
-                                                {pin.name} (Pin {pin.value})
+                                            <option key={pin.value} value={pin.value} desc={pin.desc}>
+                                                {pin.name} (GPIO {pin.value})
                                             </option>
                                         ))}
                                     </Form.Select>
                                 </div>
-                                <div className='d-flex flex-column'>
+                                <div className='d-flex flex-column w-100'>
                                     <Form.Label>Select Green PIN</Form.Label>
                                     <Form.Select
                                         value={gPIN}
-                                        onChange={(e) => setGPIN(e.target.value)}
+                                        onChange={(e) => {
+                                            setGPIN(e.target.value)
+                                            const selectedOption = e.target.selectedOptions[0];
+                                            const description = selectedOption.getAttribute("desc");
+                                            setPinDescription(description);
+                                        }}
                                     >
                                         <option value="">-- Choose a Pin --</option>
                                         {currentSafePins.map((pin) => (
-                                            <option key={pin.value} value={pin.value}>
-                                                {pin.name} (Pin {pin.value})
+                                            <option key={pin.value} value={pin.value} desc={pin.desc}>
+                                                {pin.name} (GPIO {pin.value})
                                             </option>
                                         ))}
                                     </Form.Select>
                                 </div>
 
-                                <div className='d-flex flex-column'>
+                                <div className='d-flex flex-column w-100'>
                                     <Form.Label>Select Blue PIN</Form.Label>
                                     <Form.Select
                                         value={bPIN}
-                                        onChange={(e) => setBPIN(e.target.value)}
+                                        onChange={(e) => {
+                                            setBPIN(e.target.value)
+                                            const selectedOption = e.target.selectedOptions[0];
+                                            const description = selectedOption.getAttribute("desc");
+                                            setPinDescription(description);
+                                        }}
                                     >
                                         <option value="">-- Choose a Pin --</option>
                                         {currentSafePins.map((pin) => (
-                                            <option key={pin.value} value={pin.value}>
-                                                {pin.name} (Pin {pin.value})
+                                            <option key={pin.value} value={pin.value} desc={pin.desc}>
+                                                {pin.name} (GPIO {pin.value})
                                             </option>
                                         ))}
                                     </Form.Select>
