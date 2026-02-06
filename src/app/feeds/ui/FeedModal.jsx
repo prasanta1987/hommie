@@ -38,7 +38,7 @@ export default function FeedModal({
     if (!isOpen) return null;
 
     return (
-        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark" size='md'>
+        <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark" size='lg'>
             <Modal.Header closeButton>
                 <Modal.Title>
                     {purpose === "create" ? "Create New Feed" : `${feedName} Settings`}
