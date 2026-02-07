@@ -6,15 +6,24 @@ import { auth, db } from '../../firebaseConfig/config';
 import { ref as databaseRef, remove } from 'firebase/database';
 import { updateValuesToDatabase } from '../miscFunctions/actions';
 import { Spinner } from "react-bootstrap";
-import ClockWidget from './ui/ClockWidget';
-import DateWidget from './ui/DateWidget';
 import SignIn from '../components/sign-in';
+import GaugeUI from '../feeds/ui/GaugeUI';
+import SliderUI from '../feeds/ui/SliderUI';
+import ToggleUI from '../feeds/ui/ToggleUI';
+import ColourPickerUI from '../feeds/ui/ColourPickerUI';
+
+const feedTypeToComponent = {
+  gauge: GaugeUI,
+  slider: SliderUI,
+  toggle: ToggleUI,
+  color: ColourPickerUI,
+};
 
 // A draggable widget component for the sidebar
 const DraggableWidget = ({ id, name, onDragStart }) => {
   return (
     <div
-      id={name} // Use name as the draggable id
+      id={id} // Use name as the draggable id
       draggable
       onDragStart={onDragStart}
       style={{
@@ -40,13 +49,14 @@ const DisplayPage = () => {
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [data, dataLoading, dataError] = useObjectVal(user && selectedDevice ? databaseRef(db, `/${user.uid}/${selectedDevice}/display`) : null);
+  const [devFeeds] = useObjectVal(user && selectedDevice ? databaseRef(db, `${user.uid}/${selectedDevice}/devFeeds`) : null);
   const [allUserData] = useObjectVal(user ? databaseRef(db, `/${user.uid}`) : null);
   const [selectedWidget, setSelectedWidget] = useState(null);
   const [backgroundColor, setBackgroundColor] = useState('#333333');
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
 
   useEffect(() => {
     if (allUserData) {
-      // const deviceKeys = Object.keys(allUserData).filter(key => key !== 'display' && key.length >= 8 && allUserData[key]);
       const deviceKeys = Object.keys(allUserData);
       const devicesData = deviceKeys.map(key => ({
         code: key,
@@ -60,7 +70,7 @@ const DisplayPage = () => {
   }, [allUserData, selectedDevice]);
 
   useEffect(() => {
-    if (data && virtualScreenRef.current) {
+    if (data && devFeeds && virtualScreenRef.current) {
       const { bgColour, ...widgetsData } = data;
       if (bgColour) {
         setBackgroundColor(bgColour);
@@ -68,20 +78,30 @@ const DisplayPage = () => {
       
       const screenRect = virtualScreenRef.current.getBoundingClientRect();
       if (screenRect.width > 0) {
-          const loadedWidgets = Object.entries(widgetsData).map(([name, props]) => ({
-            name: name,
-            ...props,
-            color: typeof props.color === 'string' ? props.color : '#ffffff',
-            fontSize: props.fontSize || 2,
-            pixelX: (props.x / 320) * screenRect.width,
-            pixelY: (props.y / 240) * screenRect.height,
-          }));
+          const loadedWidgets = Object.entries(widgetsData).map(([name, props]) => {
+            let widgetType = props.type;
+            if (!widgetType && devFeeds[name]) {
+                widgetType = devFeeds[name].type;
+            }
+
+            return {
+                name: name,
+                ...props,
+                type: widgetType,
+                color: typeof props.color === 'string' ? props.color : '#ffffff',
+                backgroundColor: typeof props.backgroundColor === 'string' ? props.backgroundColor : 'transparent',
+                fontSize: props.fontSize || 2,
+                pixelX: (props.x / 320) * screenRect.width,
+                pixelY: (props.y / 240) * screenRect.height,
+            }
+          });
         setWidgets(loadedWidgets);
+		setLastUpdateTime(new Date());
       }
-    } else {
+    } else if (!data) {
       setWidgets([]);
     }
-  }, [data, user]);
+  }, [data, devFeeds, user]);
 
   if (authLoading || dataLoading) {
     return (
@@ -99,8 +119,8 @@ const DisplayPage = () => {
     return <SignIn />;
   }
 
-  const handleDragStart = (e) => {
-    e.dataTransfer.setData('widgetName', e.target.id);
+  const handleDragStart = (e, feedId) => {
+    e.dataTransfer.setData('feedId', feedId);
   };
 
   const handleWidgetDragStart = (e, widgetName) => {
@@ -115,21 +135,25 @@ const DisplayPage = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     if (!user || !selectedDevice) return;
-
+  
+    const feedId = e.dataTransfer.getData('feedId');
     const widgetName = e.dataTransfer.getData('widgetName');
     const screenRect = virtualScreenRef.current.getBoundingClientRect();
-
+  
     let x = e.clientX - screenRect.left;
     let y = e.clientY - screenRect.top;
-
+  
     x = Math.max(0, Math.min(x, screenRect.width));
     y = Math.max(0, Math.min(y, screenRect.height));
-
+  
     const scaledX = Math.round((x / screenRect.width) * 320);
     const scaledY = Math.round((y / screenRect.height) * 240);
-    
-    const existingWidgetIndex = widgets.findIndex(w => w.name === widgetName);
+      
+    const id = feedId || widgetName;
+    if (!id) return;
 
+    const existingWidgetIndex = widgets.findIndex(w => w.name === id);
+  
     let newWidgets;
     if (existingWidgetIndex > -1) {
       newWidgets = [...widgets];
@@ -138,30 +162,44 @@ const DisplayPage = () => {
         x: scaledX,
         y: scaledY,
         pixelX: x,
-        pixelY: y
+        pixelY: y,
       };
-    } else {
+    } else if (feedId) {
+      const feed = devFeeds[feedId];
+      if (!feed) return;
       const newWidget = {
-        name: widgetName,
+        name: feedId,
+        type: feed.type,
         x: scaledX,
         y: scaledY,
         pixelX: x,
         pixelY: y,
         color: '#ffffff',
-        fontSize: 2
+        backgroundColor: 'transparent',
+        fontSize: 2,
       };
       newWidgets = [...widgets, newWidget];
+    } else {
+      return;
     }
-    setWidgets(newWidgets);
-    setSelectedWidget(widgetName);
 
+    setWidgets(newWidgets);
+    setSelectedWidget(id);
+  
     const dataToSend = newWidgets.reduce((acc, widget) => {
-      acc[widget.name] = { x: widget.x, y: widget.y, color: widget.color, fontSize: widget.fontSize };
+      acc[widget.name] = { 
+        x: widget.x, 
+        y: widget.y, 
+        color: widget.color, 
+        backgroundColor: widget.backgroundColor,
+        fontSize: widget.fontSize,
+        type: widget.type,
+      };
       return acc;
     }, {});
     updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, dataToSend);
   };
-  
+
   const handleDeleteDrop = (e) => {
     e.preventDefault();
     if (!user || !selectedDevice) return;
@@ -197,7 +235,9 @@ const DisplayPage = () => {
             x: widgetToUpdate.x,
             y: widgetToUpdate.y,
             color: widgetToUpdate.color,
+            backgroundColor: widgetToUpdate.backgroundColor,
             fontSize: widgetToUpdate.fontSize,
+            type: widgetToUpdate.type,
         };
         updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display/${widgetToUpdate.name}`, dataToSend);
     }
@@ -239,9 +279,10 @@ const DisplayPage = () => {
               ))}
             </select>
         </div>
-        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Widgets</h2>
-        <DraggableWidget name="Clock" onDragStart={handleDragStart} />
-        <DraggableWidget name="Date" onDragStart={handleDragStart} />
+        <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Feeds</h2>
+        {devFeeds && Object.entries(devFeeds).map(([feedId, feed]) => (
+            feed.type == "Toggle"&& <DraggableWidget key={feedId} id={feedId} name={feedId} onDragStart={(e) => handleDragStart(e, feedId)} />
+        ))}
       </div>
 
       {/* Main Content (Virtual Screen) */}
@@ -262,32 +303,39 @@ const DisplayPage = () => {
             boxShadow: '0 0 20px rgba(0,0,0,0.5) inset'
           }}
         >
-          {widgets.map((widget) => (
-            <div
-              key={widget.name}
-              id={widget.name}
-              draggable
-              onDragStart={(e) => handleWidgetDragStart(e, widget.name)}
-              onClick={(e) => handleWidgetClick(e, widget.name)}
-              style={{
-                position: 'absolute',
-                left: widget.pixelX,
-                top: widget.pixelY,
-                transform: 'translate(-50%, -50%)',
-                padding: '8px 12px',
-                border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
-                borderRadius: '5px',
-                backdropFilter: 'blur(5px)',
-                cursor: 'grab',
-                userSelect: 'none',
-                color: widget.color,
-              }}
-            >
-              {widget.name === 'Clock' && <ClockWidget color={widget.color} fontSize={widget.fontSize} />}
-              {widget.name === 'Date' && <DateWidget color={widget.color} fontSize={widget.fontSize} />}
-            </div>
-          ))}
+          {widgets.map((widget) => {
+            return (
+                <div
+                key={widget.name}
+                id={widget.name}
+                draggable
+                onDragStart={(e) => handleWidgetDragStart(e, widget.name)}
+                onClick={(e) => handleWidgetClick(e, widget.name)}
+                style={{
+                    position: 'absolute',
+                    left: widget.pixelX,
+                    top: widget.pixelY,
+                    transform: 'translate(-50%, -50%)',
+                    padding: '8px 12px',
+                    border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
+                    borderRadius: '5px',
+                    backgroundColor: widget.backgroundColor,
+                    cursor: 'grab',
+                    userSelect: 'none',
+                    color: widget.color,
+                    textAlign: 'center'
+                }}
+                >
+                <div style={{ marginBottom: '5px' }}>{widget.name}</div>
+                </div>
+            )
+          })}
         </div>
+		{lastUpdateTime && (
+			<div style={{ position: 'absolute', top: '20px', right: '20px', color: '#aaa', fontSize: '12px' }}>
+				Last updated: {lastUpdateTime.toLocaleTimeString()}
+			</div>
+		)}
       </div>
 
       {/* Right Sidebar (Properties & Delete) */}
@@ -313,6 +361,16 @@ const DisplayPage = () => {
                     type="color" 
                     value={selectedWidgetObject?.color || '#ffffff'} 
                     onChange={(e) => handlePropertyChange('color', e.target.value)}
+                    onBlur={handlePropertySave}
+                    style={{ width: '100%' }} 
+                />
+            </div>
+            <div style={{ marginTop: '10px' }}>
+                <label>Background Color</label>
+                <input 
+                    type="color" 
+                    value={selectedWidgetObject?.backgroundColor || '#000000'} 
+                    onChange={(e) => handlePropertyChange('backgroundColor', e.target.value)}
                     onBlur={handlePropertySave}
                     style={{ width: '100%' }} 
                 />
