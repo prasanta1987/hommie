@@ -107,12 +107,25 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
 
     const sliderValueChange = (e) => {
-        // console.log(e.target.value);
-        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
-            {
-                value: e.target.value,
-                time: new Date().getTime()
-            });
+        console.log(e.target.value);
+
+        const newValue = e.target.value;
+        const multiUpdate = {};
+
+        // Use dot notation to target specific fields within the path
+        multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/value`] = newValue;
+        multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/time`] = new Date().getTime();
+
+        multiUpdate[`${uid}/${deviceCode}/display/${feedName}/value`] = newValue;
+
+        // Use update() to perform the atomic multi-path update
+        updateValuesToDatabase(`/`, multiUpdate);
+
+        // updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
+        //     {
+        //         value: e.target.value,
+        //         time: new Date().getTime()
+        //     });
     }
 
     return (

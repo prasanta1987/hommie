@@ -75,28 +75,28 @@ const DisplayPage = () => {
       if (bgColour) {
         setBackgroundColor(bgColour);
       }
-      
+
       const screenRect = virtualScreenRef.current.getBoundingClientRect();
       if (screenRect.width > 0) {
-          const loadedWidgets = Object.entries(widgetsData).map(([name, props]) => {
-            let widgetType = props.type;
-            if (!widgetType && devFeeds[name]) {
-                widgetType = devFeeds[name].type;
-            }
+        const loadedWidgets = Object.entries(widgetsData).map(([name, props]) => {
+          let widgetType = props.type;
+          if (!widgetType && devFeeds[name]) {
+            widgetType = devFeeds[name].type;
+          }
 
-            return {
-                name: name,
-                ...props,
-                type: widgetType,
-                color: typeof props.color === 'string' ? props.color : '#ffffff',
-                backgroundColor: typeof props.backgroundColor === 'string' ? props.backgroundColor : 'transparent',
-                fontSize: props.fontSize || 2,
-                pixelX: (props.x / 320) * screenRect.width,
-                pixelY: (props.y / 240) * screenRect.height,
-            }
-          });
+          return {
+            name: name,
+            ...props,
+            type: widgetType,
+            color: typeof props.color === 'string' ? props.color : '#ffffff',
+            backgroundColor: typeof props.backgroundColor === 'string' ? props.backgroundColor : 'transparent',
+            fontSize: props.fontSize || 2,
+            pixelX: (props.x / 320) * screenRect.width,
+            pixelY: (props.y / 240) * screenRect.height,
+          }
+        });
         setWidgets(loadedWidgets);
-		setLastUpdateTime(new Date());
+        setLastUpdateTime(new Date());
       }
     } else if (!data) {
       setWidgets([]);
@@ -112,7 +112,7 @@ const DisplayPage = () => {
   }
 
   if (authError || dataError) {
-      return <div>Error: {authError?.message || dataError?.message}</div>
+    return <div>Error: {authError?.message || dataError?.message}</div>
   }
 
   if (!user) {
@@ -135,25 +135,25 @@ const DisplayPage = () => {
   const handleDrop = (e) => {
     e.preventDefault();
     if (!user || !selectedDevice) return;
-  
+
     const feedId = e.dataTransfer.getData('feedId');
     const widgetName = e.dataTransfer.getData('widgetName');
     const screenRect = virtualScreenRef.current.getBoundingClientRect();
-  
+
     let x = e.clientX - screenRect.left;
     let y = e.clientY - screenRect.top;
-  
+
     x = Math.max(0, Math.min(x, screenRect.width));
     y = Math.max(0, Math.min(y, screenRect.height));
-  
+
     const scaledX = Math.round((x / screenRect.width) * 320);
     const scaledY = Math.round((y / screenRect.height) * 240);
-      
+
     const id = feedId || widgetName;
     if (!id) return;
 
     const existingWidgetIndex = widgets.findIndex(w => w.name === id);
-  
+
     let newWidgets;
     if (existingWidgetIndex > -1) {
       newWidgets = [...widgets];
@@ -185,16 +185,14 @@ const DisplayPage = () => {
 
     setWidgets(newWidgets);
     setSelectedWidget(id);
-  
+
     const dataToSend = newWidgets.reduce((acc, widget) => {
-      acc[widget.name] = { 
-        x: widget.x, 
-        y: widget.y, 
-        color: widget.color, 
-        backgroundColor: widget.backgroundColor,
-        fontSize: widget.fontSize,
-        type: widget.type,
-      };
+      acc[`${widget.name}/x`] = widget.x;
+      acc[`${widget.name}/y`] = widget.y;
+      acc[`${widget.name}/color`] = widget.color;
+      acc[`${widget.name}/backgroundColor`] = widget.backgroundColor;
+      acc[`${widget.name}/fontSize`] = widget.fontSize;
+      acc[`${widget.name}/type`] = widget.type;
       return acc;
     }, {});
     updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, dataToSend);
@@ -219,10 +217,10 @@ const DisplayPage = () => {
   const handlePropertyChange = (property, value) => {
     if (!selectedWidget) return;
     const newWidgets = widgets.map(w => {
-        if (w.name === selectedWidget) {
-            return { ...w, [property]: value };
-        }
-        return w;
+      if (w.name === selectedWidget) {
+        return { ...w, [property]: value };
+      }
+      return w;
     });
     setWidgets(newWidgets);
   };
@@ -231,15 +229,15 @@ const DisplayPage = () => {
     if (!selectedWidget || !selectedDevice) return;
     const widgetToUpdate = widgets.find(w => w.name === selectedWidget);
     if (widgetToUpdate) {
-        const dataToSend = {
-            x: widgetToUpdate.x,
-            y: widgetToUpdate.y,
-            color: widgetToUpdate.color,
-            backgroundColor: widgetToUpdate.backgroundColor,
-            fontSize: widgetToUpdate.fontSize,
-            type: widgetToUpdate.type,
-        };
-        updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display/${widgetToUpdate.name}`, dataToSend);
+      const dataToSend = {
+        x: widgetToUpdate.x,
+        y: widgetToUpdate.y,
+        color: widgetToUpdate.color,
+        backgroundColor: widgetToUpdate.backgroundColor,
+        fontSize: widgetToUpdate.fontSize,
+        type: widgetToUpdate.type,
+      };
+      updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display/${widgetToUpdate.name}`, dataToSend);
     }
   };
 
@@ -248,8 +246,8 @@ const DisplayPage = () => {
   };
 
   const handleBackgroundColorSave = () => {
-      if (!user || !selectedDevice) return;
-      updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, { bgColour: backgroundColor });
+    if (!user || !selectedDevice) return;
+    updateValuesToDatabase(`/${user.uid}/${selectedDevice}/display`, { bgColour: backgroundColor });
   };
 
   const handleScreenClick = () => {
@@ -268,20 +266,20 @@ const DisplayPage = () => {
       {/* Left Sidebar (Widgets) */}
       <div style={{ width: '200px', borderRight: '1px solid #444', padding: '20px', backgroundColor: '#252526' }}>
         <div style={{ marginBottom: '20px' }}>
-            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Devices</h3>
-            <select
-              value={selectedDevice || ''}
-              onChange={(e) => setSelectedDevice(e.target.value)}
-              style={{ width: '100%', padding: '5px', backgroundColor: '#333', color: 'white', border: '1px solid #555' }}
-            >
-              {devices.map(device => (
-                <option key={device.code} value={device.code}>{device.name}</option>
-              ))}
-            </select>
+          <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Devices</h3>
+          <select
+            value={selectedDevice || ''}
+            onChange={(e) => setSelectedDevice(e.target.value)}
+            style={{ width: '100%', padding: '5px', backgroundColor: '#333', color: 'white', border: '1px solid #555' }}
+          >
+            {devices.map(device => (
+              <option key={device.code} value={device.code}>{device.name}</option>
+            ))}
+          </select>
         </div>
         <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Feeds</h2>
         {devFeeds && Object.entries(devFeeds).map(([feedId, feed]) => (
-            feed.type == "Toggle"&& <DraggableWidget key={feedId} id={feedId} name={feedId} onDragStart={(e) => handleDragStart(e, feedId)} />
+          feed.type == "Toggle" && <DraggableWidget key={feedId} id={feedId} name={feedId} onDragStart={(e) => handleDragStart(e, feedId)} />
         ))}
       </div>
 
@@ -292,7 +290,7 @@ const DisplayPage = () => {
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           style={{
-            width: '480px', 
+            width: '480px',
             height: '360px',
             border: '2px dashed #555',
             borderRadius: '10px',
@@ -305,105 +303,105 @@ const DisplayPage = () => {
         >
           {widgets.map((widget) => {
             return (
-                <div
+              <div
                 key={widget.name}
                 id={widget.name}
                 draggable
                 onDragStart={(e) => handleWidgetDragStart(e, widget.name)}
                 onClick={(e) => handleWidgetClick(e, widget.name)}
                 style={{
-                    position: 'absolute',
-                    left: widget.pixelX,
-                    top: widget.pixelY,
-                    transform: 'translate(-50%, -50%)',
-                    padding: '8px 12px',
-                    border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
-                    borderRadius: '5px',
-                    backgroundColor: widget.backgroundColor,
-                    cursor: 'grab',
-                    userSelect: 'none',
-                    color: widget.color,
-                    textAlign: 'center'
+                  position: 'absolute',
+                  left: widget.pixelX,
+                  top: widget.pixelY,
+                  transform: 'translate(-50%, -50%)',
+                  padding: '8px 12px',
+                  border: selectedWidget === widget.name ? '2px solid #007bff' : '1px solid #666',
+                  borderRadius: '5px',
+                  backgroundColor: widget.backgroundColor,
+                  cursor: 'grab',
+                  userSelect: 'none',
+                  color: widget.color,
+                  textAlign: 'center'
                 }}
-                >
+              >
                 <div style={{ marginBottom: '5px' }}>{widget.name}</div>
-                </div>
+              </div>
             )
           })}
         </div>
-		{lastUpdateTime && (
-			<div style={{ position: 'absolute', top: '20px', right: '20px', color: '#aaa', fontSize: '12px' }}>
-				Last updated: {lastUpdateTime.toLocaleTimeString()}
-			</div>
-		)}
+        {lastUpdateTime && (
+          <div style={{ position: 'absolute', top: '20px', right: '20px', color: '#aaa', fontSize: '12px' }}>
+            Last updated: {lastUpdateTime.toLocaleTimeString()}
+          </div>
+        )}
       </div>
 
       {/* Right Sidebar (Properties & Delete) */}
       <div style={{ width: '200px', borderLeft: '1px solid #444', padding: '20px', backgroundColor: '#252526', display: 'flex', flexDirection: 'column' }}>
         {!selectedWidget ? (
           <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Screen Properties</h3>
-              <label>Background Color</label>
-              <input
-                  type="color"
-                  value={backgroundColor}
-                  onChange={handleBackgroundColorChange}
-                  onBlur={handleBackgroundColorSave}
-                  style={{ width: '100%' }}
-              />
+            <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Screen Properties</h3>
+            <label>Background Color</label>
+            <input
+              type="color"
+              value={backgroundColor}
+              onChange={handleBackgroundColorChange}
+              onBlur={handleBackgroundColorSave}
+              style={{ width: '100%' }}
+            />
           </div>
         ) : (
           <div style={{ marginBottom: '20px' }}>
             <h3 style={{ textAlign: 'center', marginBottom: '10px' }}>Widget Properties</h3>
             <div>
-                <label>Color</label>
-                <input 
-                    type="color" 
-                    value={selectedWidgetObject?.color || '#ffffff'} 
-                    onChange={(e) => handlePropertyChange('color', e.target.value)}
-                    onBlur={handlePropertySave}
-                    style={{ width: '100%' }} 
-                />
+              <label>Color</label>
+              <input
+                type="color"
+                value={selectedWidgetObject?.color || '#ffffff'}
+                onChange={(e) => handlePropertyChange('color', e.target.value)}
+                onBlur={handlePropertySave}
+                style={{ width: '100%' }}
+              />
             </div>
             <div style={{ marginTop: '10px' }}>
-                <label>Background Color</label>
-                <input 
-                    type="color" 
-                    value={selectedWidgetObject?.backgroundColor || '#000000'} 
-                    onChange={(e) => handlePropertyChange('backgroundColor', e.target.value)}
-                    onBlur={handlePropertySave}
-                    style={{ width: '100%' }} 
-                />
+              <label>Background Color</label>
+              <input
+                type="color"
+                value={selectedWidgetObject?.backgroundColor || '#000000'}
+                onChange={(e) => handlePropertyChange('backgroundColor', e.target.value)}
+                onBlur={handlePropertySave}
+                style={{ width: '100%' }}
+              />
             </div>
             <div style={{ marginTop: '10px' }}>
-                <label>Font Size: {selectedWidgetObject?.fontSize}</label>
-                <input 
-                    type="range" 
-                    min="1" 
-                    max="7" 
-                    value={selectedWidgetObject?.fontSize || 2} 
-                    onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value, 10))}
-                    onMouseUp={handlePropertySave}
-                    style={{ width: '100%' }}
-                />
+              <label>Font Size: {selectedWidgetObject?.fontSize}</label>
+              <input
+                type="range"
+                min="1"
+                max="7"
+                value={selectedWidgetObject?.fontSize || 2}
+                onChange={(e) => handlePropertyChange('fontSize', parseInt(e.target.value, 10))}
+                onMouseUp={handlePropertySave}
+                style={{ width: '100%' }}
+              />
             </div>
           </div>
         )}
         <div
-            onDragOver={handleDragOver}
-            onDrop={handleDeleteDrop}
-            style={{
-              marginTop: 'auto',
-              padding: '20px',
-              border: '2px dashed #dc3545',
-              borderRadius: '5px',
-              textAlign: 'center',
-              color: '#dc3545',
-              cursor: 'pointer'
-            }}
-          >
-            Drag here to delete
-          </div>
+          onDragOver={handleDragOver}
+          onDrop={handleDeleteDrop}
+          style={{
+            marginTop: 'auto',
+            padding: '20px',
+            border: '2px dashed #dc3545',
+            borderRadius: '5px',
+            textAlign: 'center',
+            color: '#dc3545',
+            cursor: 'pointer'
+          }}
+        >
+          Drag here to delete
+        </div>
       </div>
     </div>
   );
