@@ -89,7 +89,7 @@ const DisplayPage = () => {
             ...props,
             type: widgetType,
             color: typeof props.color === 'string' ? props.color : '#ffffff',
-            backgroundColor: typeof props.backgroundColor === 'string' ? props.backgroundColor : 'transparent',
+            backgroundColor: typeof props.backgroundColor === 'string' ? props.backgroundColor : '#ffffff00',
             fontSize: props.fontSize || 2,
             pixelX: (props.x / 320) * screenRect.width,
             pixelY: (props.y / 240) * screenRect.height,
@@ -175,7 +175,7 @@ const DisplayPage = () => {
         pixelX: x,
         pixelY: y,
         color: '#ffffff',
-        backgroundColor: 'transparent',
+        backgroundColor: '#ffffff00',
         fontSize: 2,
       };
       newWidgets = [...widgets, newWidget];
@@ -186,8 +186,10 @@ const DisplayPage = () => {
     setWidgets(newWidgets);
     setSelectedWidget(id);
 
+    
     const dataToSend = newWidgets.reduce((acc, widget) => {
       acc[`${widget.name}/x`] = widget.x;
+      acc[`${widget.name}/value`] = devFeeds[widget.name].value;
       acc[`${widget.name}/y`] = widget.y;
       acc[`${widget.name}/color`] = widget.color;
       acc[`${widget.name}/backgroundColor`] = widget.backgroundColor;
@@ -228,6 +230,7 @@ const DisplayPage = () => {
   const handlePropertySave = () => {
     if (!selectedWidget || !selectedDevice) return;
     const widgetToUpdate = widgets.find(w => w.name === selectedWidget);
+
     if (widgetToUpdate) {
       const dataToSend = {
         x: widgetToUpdate.x,
