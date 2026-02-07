@@ -122,6 +122,7 @@ const deleteUserAccount = (user, setShowProfileModal) => {
         const multiUpdate = {};
         multiUpdate[`userCred/UIDtoAPI/${uid}`] = null;
         multiUpdate[`userCred/APItoUID/${apiKey}`] = null;
+        multiUpdate[uid] = null;
 
         updateValuesToDatabase(`/`, multiUpdate);
       } else {
