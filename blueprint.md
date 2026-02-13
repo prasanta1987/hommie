@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a music player application that allows users to search for songs, play them, and create playlists.
+This project is a music player application that allows users to search for songs, play them, and create playlists. It also has a feature to create and customize displays with various widgets that can be linked to IoT devices.
 
 ## Implemented Features
 
@@ -21,6 +21,8 @@ This project is a music player application that allows users to search for songs
 * **Removed Scrollable Container:** The scrollable container for the song list has been removed, allowing the page to scroll naturally with the song list.
 * **Compact Song Card:** The song card has been redesigned to be more compact, with a 100x100px image and song information to the right, to maximize the number of songs visible on the screen.
 * **Responsive Song Grid:** The song list is now a responsive grid, displaying multiple columns on larger screens and a single column on smaller screens, optimizing the layout for all devices.
+* **Dynamic Display Feeds:** The display customization page now dynamically loads and renders feeds from the Firebase Realtime Database. Any feed created under `/<uid>/<deviceCode>/devFeeds` will be available as a draggable widget, allowing for a fully customizable display.
+
 
 ## Current Plan
 

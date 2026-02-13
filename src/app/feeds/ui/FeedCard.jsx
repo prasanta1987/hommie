@@ -106,13 +106,26 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     }
 
 
-    const sliderValueChange = (e) => {
-        // console.log(e.target.value);
-        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
-            {
-                value: e.target.value,
-                time: new Date().getTime()
-            });
+    const sliderValueChange = (type, value) => {
+        console.log(type, value);
+
+        if (type == "Toggle") {
+            const multiUpdate = {};
+
+            multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/value`] = value;
+            multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/time`] = new Date().getTime();
+            multiUpdate[`${uid}/${deviceCode}/display/${feedName}/value`] = value;
+
+            updateValuesToDatabase(`/`, multiUpdate);
+
+        } else {
+            updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
+                {
+                    value: value,
+                    time: new Date().getTime()
+                });
+        }
+
     }
 
     return (
@@ -139,8 +152,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             rangeMin={feed.rangeMin}
                             rangeMax={feed.rangeMax}
                             onChange={(value) => setSliderValue(value)}
-                            onMouseUp={(value) => sliderValueChange({ target: { value } })}
-                            onTouchEnd={(value) => sliderValueChange({ target: { value } })}
+                            onMouseUp={(value) => sliderValueChange("Slider", value)}
+                            onTouchEnd={(value) => sliderValueChange("Slider", value)}
                         />
 
                     ) : type === 'Toggle' ? (
@@ -148,7 +161,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             value={sliderValue}
                             onChange={(checked) => {
                                 setSliderValue(checked)
-                                sliderValueChange({ target: { value: checked ? 1 : 0 } })
+                                sliderValueChange("Toggle", checked ? 1 : 0)
                             }}
                         />
                     ) : type === 'Colour' ? (
@@ -159,7 +172,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             bPIN={bPIN}
                             onBlur={(value) => {
                                 setSliderValue(value)
-                                sliderValueChange({ target: { value } })
+                                sliderValueChange("Colour", value)
                             }}
                         />
                     ) : (
