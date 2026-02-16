@@ -37,6 +37,9 @@ export default function FeedModal({
     const [pinDescription, setPinDescription] = useState('');
     const currentSafePins = mcuTypes[mcuType || "ESP8266"].safeGPIOs;
 
+
+    
+
     if (!isOpen) return null;
 
     return (
