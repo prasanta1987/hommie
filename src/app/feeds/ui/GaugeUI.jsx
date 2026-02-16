@@ -1,7 +1,7 @@
 import React from 'react';
 import GaugeComponent from 'react-gauge-component';
 
-const GaugeUI = ({value, minValue, maxValue}) => {
+const GaugeUI = ({ value, minValue, maxValue }) => {
 
     return (
         <GaugeComponent
@@ -26,8 +26,8 @@ const GaugeUI = ({value, minValue, maxValue}) => {
                 animationDelay: 0,
                 animationDuration: 1141,
                 length: 0.8558179773268897,
-                width: 24,
-                // color: "#48cae4",
+                // width: 10,
+                // color: "#c8d4d6",
                 // baseColor: "#ffffff",
                 // strokeWidth: 1,
                 // strokeColor: "rgba(255,255,255,0.5)",
@@ -37,11 +37,11 @@ const GaugeUI = ({value, minValue, maxValue}) => {
                 valueLabel: {
                     formatTextValue: e => "".concat(e, ""),
                     matchColorWithArc: true,
-                    style: { fontSize: "72px", fontWeight: "bold", stroke: '#2f6ae9', strokeWidth: '0.1px' },
+                    style: { fontSize: "60px", fontWeight: "bold", stroke: '#2f6ae9', strokeWidth: '0.1px' },
                     hide: false,
                     animateValue: false,
                     offsetX: 0,
-                    offsetY: 15
+                    offsetY: 25
                 },
                 tickLabels: {
                     type: "outer",
