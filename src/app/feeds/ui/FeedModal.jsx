@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import FeedTypes from './FeedTypes';
-import { mcuTypes } from '../../miscFunctions/espSafeGPIOs';
+import { mcuTypes } from '@/miscFunctions/espSafeGPIOs';
 
 export default function FeedModal({
     purpose,
@@ -34,13 +34,11 @@ export default function FeedModal({
 
 }) {
 
+    if (!isOpen && !purpose) return null;
+    
     const [pinDescription, setPinDescription] = useState('');
     const currentSafePins = mcuTypes[mcuType || "ESP8266"].safeGPIOs;
 
-
-    
-
-    if (!isOpen) return null;
 
     return (
         <Modal show={isOpen} onHide={onClose} centered data-bs-theme="dark" size='lg'>

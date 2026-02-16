@@ -20,11 +20,11 @@ const regenerateApiKey = (apiKey, setIsApiKeyBTN, setApiKey, user) => {
 
   const multiUpdate = {};
 
-  multiUpdate[`userCred/UIDtoAPI/${user.uid}`] = newKey;
-  multiUpdate[`userCred/APItoUID/${newKey}`] = user.uid;
+  multiUpdate[`userCred/UIDtoAPI/${user.uid}/fbAPIKey`] = newKey;
+  multiUpdate[`userCred/APItoUID/${newKey}/fbUID`] = user.uid;
 
   if (oldKey) {
-    multiUpdate[`userCred/APItoUID/${oldKey}`] = null;
+    multiUpdate[`userCred/APItoUID/${oldKey}/fbUID`] = null;
   }
 
   // CRITICAL: Call the update on the root of the database
