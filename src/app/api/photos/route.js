@@ -9,38 +9,36 @@ const imagekit = new ImageKit({
 
 export async function GET(request) {
   try {
-    // 1. Get pagination params from the URL (e.g., /api/images?limit=10&skip=0)
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const limit = parseInt(searchParams.get('limit') || '12');
     const skip = parseInt(searchParams.get('skip') || '0');
+    const tag = searchParams.get('tags'); // Fetch tag from query params
 
-    // 2. Fetch the specific batch using the ImageKit Node.js SDK
-    const files = await imagekit.listFiles({
-      limit: limit,
-      skip: skip,
+    const options = {
+      limit,
+      skip,
       fileType: 'image',
-      sort: 'ASC_CREATED' // Keeps order consistent for pagination
-    });
+      sort: 'ASC_CREATED'
+    };
 
-    // 3. Generate optimized URLs
-    const transformedData = files.map(file => {
-      const thumbnailUrl = imagekit.url({
+    // If tag is provided and not "ALL", add it to ImageKit search options
+    if (tag && tag !== "ALL") {
+      options.tags = tag; 
+    }
+
+    const files = await imagekit.listFiles(options);
+
+    const transformedData = files.map(file => ({
+      id: file.fileId,
+      name: file.name,
+      tags: file.tags || [],
+      fullUrl: file.url,
+      // Optimized thumbnail for the grid
+      thumbnailUrl: imagekit.url({
         src: file.url,
-        transformation: [{
-          height: "300",
-          width: "300",
-          focus: "auto"
-        }]
-      });
-
-      return {
-        id: file.fileId,
-        tags: file.tags || [],
-        name: file.name,
-        fullUrl: file.url,
-        thumbnailUrl: thumbnailUrl
-      };
-    });
+        transformation: [{ height: 240, width: 320, focus: "auto" }]
+      })
+    }));
 
     return NextResponse.json(transformedData);
   } catch (error) {

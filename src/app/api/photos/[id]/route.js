@@ -7,19 +7,27 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
 });
 
-// DELETE Image
-export async function DELETE(req, { params }) {
+export async function PATCH(request, { params }) {
+  try {
+    const { id } = params;
+    const { tags } = await request.json(); // This is the array from frontend
+
+    // ImageKit replaces old tags with this new array automatically
+    const result = await imagekit.updateFileDetails(id, {
+      tags: tags 
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request, { params }) {
   try {
     await imagekit.deleteFile(params.id);
     return NextResponse.json({ success: true });
-  } catch (e) { return NextResponse.json({ error: e.message }, { status: 500 }); }
-}
-
-// UPDATE Tags
-export async function PATCH(req, { params }) {
-  try {
-    const { tags } = await req.json();
-    await imagekit.updateFileDetails(params.id, { tags });
-    return NextResponse.json({ success: true });
-  } catch (e) { return NextResponse.json({ error: e.message }, { status: 500 }); }
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }
