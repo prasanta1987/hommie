@@ -53,6 +53,14 @@ export default function InfiniteGallery() {
 
   useEffect(() => { if (inView) fetchImages(); }, [inView, selectedTag]);
 
+  useEffect(() => {
+    // Call the new separate route
+    fetch('/api/tags')
+      .then(res => res.json())
+      .then(data => setAvailableTags(data))
+      .catch(err => console.error("Error fetching tags:", err));
+  }, []);
+
   // Upload Logic
   const handleUpload = async () => {
     if (!uploadFile) return alert("Please select a file first.");
@@ -134,23 +142,59 @@ export default function InfiniteGallery() {
       </button>
 
       {/* 1. TOP FILTER BAR */}
-      <div className="d-flex flex-wrap gap-2 justify-content-center mb-4 sticky-top bg-white py-3 border-bottom z-3">
-        <button
-          onClick={() => setSelectedTag("ALL")}
-          className={`btn btn-sm rounded-pill px-4 ${selectedTag === "ALL" ? 'btn-primary' : 'btn-outline-primary'}`}
-        >
-          ALL
-        </button>
-        {availableTags.map(tag => (
-          <button
-            key={tag}
-            onClick={() => setSelectedTag(tag)}
-            className={`btn btn-sm rounded-pill px-3 ${selectedTag === tag ? 'btn-primary' : 'btn-outline-secondary'}`}
+      <div
+        className="sticky-top border-bottom z-3"
+        style={{
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)' // For Safari support
+        }}
+      >
+        <div className="container-fluid py-2">
+          <div
+            className="d-flex overflow-auto gap-2 no-scrollbar pb-1 justify-content-start justify-content-md-center"
+            style={{
+              scrollbarWidth: 'none', // Firefox
+              msOverflowStyle: 'none' // IE/Edge
+            }}
           >
-            {tag}
-          </button>
-        ))}
+            {/* ALL Button */}
+            <button
+              onClick={() => setSelectedTag("ALL")}
+              className={`btn btn-sm rounded-pill px-4 flex-shrink-0 transition-all ${selectedTag === "ALL" ? 'btn-primary shadow-sm' : 'btn-light border text-muted'
+                }`}
+            >
+              ALL
+            </button>
+
+            {/* Dynamic Tags */}
+            {availableTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(tag)}
+                className={`btn btn-sm rounded-pill px-3 flex-shrink-0 transition-all ${selectedTag === tag ? 'btn-primary shadow-sm' : 'btn-light border text-muted hover-bg-light'
+                  }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Custom CSS (can be in globals.css or a <style> tag) */}
+      <style jsx>{`
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+  .transition-all {
+    transition: all 0.2s ease-in-out;
+  }
+  .hover-bg-light:hover {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+  }
+`}</style>
 
       {/* 2. IMAGE GRID */}
       <div className="d-flex flex-wrap justify-content-evenly">
