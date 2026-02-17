@@ -1,5 +1,5 @@
 'use client';
-import InfiniteGallery from '@/photo/components/InfiniteGallery';
+import InfiniteGallery from '@/photos/components/InfiniteGallery';
 
 export default function TagPage() {
 

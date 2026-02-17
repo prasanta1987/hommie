@@ -92,11 +92,11 @@ export default function InfiniteGallery() {
         <div className="container-fluid pt-2 position-relative">
             {/* Tag Filter Bar with Next.js Links */}
             <div className="d-flex flex-wrap gap-2 justify-content-center mb-4 sticky-top bg-white py-3 border-bottom z-3">
-                <Link href="/photo" className={`btn btn-sm rounded-pill px-4 ${urlTag === "ALL" ? 'btn-primary' : 'btn-outline-primary'}`}>
+                <Link href="/photos" className={`btn btn-sm rounded-pill px-4 ${urlTag === "ALL" ? 'btn-primary' : 'btn-outline-primary'}`}>
                     ALL
                 </Link>
                 {availableTags.map(t => (
-                    <Link key={t} href={`/photo/${encodeURIComponent(t)}`} className={`btn btn-sm rounded-pill px-3 ${urlTag === t ? 'btn-primary' : 'btn-outline-secondary'}`}>
+                    <Link key={t} href={`/photos/${encodeURIComponent(t)}`} className={`btn btn-sm rounded-pill px-3 ${urlTag === t ? 'btn-primary' : 'btn-outline-secondary'}`}>
                         {t}
                     </Link>
                 ))}
@@ -108,8 +108,8 @@ export default function InfiniteGallery() {
                     <div key={`${img.id}-${i}`} className="col-6 col-md-4 col-lg-3 col-xl-2">
                         <div className="card h-100 border-0 shadow-sm overflow-hidden position-relative group cursor-pointer" onClick={() => setViewerIndex(i)}>
                             <img src={img.thumbnailUrl} className="card-img-top object-cover aspect-square" alt="" />
-                            <div 
-                                role="button" 
+                            <div
+                                role="button"
                                 className="position-absolute top-0 end-0 p-1"
                                 style={{ background: 'radial-gradient(circle at top right, rgba(37,59,46,0.9) 0%, transparent 70%)', zIndex: 20 }}
                                 onClick={(e) => { e.stopPropagation(); setSelectedImg(img); setNewTags(img.tags.join(', ')); }}
@@ -135,7 +135,7 @@ export default function InfiniteGallery() {
             </button>
 
             {/* Sentinel */}
-            <div ref={ref} className="h-40 flex items-center justify-center mt-4">
+            <div ref={ref} className="w-100 h-40 flex items-center justify-center mt-4">
                 {loading && <div className="spinner-border text-primary" />}
             </div>
 
