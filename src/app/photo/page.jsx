@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { FiPlus, FiSettings } from "react-icons/fi";
 
 export default function InfiniteGallery() {
   const [images, setImages] = useState([]);
@@ -74,7 +75,7 @@ export default function InfiniteGallery() {
         // Update tags list if new tags were added
         const updatedTags = [...new Set([...availableTags, ...newImg.tags])];
         setAvailableTags(updatedTags);
-        
+
         // Reset form
         setUploadFile(null);
         setUploadTags("");
@@ -115,15 +116,22 @@ export default function InfiniteGallery() {
   return (
     <div className="container-fluid pt-4">
       {/* UPLOAD BUTTON */}
-      <div className="text-center mb-3">
-        <button 
-          className="btn btn-success rounded-pill px-4 shadow-sm"
-          data-bs-toggle="modal" 
-          data-bs-target="#uploadModal"
-        >
-          + Add New Photo
-        </button>
-      </div>
+      <button
+        className="btn btn-success rounded shadow-sm"
+        style={{
+          position: 'fixed',
+          bottom: '30px',
+          right: '30px',
+          width: '60px',
+          height: '60px',
+          zIndex: 1050, // Higher than sticky filter bar (z-3)
+          fontSize: '24px'
+        }}
+        data-bs-toggle="modal"
+        data-bs-target="#uploadModal"
+      >
+        <FiPlus />
+      </button>
 
       {/* 1. TOP FILTER BAR */}
       <div className="d-flex flex-wrap gap-2 justify-content-center mb-4 sticky-top bg-white py-3 border-bottom z-3">
@@ -145,19 +153,22 @@ export default function InfiniteGallery() {
       </div>
 
       {/* 2. IMAGE GRID */}
-      <div className="d-flex flex-wrap gap-4 justify-content-evenly">
+      <div className="d-flex flex-wrap justify-content-evenly">
         {images.map((img, i) => (
-          <div key={`${img.id}-${i}`} className="relative group w-full sm:w-64 rounded-lg overflow-hidden bg-gray-100 shadow-sm border cursor-pointer" onClick={() => setViewerIndex(i)}>
+          <div key={`${img.id}-${i}`} className="border p-1 position-relative d-flex flex-column cursor-pointer" onClick={() => setViewerIndex(i)}>
             <img src={img.thumbnailUrl} alt={img.name} className="w-full aspect-square object-cover" />
-            <button
-              className="absolute top-2 right-2 z-10 bg-white/90 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity border shadow-sm"
+            <div
+              role="button"
+              className="position-absolute bottom-0 end-0 p-2 text-dark"
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedImg(img);
                 setNewTags(img.tags.join(', '));
               }}
               data-bs-toggle="modal" data-bs-target="#settingsModal"
-            >⚙️</button>
+            >
+              <FiSettings />
+            </div>
             <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/60 z-10">
               <div className="flex flex-wrap gap-1">
                 {img.tags?.map((tag, idx) => (
@@ -178,19 +189,19 @@ export default function InfiniteGallery() {
               <button type="button" className="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div className="modal-body">
-              <input 
-                type="file" className="form-control mb-3" 
+              <input
+                type="file" className="form-control mb-3"
                 accept="image/*"
-                onChange={(e) => setUploadFile(e.target.files[0])} 
+                onChange={(e) => setUploadFile(e.target.files[0])}
               />
-              <input 
-                type="text" className="form-control mb-3" 
+              <input
+                type="text" className="form-control mb-3"
                 placeholder="Tags (comma separated)"
                 value={uploadTags}
                 onChange={(e) => setUploadTags(e.target.value)}
               />
-              <button 
-                className="btn btn-primary w-100" 
+              <button
+                className="btn btn-primary w-100"
                 onClick={handleUpload}
                 disabled={isUploading}
                 data-bs-dismiss={!isUploading ? "modal" : ""}
