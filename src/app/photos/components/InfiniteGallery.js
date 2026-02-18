@@ -29,7 +29,7 @@ export default function InfiniteGallery() {
     // Load Bootstrap and Global Tags
     useEffect(() => {
         if (typeof document !== 'undefined') require('bootstrap/dist/js/bootstrap.bundle.min.js');
-        fetch('/api/tags').then(res => res.json()).then(setAvailableTags);
+        fetch('/api/photos/tags').then(res => res.json()).then(setAvailableTags);
     }, []);
 
     // RESET Gallery whenever the URL Tag changes
@@ -52,6 +52,7 @@ export default function InfiniteGallery() {
         } catch (e) { console.error(e); } finally { setLoading(false); }
     };
 
+    
     useEffect(() => {
         if (inView) fetchImages();
     }, [inView, urlTag, skip]);
