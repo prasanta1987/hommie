@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { db } from '../../../firebaseConfig/config';
+import { db } from '@/firebaseConfig/config';
 import { ref, get, set, update } from 'firebase/database';
 
 

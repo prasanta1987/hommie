@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import admin from '../../../firebaseConfig/adminConfig';
+import admin from '@/firebaseConfig/adminConfig';
 
 export async function POST(request) {
     try {
@@ -19,14 +19,14 @@ export async function POST(request) {
                     const ref = db.ref(`nextDevice/${deviceCode}`);
                     const snapshot = await ref.once('value');
                     const data = snapshot.val();
-                    if(data == null){
-                        return NextResponse.json({"error":"Device Not Found"}, { status: 404 });
+                    if (data == null) {
+                        return NextResponse.json({ "error": "Device Not Found" }, { status: 404 });
                         // return NextResponse.json({"error":"Wrong Device Code Supplied"}, { status: 200 });
                     } else {
                         return NextResponse.json(data, { status: 200 });
                     }
                 } else {
-                    return NextResponse.json({"error":"Device Code Missing"}, { status: 200 });
+                    return NextResponse.json({ "error": "Device Code Missing" }, { status: 200 });
                 }
 
 

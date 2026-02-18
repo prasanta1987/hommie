@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import FeedTypes from './FeedTypes';
-import { mcuTypes } from '@/miscFunctions/espSafeGPIOs';
+import { mcuTypes } from '@/app/miscFunctions/espSafeGPIOs';
 
 export default function FeedModal({
     purpose,

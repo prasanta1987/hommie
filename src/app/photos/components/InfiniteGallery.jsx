@@ -52,7 +52,7 @@ export default function InfiniteGallery() {
         } catch (e) { console.error(e); } finally { setLoading(false); }
     };
 
-    
+
     useEffect(() => {
         if (inView) fetchImages();
     }, [inView, urlTag, skip]);

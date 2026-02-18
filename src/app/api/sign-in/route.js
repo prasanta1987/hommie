@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '../../../firebaseConfig/config';
+import { auth } from '@/firebaseConfig/config';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export async function POST(request) {

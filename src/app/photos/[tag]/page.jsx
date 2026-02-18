@@ -1,6 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
-import InfiniteGallery from '@/photos/components/InfiniteGallery';
+import InfiniteGallery from '@/app/photos/components/InfiniteGallery';
 
 export default function TagPage() {
     const params = useParams();
