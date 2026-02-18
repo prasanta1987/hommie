@@ -20,7 +20,11 @@ export async function POST(request) {
         const db = admin.database();
 
         // Verify API key and get user UID
-        const userUID = (await db.ref(`userCred/APItoUID/${apiKey}`).once('value')).val();
+        const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}/fbUID`);
+        const apiKeySnapshot = await apiKeyRef.once('value');
+        const userUID = apiKeySnapshot.val();
+
+        // return NextResponse.json({ uid: userUID }, { status: 401 });
 
         if (!userUID) {
             return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
