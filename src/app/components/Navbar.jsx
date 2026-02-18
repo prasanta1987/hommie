@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, use } from 'react';
-import { auth } from '../../firebaseConfig/config';
+import { auth } from '@/firebaseConfig/config';
 import {
   onAuthStateChanged,
   signOut,
@@ -11,7 +11,7 @@ import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut, FiLogIn } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
-import { db } from '../../firebaseConfig/config'
+import { db } from '@/firebaseConfig/config'
 import { ref, get } from 'firebase/database'
 import { regenerateApiKey, deleteUserAccount } from '../miscFunctions/actions';
 import SignIn from './sign-in';

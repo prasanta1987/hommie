@@ -6,6 +6,11 @@ import { useInView } from 'react-intersection-observer';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import { FiPlus, FiSettings } from "react-icons/fi";
+import { useObjectVal } from 'react-firebase-hooks/database';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { db } from '@/firebaseConfig/config'
+import { ref as dbRef, get } from 'firebase/database'
+import { auth } from '@/firebaseConfig/config';
 
 export default function InfiniteGallery() {
     const params = useParams();
@@ -23,8 +28,24 @@ export default function InfiniteGallery() {
     const [uploadFile, setUploadFile] = useState(null);
     const [uploadTags, setUploadTags] = useState("");
     const [isUploading, setIsUploading] = useState(false);
+    const [apiKey, setApiKey] = useState(null);
+
 
     const { ref, inView } = useInView();
+
+    const [user, userLoading, error] = useAuthState(auth);
+
+    useEffect(() => {
+        if (user) {
+            get(dbRef(db, `userCred/UIDtoAPI/${user.uid}/fbAPIKey`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    setApiKey(snapshot.val());
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+        }
+    }, [user]);
 
     // Load Bootstrap and Global Tags
     useEffect(() => {
@@ -40,11 +61,12 @@ export default function InfiniteGallery() {
     }, [urlTag]);
 
     const fetchImages = async () => {
+        console.log(apiKey)
         if (loading || !hasMore) return;
         setLoading(true);
         try {
             const tagParam = urlTag === "ALL" ? "" : `&tags=${encodeURIComponent(urlTag)}`;
-            const res = await fetch(`/api/photos?limit=12&skip=${skip}${tagParam}`);
+            const res = await fetch(`/api/photos?apiKey=${apiKey}&limit=12&skip=${skip}${tagParam}`);
             const data = await res.json();
             if (data.length < 12) setHasMore(false);
             setImages(prev => [...prev, ...data]);
@@ -54,11 +76,15 @@ export default function InfiniteGallery() {
 
 
     useEffect(() => {
-        if (inView) fetchImages();
-    }, [inView, urlTag, skip]);
+        // Only fetch if the element is in view and we have the necessary API key data
+        if (inView && apiKey) {
+            fetchImages();
+        }
+    }, [inView, apiKey]);
 
     // Handlers
     const handleUpload = async () => {
+
         if (!uploadFile) return;
         setIsUploading(true);
         const formData = new FormData();

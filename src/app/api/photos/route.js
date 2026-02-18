@@ -1,18 +1,36 @@
 import { NextResponse } from 'next/server';
+import admin from '@/firebaseConfig/adminConfig';
 import ImageKit from 'imagekit';
 
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-});
 
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
+    const apiKey = searchParams.get('apiKey');
     const limit = parseInt(searchParams.get('limit') || '12');
     const skip = parseInt(searchParams.get('skip') || '0');
     const tag = searchParams.get('tags'); // Fetch tag from query params
+
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing API Key' }, { status: 400 });
+    }
+
+    const db = admin.database();
+
+    // Verify API key and get user UID
+    const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}/`);
+    const apiKeySnapshot = (await apiKeyRef.once('value')).val();
+
+    if (!apiKeySnapshot) {
+      return NextResponse.json({ error: "Invalid API Key" }, { status: 400 });
+    }
+
+    const imagekit = new ImageKit({
+      publicKey: apiKeySnapshot.imgPubKey,
+      privateKey: apiKeySnapshot.imgPrivKey,
+      urlEndpoint: apiKeySnapshot.imgEndPoint
+    });
 
     const options = {
       limit,
