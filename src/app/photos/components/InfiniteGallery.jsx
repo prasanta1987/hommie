@@ -8,6 +8,8 @@ import "yet-another-react-lightbox/styles.css";
 import { FiPlus, FiSettings } from "react-icons/fi";
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 import { Modal, Form, Button } from 'react-bootstrap';
+import SettingsModal from '@/app/photos/ui/UploadModal';
+import UploadModal from '@/app/photos/ui/SettingsModal';
 
 export default function InfiniteGallery() {
     const params = useParams();
@@ -71,7 +73,7 @@ export default function InfiniteGallery() {
             fetch(`/api/photos/tags?apiKey=${apiKey}`).then(res => res.json()).then(setAvailableTags);
             fetchImages();
         }
-    }, [inView, apiKey, images.length]);
+    }, [inView, apiKey, images.length],);
 
     // Handlers
     const handleUpload = async () => {
@@ -88,7 +90,7 @@ export default function InfiniteGallery() {
             setUploadTags(""); setUploadFile(null);
         }
         setIsUploading(false);
-        setShowModal(false);
+        setShowUploadModal(false)
     };
 
     const handleUpdateTags = async () => {
@@ -142,7 +144,7 @@ export default function InfiniteGallery() {
                             <div
                                 role="button"
                                 className="position-absolute top-0 end-0 p-1"
-                                style={{ background: 'radial-gradient(circle at top right, rgba(37,59,46,0.9) 0%, transparent 70%)'}}
+                                style={{ background: 'radial-gradient(circle at top right, rgba(37,59,46,0.9) 0%, transparent 70%)' }}
                                 onClick={(e) => { e.stopPropagation(); setSelectedImg(img); setNewTags(img.tags.join(', ')); }}
                             >
                                 <FiSettings size={20} color="red" onClick={() => setShowSettingsModal(true)} />
@@ -173,70 +175,26 @@ export default function InfiniteGallery() {
             {/* Modals & Lightbox */}
             <Lightbox open={viewerIndex >= 0} index={viewerIndex} close={() => setViewerIndex(-1)} slides={images.map(img => ({ src: img.fullUrl }))} />
 
-            <Modal show={showUploadModal} onHide={handleClose} animation={true}>
-                <Modal.Header closeButton>
-                    <Modal.Title as="h5">Upload Photo</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Group className="mb-3">
-                        <Form.Control
-                            type="file"
-                            onChange={(e) => setUploadFile(e.target.files)}
-                        />
-                    </Form.Group>
+            <SettingsModal
+                showUploadModal={showUploadModal}
+                handleClose={handleClose}
+                setUploadFile={setUploadFile}
+                setUploadTags={setUploadTags}
+                handleUpload={handleUpload}
+                isUploading={isUploading}
+            />
 
-                    <Form.Group className="mb-3">
-                        <Form.Control
-                            type="text"
-                            placeholder="Tags (comma separated)"
-                            value={uploadTags}
-                            onChange={(e) => setUploadTags(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Button
-                        variant="primary"
-                        className="w-100"
-                        onClick={handleUpload}
-                        disabled={isUploading}
-                    >
-                        {isUploading ? 'Uploading...' : 'Start Upload'}
-                    </Button>
-                </Modal.Body>
-            </Modal>
-
-            <Modal show={showSettingsModal} onHide={handleClose} animation={true}>
-                <Modal.Header closeButton>
-                    <Modal.Title as="h5">Settings</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form.Control
-                        type="text"
-                        className="mb-3"
-                        value={newTags}
-                        onChange={(e) => setNewTags(e.target.value)}
-                    />
-
-                    <Button
-                        variant="primary"
-                        className="w-100 mb-2"
-                        onClick={() => handleUpdateTags()}
-                        disabled={isUpdating}
-                    >
-                        {isUpdating ? 'Updating..' : 'Update Tags'}
-                    </Button>
-
-                    <Button
-                        variant="danger"
-                        className="w-100"
-                        disabled={isDeleting || isUpdating}
-                        onClick={() => handleDeleteImage()}
-                    >
-                        {isDeleting ? 'Deleting..' : 'Delete Image'}
-                    </Button>
-                </Modal.Body>
-            </Modal>
-
+            <UploadModal
+                showSettingsModal={showSettingsModal}
+                handleClose={handleClose}
+                setNewTags={setNewTags}
+                handleUpdateTags={handleUpdateTags}
+                handleUpload={handleUpload}
+                isUpdating={isUpdating}
+                isDeleting={isDeleting}
+                handleDeleteImage={handleDeleteImage}
+                newTags={newTags}
+            />
         </div>
     );
 }
