@@ -8,8 +8,8 @@ import "yet-another-react-lightbox/styles.css";
 import { FiPlus, FiSettings } from "react-icons/fi";
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 import { Modal, Form, Button } from 'react-bootstrap';
-import SettingsModal from '@/app/photos/ui/UploadModal';
-import UploadModal from '@/app/photos/ui/SettingsModal';
+import UploadModal from '@/app/photos/ui/UploadModal';
+import SettingsModal from '@/app/photos/ui/SettingsModal';
 
 export default function InfiniteGallery() {
     const params = useParams();
@@ -175,7 +175,7 @@ export default function InfiniteGallery() {
             {/* Modals & Lightbox */}
             <Lightbox open={viewerIndex >= 0} index={viewerIndex} close={() => setViewerIndex(-1)} slides={images.map(img => ({ src: img.fullUrl }))} />
 
-            <SettingsModal
+            <UploadModal
                 showUploadModal={showUploadModal}
                 handleClose={handleClose}
                 setUploadFile={setUploadFile}
@@ -184,7 +184,7 @@ export default function InfiniteGallery() {
                 isUploading={isUploading}
             />
 
-            <UploadModal
+            <SettingsModal
                 showSettingsModal={showSettingsModal}
                 handleClose={handleClose}
                 setNewTags={setNewTags}
