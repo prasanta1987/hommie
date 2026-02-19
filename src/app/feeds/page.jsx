@@ -4,7 +4,7 @@ import { Spinner } from 'react-bootstrap';
 import LandingPage from './components/LandingPage';
 import NoBoard from './ui/NoBoard';
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
-
+import SignIn from '@/app/components/sign-in';
 
 
 export default function Home() {
