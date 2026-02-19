@@ -114,13 +114,13 @@ export default function MusicPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className='text-center bg-dark flex-grow-1 d-flex justify-content-center align-items-center'>
-        <Spinner animation="grow" variant="info" size="lg" />
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className='text-center bg-dark flex-grow-1 d-flex justify-content-center align-items-center'>
+  //       <Spinner animation="grow" variant="info" size="lg" />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={styles.musicContainer}>

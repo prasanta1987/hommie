@@ -11,9 +11,6 @@ export default function SettingsModal({
     newTags
 }) {
     
-
-
-
     return (
         <Modal show={showSettingsModal} onHide={handleClose} animation={true}>
             <Modal.Header closeButton>
