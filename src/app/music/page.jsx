@@ -5,12 +5,9 @@ import Image from 'next/image';
 import { useMusicPlayer } from '../context/MusicPlayerContext.jsx';
 import styles from './Music.module.css';
 import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward, FiHeart, FiShuffle, FiTrash2 } from 'react-icons/fi';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { getAuth } from 'firebase/auth';
-import { getDatabase, ref } from 'firebase/database';
-import { useObjectVal } from 'react-firebase-hooks/database';
 import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions.js';
 import { Spinner } from 'react-bootstrap';
+import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 
 const Search = memo(function Search({ query, setQuery, searchSong, isLoading }) {
   return (
@@ -52,10 +49,11 @@ export default function MusicPage() {
     handleSeek,
     toggleShuffle,
   } = useMusicPlayer();
-  const auth = getAuth();
-  const database = getDatabase();
-  const [user] = useAuthState(auth);
-  const [playlist, loading] = useObjectVal(user ? ref(database, 'playlist/' + user.uid) : null);
+
+  const { user, loading: authLoading } = useAuth();
+  const { data: playlist, loading } = useRTDB(
+    user ? `playlist/${user.uid}` : null
+  );
 
   useEffect(() => {
     if (playlist && !query) {
@@ -78,11 +76,11 @@ export default function MusicPage() {
       }
       metaDescription.content = currentSong.artist;
     } else {
-        document.title = "Music Player";
-        let metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-            metaDescription.content = "Search for and listen to your favorite music.";
-        }
+      document.title = "Music Player";
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.content = "Search for and listen to your favorite music.";
+      }
     }
   }, [currentSong]);
 
@@ -96,11 +94,11 @@ export default function MusicPage() {
       const path = 'playlist/' + user.uid;
       const values = {
         [song.id]: {
-            name: song.name,
-            image: song.image,
-            artist: song.artist,
-            album: song.album,
-            url: song.url,
+          name: song.name,
+          image: song.image,
+          artist: song.artist,
+          album: song.album,
+          url: song.url,
         }
       };
       updateValuesToDatabase(path, values);
@@ -108,12 +106,12 @@ export default function MusicPage() {
       console.log("You must be logged in to like a song.");
     }
   };
-  
+
   const handleDelete = (songId) => {
-      if (user) {
-          const path = 'playlist/' + user.uid + '/' + songId;
-          setValueToDatabase(path, null);
-      }
+    if (user) {
+      const path = 'playlist/' + user.uid + '/' + songId;
+      setValueToDatabase(path, null);
+    }
   };
 
   if (loading) {
@@ -126,11 +124,11 @@ export default function MusicPage() {
 
   return (
     <div className={styles.musicContainer}>
-      <Search 
-        query={query} 
-        setQuery={setQuery} 
-        searchSong={searchSong} 
-        isLoading={isLoading} 
+      <Search
+        query={query}
+        setQuery={setQuery}
+        searchSong={searchSong}
+        isLoading={isLoading}
       />
 
       {error && <p className={styles.error}>{error}</p>}
@@ -147,13 +145,13 @@ export default function MusicPage() {
             {song.url && (
               <div className={styles.songActions}>
                 {isLiked(song.id) ? (
-                    <button onClick={() => handleDelete(song.id)} className={styles.likeButton}>
-                        <FiTrash2 size={28} color="#ff6347" />
-                    </button>
+                  <button onClick={() => handleDelete(song.id)} className={styles.likeButton}>
+                    <FiTrash2 size={28} color="#ff6347" />
+                  </button>
                 ) : (
-                    <button onClick={() => handleLike(song)} className={styles.likeButton}>
-                        <FiHeart size={28} />
-                    </button>
+                  <button onClick={() => handleLike(song)} className={styles.likeButton}>
+                    <FiHeart size={28} />
+                  </button>
                 )}
                 <button onClick={() => handlePlayPause(song)} className={styles.playPauseButton}>
                   {isPlaying && playingSongId === song.id ? <FiPauseCircle size={28} /> : <FiPlayCircle size={28} />}
@@ -173,38 +171,38 @@ export default function MusicPage() {
 
       {currentSong && (
         <div className={styles.bottomPlayer}>
-            <div className={styles.progressBarContainerMobile} onClick={handleSeek}>
-                <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
-                    <div className={styles.progressBarThumb}></div>
-                </div>
+          <div className={styles.progressBarContainerMobile} onClick={handleSeek}>
+            <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
+              <div className={styles.progressBarThumb}></div>
             </div>
-            <div className={styles.playerContent}>
-                <Image src={currentSong.image} alt={currentSong.name} className={styles.playerImage} width={64} height={64} />
-                <div className={styles.playerSongInfo}>
-                    <p className={styles.playerSongName}>{currentSong.name}</p>
-                    <p className={styles.playerArtistName}>{currentSong.artist}</p>
-                    <p className={styles.playerAlbumName}>{currentSong.album}</p>
-                </div>
-                <div className={styles.playerControls}>
-                    <button onClick={handlePreviousSong} className={styles.controlButton}>
-                        <FiSkipBack size={28} />
-                    </button>
-                    <button onClick={() => handlePlayPause(currentSong)} className={styles.controlButton}>
-                        {isPlaying ? <FiPauseCircle size={32} /> : <FiPlayCircle size={32} />}
-                    </button>
-                    <button onClick={handleNextSong} className={styles.controlButton}>
-                        <FiSkipForward size={28} />
-                    </button>
-                    <button onClick={toggleShuffle} className={styles.controlButton}>
-                        <FiShuffle size={28} color={shuffle ? '#1DB954' : 'currentColor'} />
-                    </button>
-                </div>
-                <div className={styles.progressBarContainerDesktop} onClick={handleSeek}>
-                    <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
-                       <div className={styles.progressBarThumb}></div>
-                    </div>
-                </div>
+          </div>
+          <div className={styles.playerContent}>
+            <Image src={currentSong.image} alt={currentSong.name} className={styles.playerImage} width={64} height={64} />
+            <div className={styles.playerSongInfo}>
+              <p className={styles.playerSongName}>{currentSong.name}</p>
+              <p className={styles.playerArtistName}>{currentSong.artist}</p>
+              <p className={styles.playerAlbumName}>{currentSong.album}</p>
             </div>
+            <div className={styles.playerControls}>
+              <button onClick={handlePreviousSong} className={styles.controlButton}>
+                <FiSkipBack size={28} />
+              </button>
+              <button onClick={() => handlePlayPause(currentSong)} className={styles.controlButton}>
+                {isPlaying ? <FiPauseCircle size={32} /> : <FiPlayCircle size={32} />}
+              </button>
+              <button onClick={handleNextSong} className={styles.controlButton}>
+                <FiSkipForward size={28} />
+              </button>
+              <button onClick={toggleShuffle} className={styles.controlButton}>
+                <FiShuffle size={28} color={shuffle ? '#1DB954' : 'currentColor'} />
+              </button>
+            </div>
+            <div className={styles.progressBarContainerDesktop} onClick={handleSeek}>
+              <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
+                <div className={styles.progressBarThumb}></div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

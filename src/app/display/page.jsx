@@ -1,8 +1,5 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { useObjectVal } from 'react-firebase-hooks/database';
-import { auth, db } from '../../firebaseConfig/config';
 import { ref as databaseRef, remove } from 'firebase/database';
 import { updateValuesToDatabase } from '../miscFunctions/actions';
 import { Spinner } from "react-bootstrap";
@@ -11,6 +8,7 @@ import GaugeUI from '../feeds/ui/GaugeUI';
 import SliderUI from '../feeds/ui/SliderUI';
 import ToggleUI from '../feeds/ui/ToggleUI';
 import ColourPickerUI from '../feeds/ui/ColourPickerUI';
+import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 
 const feedTypeToComponent = {
   gauge: GaugeUI,
@@ -45,18 +43,22 @@ const DraggableWidget = ({ id, name, onDragStart }) => {
 const DisplayPage = () => {
   const [widgets, setWidgets] = useState([]);
   const virtualScreenRef = useRef(null);
-  const [user, authLoading, authError] = useAuthState(auth);
   const [devices, setDevices] = useState([]);
   const [selectedDevice, setSelectedDevice] = useState(null);
-  const [data, dataLoading, dataError] = useObjectVal(user && selectedDevice ? databaseRef(db, `/${user.uid}/${selectedDevice}/display`) : null);
-  const [devFeeds] = useObjectVal(user && selectedDevice ? databaseRef(db, `${user.uid}/${selectedDevice}/devFeeds`) : null);
-  const [allUserData] = useObjectVal(user ? databaseRef(db, `/${user.uid}`) : null);
   const [selectedWidget, setSelectedWidget] = useState(null);
   const [backgroundColor, setBackgroundColor] = useState('#333333');
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
+  const [devFeeds, setDevFeeds] = useState([]);
+  const [data, setData] = useState([]);
+
+
+
+  const { user, loading: authLoading, error: authError } = useAuth();
+  const { data: allUserData, loading: dataLoading, error:dataError } = useRTDB(user ? user.uid : null);
 
   useEffect(() => {
-    if (allUserData) {
+    if (user && allUserData) {
+
       const deviceKeys = Object.keys(allUserData);
       const devicesData = deviceKeys.map(key => ({
         code: key,
@@ -67,7 +69,15 @@ const DisplayPage = () => {
         setSelectedDevice(devicesData[0].code);
       }
     }
-  }, [allUserData, selectedDevice]);
+  }, [allUserData, selectedDevice, devFeeds]);
+
+  useEffect(() => {
+    if (user && selectedDevice) {
+      console.log(allUserData[selectedDevice]);
+      setDevFeeds(allUserData[selectedDevice].devFeeds)
+      setData(allUserData[selectedDevice].display)
+    }
+  }, [selectedDevice])
 
   useEffect(() => {
     if (data && devFeeds && virtualScreenRef.current) {
@@ -186,7 +196,7 @@ const DisplayPage = () => {
     setWidgets(newWidgets);
     setSelectedWidget(id);
 
-    
+
     const dataToSend = newWidgets.reduce((acc, widget) => {
       acc[`${widget.name}/x`] = widget.x;
       acc[`${widget.name}/value`] = devFeeds[widget.name].value;
