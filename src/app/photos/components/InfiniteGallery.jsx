@@ -103,6 +103,7 @@ export default function InfiniteGallery() {
 
     return (
         <div className="container-fluid pt-2 position-relative">
+
             {/* Tag Filter Bar with Next.js Links */}
             <div className="d-flex flex-wrap gap-2 justify-content-center mb-4 sticky-top bg-white py-3 border-bottom z-3">
                 <Link href="/photos" className={`btn btn-sm rounded-pill px-4 ${urlTag === "ALL" ? 'btn-primary' : 'btn-outline-primary'}`}>
@@ -170,6 +171,7 @@ export default function InfiniteGallery() {
                     <button className="btn btn-danger w-100" onClick={handleDeleteImage} data-bs-dismiss="modal">Delete Image</button>
                 </div></div></div>
             </div>
+
         </div>
     );
 }

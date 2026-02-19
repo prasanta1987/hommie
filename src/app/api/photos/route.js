@@ -70,6 +70,30 @@ export async function POST(request) {
     const formData = await request.formData();
     const file = formData.get('file');
     const tagsString = formData.get('tags') || "";
+    
+    const { searchParams } = new URL(request.url);
+    const apiKey = searchParams.get('apiKey');
+
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing API Key' }, { status: 400 });
+    }
+
+    const db = admin.database();
+
+    // Verify API key and get user UID
+    const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}/`);
+    const apiKeySnapshot = (await apiKeyRef.once('value')).val();
+
+    if (!apiKeySnapshot) {
+      return NextResponse.json({ error: "Invalid API Key" }, { status: 400 });
+    }
+
+    const imagekit = new ImageKit({
+      publicKey: apiKeySnapshot.imgPubKey,
+      privateKey: apiKeySnapshot.imgPrivKey,
+      urlEndpoint: apiKeySnapshot.imgEndPoint
+    });
+
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
