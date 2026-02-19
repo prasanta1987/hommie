@@ -3,7 +3,6 @@
 import React, { useState, useEffect, use } from 'react';
 import { auth } from '@/firebaseConfig/config';
 import {
-  onAuthStateChanged,
   signOut,
   updateProfile,
 } from 'firebase/auth';
@@ -11,48 +10,34 @@ import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut, FiLogIn } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
-import { db } from '@/firebaseConfig/config'
-import { ref, get } from 'firebase/database'
-import { regenerateApiKey, deleteUserAccount } from '../miscFunctions/actions';
+import { regenerateApiKey, deleteUserAccount } from '@/app/miscFunctions/actions';
 import SignIn from './sign-in';
 import './NavBar.css'
+import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 
-import ArduinoCode from '../feeds/ui/ArduinoCode'
+import ArduinoCode from '@/app/feeds/ui/ArduinoCode'
 
 const AppNavbar = () => {
-  const [user, setUser] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
   const [apiKeyBTN, setIsApiKeyBTN] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      if (user) {
-        setDisplayName(user.displayName || user.email);
-        setShowSignInModal(false);
-      } else {
-        console.log('No user is signed in');
-        setApiKey('');
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+
+  const { user, loading: authLoading } = useAuth();
+  const { data: apiKey, loading: dataLoading } = useRTDB(
+    user ? `userCred/UIDtoAPI/${user.uid}/fbAPIKey` : null
+  );
 
   useEffect(() => {
     if (user) {
-      get(ref(db, `userCred/UIDtoAPI/${user.uid}/fbAPIKey`)).then((snapshot) => {
-        if (snapshot.exists()) {
-          setApiKey(snapshot.val());
-        }
-      }).catch((error) => {
-        console.log(error);
-      });
+      setDisplayName(user.displayName || user.email);
+      setShowSignInModal(false);
+    } else {
+      setDisplayName('');
     }
   }, [user]);
+
 
 
   const updateDisplayName = () => {
@@ -141,7 +126,7 @@ const AppNavbar = () => {
                 className='btn btn-sm btn-warning mt-2'
                 onClick={(e) => {
                   e.preventDefault();
-                  regenerateApiKey(apiKey, setIsApiKeyBTN, setApiKey, user);
+                  regenerateApiKey(apiKey, setIsApiKeyBTN, user);
                 }}
                 disabled={apiKeyBTN}
               >

@@ -33,10 +33,10 @@ export default function InfiniteGallery() {
         user ? `userCred/UIDtoAPI/${user.uid}/fbAPIKey` : null
     );
 
+
     // Load Bootstrap and Global Tags
     useEffect(() => {
         if (typeof document !== 'undefined') require('bootstrap/dist/js/bootstrap.bundle.min.js');
-        fetch('/api/photos/tags').then(res => res.json()).then(setAvailableTags);
     }, []);
 
     // RESET Gallery whenever the URL Tag changes
@@ -63,6 +63,7 @@ export default function InfiniteGallery() {
     useEffect(() => {
         // Only fetch if the element is in view and we have the necessary API key data
         if (inView && apiKey && !loading && hasMore) {
+            fetch(`/api/photos/tags?apiKey=${apiKey}`).then(res => res.json()).then(setAvailableTags);
             fetchImages();
         }
     }, [inView, apiKey, images.length]);
@@ -75,7 +76,7 @@ export default function InfiniteGallery() {
         const formData = new FormData();
         formData.append("file", uploadFile[0]);
         formData.append("tags", uploadTags);
-        const res = await fetch('/api/photos', { method: 'POST', body: formData });
+        const res = await fetch(`/api/photos?apiKey=${apiKey}`, { method: 'POST', body: formData });
         if (res.ok) {
             const newImg = await res.json();
             setImages(p => [newImg, ...p]);
@@ -86,7 +87,7 @@ export default function InfiniteGallery() {
 
     const handleUpdateTags = async () => {
         const tagsArray = newTags.split(',').map(t => t.trim()).filter(t => t !== "");
-        const res = await fetch(`/api/photos/${selectedImg.id}`, {
+        const res = await fetch(`/api/photos/${selectedImg.id}?apiKey=${apiKey}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ tags: tagsArray })
@@ -96,7 +97,7 @@ export default function InfiniteGallery() {
 
     const handleDeleteImage = async () => {
         if (!confirm("Delete?")) return;
-        const res = await fetch(`/api/photos/${selectedImg.id}`, { method: 'DELETE' });
+        const res = await fetch(`/api/photos/${selectedImg.id}?apiKey=${apiKey}`, { method: 'DELETE' });
         if (res.ok) setImages(p => p.filter(img => img.id !== selectedImg.id));
     };
 

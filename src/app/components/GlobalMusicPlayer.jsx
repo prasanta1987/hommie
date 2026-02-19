@@ -1,8 +1,8 @@
 'use client';
 
-import { useMusicPlayer } from '../context/MusicPlayerContext.jsx';
+import { useMusicPlayer } from '@/app/context/MusicPlayerContext.jsx';
 import { usePathname } from 'next/navigation';
-import styles from '../music/Music.module.css';
+import styles from '@/app/music/Music.module.css';
 import { FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward } from 'react-icons/fi';
 
 export default function GlobalMusicPlayer() {

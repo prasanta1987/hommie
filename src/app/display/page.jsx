@@ -1,13 +1,13 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
 import { ref as databaseRef, remove } from 'firebase/database';
-import { updateValuesToDatabase } from '../miscFunctions/actions';
+import { updateValuesToDatabase } from '@/app/miscFunctions/actions';
 import { Spinner } from "react-bootstrap";
-import SignIn from '../components/sign-in';
-import GaugeUI from '../feeds/ui/GaugeUI';
-import SliderUI from '../feeds/ui/SliderUI';
-import ToggleUI from '../feeds/ui/ToggleUI';
-import ColourPickerUI from '../feeds/ui/ColourPickerUI';
+import SignIn from '@/app/components/sign-in';
+import GaugeUI from '@/app/feeds/ui/GaugeUI';
+import SliderUI from '@/app/feeds/ui/SliderUI';
+import ToggleUI from '@/app/feeds/ui/ToggleUI';
+import ColourPickerUI from '@/app/feeds/ui/ColourPickerUI';
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 
 const feedTypeToComponent = {
@@ -73,7 +73,6 @@ const DisplayPage = () => {
 
   useEffect(() => {
     if (user && selectedDevice) {
-      console.log(allUserData[selectedDevice]);
       setDevFeeds(allUserData[selectedDevice].devFeeds)
       setData(allUserData[selectedDevice].display)
     }

@@ -1,13 +1,32 @@
 import { NextResponse } from 'next/server';
 import ImageKit from 'imagekit';
+import admin from '@/firebaseConfig/adminConfig';
 
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-});
+export async function GET(request) {
 
-export async function GET() {
+  const { searchParams } = new URL(request.url);
+  const apiKey = searchParams.get('apiKey');
+
+  if (!apiKey) {
+    return NextResponse.json({ error: 'Missing API Key' }, { status: 400 });
+  }
+
+  const db = admin.database();
+
+  // Verify API key and get user UID
+  const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}/`);
+  const apiKeySnapshot = (await apiKeyRef.once('value')).val();
+
+  if (!apiKeySnapshot) {
+    return NextResponse.json({ error: "Invalid API Key" }, { status: 400 });
+  }
+
+  const imagekit = new ImageKit({
+    publicKey: apiKeySnapshot.imgPubKey,
+    privateKey: apiKeySnapshot.imgPrivKey,
+    urlEndpoint: apiKeySnapshot.imgEndPoint
+  });
+
   try {
     // Fetch a large batch of files (max 1000) to ensure you get all tags
     const files = await imagekit.listFiles({

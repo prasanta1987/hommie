@@ -11,7 +11,7 @@ import { randomBytes } from 'crypto';
 import { getAuth } from 'firebase/auth';
 
 
-const regenerateApiKey = (apiKey, setIsApiKeyBTN, setApiKey, user) => {
+const regenerateApiKey = (apiKey, setIsApiKeyBTN, user) => {
 
   setIsApiKeyBTN(true);
 
@@ -30,7 +30,6 @@ const regenerateApiKey = (apiKey, setIsApiKeyBTN, setApiKey, user) => {
   // CRITICAL: Call the update on the root of the database
   updateValuesToDatabase("/", multiUpdate);
 
-  setApiKey(newKey);
   setTimeout(() => {
     setIsApiKeyBTN(false);
   }, 5000);

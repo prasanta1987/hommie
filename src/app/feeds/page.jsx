@@ -1,10 +1,10 @@
 'use client';
 
-import SignIn from '../components/sign-in';
 import { Spinner } from 'react-bootstrap';
 import LandingPage from './components/LandingPage';
 import NoBoard from './ui/NoBoard';
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
+
 
 
 export default function Home() {
