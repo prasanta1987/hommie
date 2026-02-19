@@ -148,7 +148,7 @@ export default function InfiniteGallery() {
             </button>
 
             {/* Sentinel */}
-            <div ref={ref} className="w-100 h-40 flex items-center justify-center mt-4">
+            <div ref={ref} className="w-100 h-40 d-flex justify-content-center mt-4">
                 {loading && <div className="spinner-border text-primary" />}
             </div>
 
