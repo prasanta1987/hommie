@@ -21,6 +21,7 @@ export default function UploadModal({
                 <Form.Group className="mb-3">
                     <Form.Control
                         type="file"
+                        accept="image/*"
                         onChange={(e) => setUploadFile(e.target.files)}
                     />
                 </Form.Group>
