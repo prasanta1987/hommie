@@ -5,45 +5,38 @@ import Boards from './Boards';
 import Feeds from './Feeds';
 import { FiPlus } from 'react-icons/fi';
 import FeedCreateModal from '@/app/feeds/ui/FeedCreateModal';
-
 import { updateValuesToDatabase } from '@/app/miscFunctions/actions';
 import './LandingPage.css'
 
-const LandingPage = (props) => {
-  const [userUid, setUserUid] = useState(null);
-  const [dbData, setDBData] = useState({});
+const LandingPage = ({ userDbData, userData }) => {
   const [selectedDeviceCode, setSelectedDeviceCode] = useState('');
   const [devices, setDevices] = useState([]);
   const [showModal, setShowModal] = useState(false);
+
+
+  const userUid = userData.uid;
 
   const boardSelection = (devCode, devFeed) => {
     const feedStatus = dbData[devCode].devFeeds[devFeed].isSelected;
     updateValuesToDatabase(`${userUid}/${devCode}/devFeeds/${devFeed}`, { "isSelected": !feedStatus });
   }
 
-  useEffect(() => {
-
-    if (props.userData) {
-      setUserUid(props.userData.uid);
-      setDBData(props.userDbData);
-    } else {
-      setUserUid(null);
-      setDBData(null);
-    }
-  }, [props.userData, props.userDbData]);
+  console.log(userDbData)
 
   useEffect(() => {
-    const deviceList = Object.entries(props.userDbData)
+    const deviceList = Object.entries(userDbData)
       // .filter(([key]) => key !== 'display')
-      .map(([deviceCode, device]) => ({
-        deviceCode: deviceCode,
-        deviceName: device.deviceName
+      .map(([key, data]) => ({
+        deviceCode: data.deviceCode,
+        deviceName: data.deviceName
       }));
     setDevices(deviceList);
+
+    console.log(deviceList)
     if (deviceList.length > 0 && !selectedDeviceCode) {
       setSelectedDeviceCode(deviceList[0].deviceCode);
     }
-  }, [dbData]);
+  }, [userDbData]);
 
 
   return (
@@ -51,14 +44,14 @@ const LandingPage = (props) => {
       <div className='container d-flex justify-content-between align-items-center pt-2'>
         <div className='d-flex justify-content-start gap-3 align-items-center flex-wrap'>
           {
-            Object.keys(dbData).map(data => {
+            Object.keys(userDbData).map(data => {
               if (data == "display") return;
               return (
                 <Boards
                   key={data}
                   boardKey={data}
                   sendSelectedBoard={boardSelection}
-                  boardData={dbData[data]}
+                  boardData={userDbData[data]}
                   uid={userUid}
                 />
               )
@@ -67,7 +60,7 @@ const LandingPage = (props) => {
         </div>
       </div>
       <div className='h-100 container justify-content-start pt-2'>
-        {dbData && <Feeds feedData={dbData} userUid={userUid} />}
+        {userDbData && <Feeds feedData={userDbData} userUid={userUid} />}
       </div>
 
       <button
@@ -82,7 +75,7 @@ const LandingPage = (props) => {
         isOpen={showModal}
         setShowModal={() => setShowModal(false)}
         devices={devices}
-        uid={props.userData.uid}
+        uid={userUid}
         selectedDeviceCode={selectedDeviceCode}
       />
 

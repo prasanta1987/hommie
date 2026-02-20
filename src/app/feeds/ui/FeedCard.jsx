@@ -52,22 +52,28 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
     const sliderValueChange = (type, value) => {
 
-        if (type == "Toggle") {
-            const multiUpdate = {};
+        updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
+            {
+                value: value,
+                time: new Date().getTime()
+            });
 
-            multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/value`] = value;
-            multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/time`] = new Date().getTime();
-            multiUpdate[`${uid}/${deviceCode}/display/${feedName}/value`] = value;
+        // if (type == "Toggle") {
+        //     const multiUpdate = {};
 
-            updateValuesToDatabase(`/`, multiUpdate);
+        //     multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/value`] = value;
+        //     multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/time`] = new Date().getTime();
+        //     multiUpdate[`${uid}/${deviceCode}/display/${feedName}/value`] = value;
 
-        } else {
-            updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
-                {
-                    value: value,
-                    time: new Date().getTime()
-                });
-        }
+        //     updateValuesToDatabase(`/`, multiUpdate);
+
+        // } else {
+        //     updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
+        //         {
+        //             value: value,
+        //             time: new Date().getTime()
+        //         });
+        // }
 
     }
 

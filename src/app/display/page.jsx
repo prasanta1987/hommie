@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react';
 import { ref as databaseRef, remove } from 'firebase/database';
-import { updateValuesToDatabase } from '@/app/miscFunctions/actions';
+import { setValueToDatabase, updateValuesToDatabase } from '@/app/miscFunctions/actions';
 import { Spinner } from "react-bootstrap";
 import SignIn from '@/app/components/sign-in';
 import GaugeUI from '@/app/feeds/ui/GaugeUI';
@@ -54,7 +54,7 @@ const DisplayPage = () => {
 
 
   const { user, loading: authLoading, error: authError } = useAuth();
-  const { data: allUserData, loading: dataLoading, error:dataError } = useRTDB(user ? user.uid : null);
+  const { data: allUserData, loading: dataLoading, error: dataError } = useRTDB(user ? user.uid : null);
 
   useEffect(() => {
     if (user && allUserData) {
@@ -220,8 +220,7 @@ const DisplayPage = () => {
       const newWidgets = widgets.filter(w => w.name !== widgetName);
       setWidgets(newWidgets);
       setSelectedWidget(null);
-      const widgetRef = databaseRef(db, `/${user.uid}/${selectedDevice}/display/${widgetToRemove.name}`);
-      remove(widgetRef);
+      setValueToDatabase(`/${user.uid}/${selectedDevice}/display/${widgetToRemove.name}`, null);
     }
   };
 
