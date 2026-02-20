@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 
-// --- HELPER FUNCTIONS (Defined outside to avoid ReferenceErrors) ---
+// --- HELPER: RGB565 CONVERSION ---
 const hexTo565 = (hex) => {
   const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
   const rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
@@ -34,6 +34,7 @@ export default function Esp32FaceDesigner() {
     let animationFrameId;
     const canvas = canvasRef.current;
     if (!canvas) return;
+    
     const ctx = canvas.getContext('2d');
 
     const render = () => {
@@ -104,7 +105,9 @@ export default function Esp32FaceDesigner() {
 
   const getXY = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const scaleX = 320 / rect.width;
+    const scaleY = 240 / rect.height;
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
   };
 
   const handleMouseDown = (e) => {
@@ -193,28 +196,82 @@ export default function Esp32FaceDesigner() {
     return code + "}";
   };
 
+  const flipArc = () => {
+    if (selectedIdx !== -1 && actions[selectedIdx].type === 'arc') {
+      const newActions = [...actions];
+      const a = newActions[selectedIdx];
+      // Flip the smile/frown by offsetting the angles by 180 degrees (PI)
+      const currentStart = a.startAngle;
+      const currentEnd = a.endAngle;
+      a.startAngle = currentStart + Math.PI;
+      a.endAngle = currentEnd + Math.PI;
+      setActions(newActions);
+    }
+  };
+
   return (
-    <div className="container py-4">
-      <div className="card shadow border-primary">
-        <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap">
-          <h5 className="mb-0">ESP32 Designer (Dual-Leg Arc)</h5>
-          <div className="btn-group btn-group-sm my-1">
-            {['pencil', 'line', 'rect', 'circle', 'arc', 'select'].map(t => (
-              <button key={t} onClick={() => {setTool(t); setSelectedIdx(-1);}} className={`btn btn-light ${tool === t ? 'active fw-bold' : ''}`}>{t.toUpperCase()}</button>
-            ))}
+    <div className="container-fluid bg-secondary py-3 px-3">
+      <div className="row g-3">
+        {/* STUDIO SIDEBAR */}
+        <div className="col-md-3 col-lg-2">
+          <div className="card shadow border-0 sticky-top" style={{ top: '20px' }}>
+            <div className="card-header bg-primary text-white text-center py-2 fw-bold small">DESIGN TOOLS</div>
+            <div className="card-body p-2 d-grid gap-1 text-center">
+              {['pencil', 'line', 'rect', 'circle', 'arc', 'select'].map(t => (
+                <button key={t} onClick={() => {setTool(t); setSelectedIdx(-1);}} 
+                        className={`btn btn-sm btn-outline-primary text-uppercase fw-bold ${tool === t ? 'active bg-primary text-white' : ''}`}>
+                  {t}
+                </button>
+              ))}
+              <hr className="my-1" />
+              <input type="color" className="form-control form-control-color w-100 mb-2 shadow-sm" value={color} onChange={(e) => setColor(e.target.value)} />
+              <div className="form-check form-switch mb-2 text-start d-flex justify-content-center">
+                <input className="form-check-input me-2" type="checkbox" checked={isFilled} onChange={() => setIsFilled(!isFilled)} />
+                <label className="form-check-label small fw-bold">FILL</label>
+              </div>
+              <hr className="my-1" />
+              <button className="btn btn-sm btn-info fw-bold mb-1 w-100" onClick={flipArc}>FLIP ARC</button>
+              <button className="btn btn-sm btn-warning fw-bold mb-1 w-100" onClick={() => { setActions(actions.filter((_, i) => i !== selectedIdx)); setSelectedIdx(-1); }}>DELETE</button>
+              <button className="btn btn-sm btn-danger fw-bold w-100" onClick={() => { if(confirm("Start new design?")) setActions([]); }}>RESET</button>
+            </div>
           </div>
         </div>
-        <div className="card-body bg-light text-center">
-          <div className="d-flex justify-content-center gap-3 mb-3 align-items-center">
-            <input type="color" className="form-control form-control-color" value={color} onChange={(e) => setColor(e.target.value)} />
-            <div className="form-check form-switch"><input className="form-check-input" type="checkbox" checked={isFilled} onChange={() => setIsFilled(!isFilled)} /><label className="form-check-label small">Fill</label></div>
-            <button className="btn btn-warning btn-sm" onClick={() => { setActions(actions.filter((_, i) => i !== selectedIdx)); setSelectedIdx(-1); }}>Delete</button>
-            <button className="btn btn-danger btn-sm" onClick={() => setActions([])}>Reset All</button>
+
+        {/* WORKSPACE */}
+        <div className="col-md-9 col-lg-10">
+          <div className="card shadow-lg border-0 bg-dark overflow-hidden d-flex align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
+            <div style={{ position: 'relative', width: '50%', maxWidth: '800px', aspectRatio: '4/3' }}>
+              <canvas 
+                ref={canvasRef} 
+                width={320} 
+                height={240} 
+                className="bg-white border rounded shadow w-100 h-100" 
+                onMouseDown={handleMouseDown} 
+                onMouseMove={handleMouseMove} 
+                onMouseUp={handleMouseUp} 
+                onMouseLeave={() => setIsDragging(false)}
+                style={{ cursor: tool === 'select' ? 'pointer' : 'crosshair', imageRendering: 'pixelated' }}
+              />
+            </div>
           </div>
-          <canvas ref={canvasRef} width={320} height={240} className="bg-white border rounded shadow-sm mx-auto d-block" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={() => setIsDragging(false)} style={{ cursor: tool === 'select' ? 'pointer' : 'crosshair' }} />
         </div>
       </div>
-      <textarea readOnly className="form-control mt-3 bg-dark text-info font-monospace p-3 small" rows="6" value={generateCpp()} />
+
+      {/* CODE GENERATOR (Scroll down to see) */}
+      <div className="row mt-4 pb-5">
+        <div className="col-12">
+          <div className="card shadow-sm border-0">
+            <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center fw-bold small">
+              TFT_eSPI ARDUINO CODE
+              <button className="btn btn-xs btn-outline-info" onClick={() => {
+                navigator.clipboard.writeText(generateCpp());
+                alert("Code Copied!");
+              }}>COPY CODE</button>
+            </div>
+            <textarea readOnly className="form-control bg-black text-info font-monospace p-4 border-0" rows="12" value={generateCpp()} style={{ fontSize: '13px', lineHeight: '1.4' }} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

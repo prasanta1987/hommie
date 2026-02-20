@@ -63,10 +63,11 @@ const AppNavbar = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto">
               <Nav.Link as={Link} href="/" className="text-light">Home</Nav.Link>
-              <Nav.Link as={Link} href="/feeds" className="text-light">Feeds</Nav.Link>
-              <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>
+              {user && <Nav.Link as={Link} href="/feeds" className="text-light">Feeds</Nav.Link>}
+              {user && <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>}
+              {user && <Nav.Link as={Link} href="/photos" className="text-light">Photos</Nav.Link>}
               <Nav.Link as={Link} href="/music" className="text-light">Music</Nav.Link>
-              <Nav.Link as={Link} href="/photos" className="text-light">Photos</Nav.Link>
+              <Nav.Link as={Link} href="/drawing" className="text-light">Drawing</Nav.Link>
             </Nav>
             <Nav>
               <div className='d-flex gap-2 align-items-center'>
