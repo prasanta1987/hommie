@@ -1,9 +1,12 @@
-const esp32Imports = `
+const esp32Imports = String.raw
+`
+
 #include <WiFi.h>
 #include <HTTPClient.h>
 
 `
-const esp8266Imports = `
+const esp8266Imports = String.raw
+`
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClientSecure.h>
@@ -12,7 +15,8 @@ const esp8266Imports = `
 
 `;
 
-const esp32Code = `
+const esp32Code = String.raw
+`
 
 void setup(void) {
 
@@ -25,9 +29,9 @@ void loop() {
 
 `;
 
-const esp8266Code = `
+const esp8266Code = String.raw
 
-
+`
 const String baseUrl = "https://hommily.vercel.app/api";
 
 const char *ssid = "PK_NEO";
