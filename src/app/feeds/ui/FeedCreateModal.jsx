@@ -6,7 +6,7 @@ import { updateValuesToDatabase } from '@/app/miscFunctions/actions';
 
 
 export default function FeedModal({
-    isOpen, setShowModal, devices, uid, selectedDeviceCode
+    isOpen, setShowModal, devices, uid, selectedDeviceCode, setSelectedDeviceCode
 }) {
 
     const [feedName, setFeedName] = useState('');

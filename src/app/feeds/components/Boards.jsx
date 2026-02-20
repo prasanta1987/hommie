@@ -13,14 +13,7 @@ export default function Boards(props) {
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(props.boardData.deviceName);
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
-    const [deviceType, setDeviceType] = useState(props.boardData.deviceType);
-
-
-    useEffect(() => {
-        setBoardName(props.boardData.deviceName);
-        setDeviceType(props.boardData.deviceType);
-        setDeviceCode(props.boardKey);
-    }, [props.boardData, props.boardKey]);
+    const [deviceType, setDeviceType] = useState(props.boardData.deviceType || 'ESP32');
 
 
     const onFeedSelect = (devCode, devFeed) => {
@@ -40,11 +33,13 @@ export default function Boards(props) {
     const handleSaveName = () => {
         setBoardName(boardName);
 
-        updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
-            "deviceName": boardName,
-            "deviceCode": deviceCode,
-            "deviceType": deviceType
-        })
+        const data = {
+            deviceName: boardName,
+            deviceCode: deviceCode,
+            deviceType: deviceType
+        }
+
+        updateValuesToDatabase(`${props.uid}/${deviceCode}`, data);
         handleCloseModal();
     };
 
