@@ -24,6 +24,7 @@ export default function FeedModal({
 
     if (!isOpen) return null;
 
+
     const handleCreateFeed = () => {
 
         if (!feedName) {
