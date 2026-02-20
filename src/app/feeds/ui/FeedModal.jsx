@@ -30,7 +30,9 @@ export default function FeedModal({
     bPIN,
     setBPIN,
     mcuType,
-    setMcuType
+    setMcuType,
+    setIsSwapped,
+    isSwapped
 
 }) {
 
@@ -116,7 +118,7 @@ export default function FeedModal({
 
                     {(feedType === 'Toggle') && (
 
-                        <div className='gap-2 justify-content-between d-flex'>
+                        <div className='gap-2 justify-content-between align-items-end d-flex'>
                             <Form.Group className="w-100 mb-3">
                                 <Form.Label>Select Microcontroller</Form.Label>
                                 <Form.Select
@@ -157,6 +159,18 @@ export default function FeedModal({
                                 </Form.Select>
                                 {/* <Form.Label>{pinDescription}</Form.Label> */}
                             </Form.Group>
+
+                            {/* Dynamic GPIO Dropdown (mapping objects) */}
+                            <Form.Group className="w-20 mb-3">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Swap"
+                                    checked={isSwapped} // Use your state here
+                                    onChange={(e) => setIsSwapped(e.target.checked)}
+                                // label="Enable Swapping" // Optional: You can put the label here instead of Form.Label
+                                />
+                            </Form.Group>
+
                         </div>
                     )}
 

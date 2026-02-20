@@ -26,6 +26,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [rPIN, setRPIN] = useState(0);
     const [gPIN, setGPIN] = useState(0);
     const [bPIN, setBPIN] = useState(0);
+    const [isSwapped, setIsSwapped] = useState(false);
 
     const dbTimestamp = feed.time ? feed.time : null;
 
@@ -40,6 +41,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
         setFeedType(feed.type || 'Card');
         setMinValue(feed.rangeMin || 0);
         setMaxValue(feed.rangeMax || 100);
+        setIsSwapped(feed.isSwapped || false);
     }, [feed.value, feed.type, feed.rangeMin, feed.rangeMax]);
 
     useEffect(() => {
@@ -64,6 +66,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     if (!feed) return null;
 
     const handleCreateFeed = () => {
+
         if (!feedName) {
             alert("Feed name is required.");
             return;
@@ -84,6 +87,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
             updatedFeed.GPIO = parseInt(GPIO);
             updatedFeed.mcu = mcuType;
+            updatedFeed.isSwapped = isSwapped;
+
         }
 
         if (feedType === 'Colour') {
@@ -107,7 +112,6 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
 
     const sliderValueChange = (type, value) => {
-        console.log(type, value);
 
         if (type == "Toggle") {
             const multiUpdate = {};
@@ -219,6 +223,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 setMaxValue={setMaxValue}
                 mcuType={mcuType}
                 setMcuType={setMcuType}
+                setIsSwapped={setIsSwapped}
+                isSwapped={isSwapped}
             />
         </>
     );
