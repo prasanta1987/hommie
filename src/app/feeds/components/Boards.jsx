@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Badge, Modal, Button, Form } from 'react-bootstrap';
 import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit } from 'react-icons/fi';
 import { BiSolidBoltCircle } from "react-icons/bi"
+import { mcuTypes } from '@/app/miscFunctions/espSafeGPIOs';
 
 import './Boards.css';
 
@@ -12,11 +13,12 @@ export default function Boards(props) {
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(props.boardData.deviceName);
     const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
+    const [deviceType, setDeviceType] = useState(props.boardData.deviceType);
 
 
     useEffect(() => {
-        // console.log(props.boardData)
         setBoardName(props.boardData.deviceName);
+        setDeviceType(props.boardData.deviceType);
         setDeviceCode(props.boardKey);
     }, [props.boardData, props.boardKey]);
 
@@ -40,7 +42,8 @@ export default function Boards(props) {
 
         updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
             "deviceName": boardName,
-            "deviceCode": deviceCode
+            "deviceCode": deviceCode,
+            "deviceType": deviceType
         })
         handleCloseModal();
     };
@@ -109,6 +112,21 @@ export default function Boards(props) {
                                 onChange={(e) => setBoardName(e.target.value)}
                             />
                         </Form.Group>
+
+                        <Form.Group className="w-100 mb-3">
+                            <Form.Label>Select Microcontroller</Form.Label>
+                            <Form.Select
+                                value={deviceType}
+                                onChange={(e) => setDeviceType(e.target.value)}
+                            >
+                                {Object.keys(mcuTypes).map((key) => (
+                                    <option key={key} value={key}>
+                                        {mcuTypes[key].name}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+
                     </Form>
                 </Modal.Body>
                 <Modal.Footer className='d-flex justify-content-between'>

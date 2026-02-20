@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { FiZap, FiCpu, FiClock, FiSettings } from 'react-icons/fi';
 import { calculateAgeing } from '../../miscFunctions/timeCalculation';
-// import Gauge from "@nationsinfo/react-simple-gauge";
 import './FeedCard.css';
-import { setValueToDatabase, updateValuesToDatabase } from '../../miscFunctions/actions';
-import FeedModal from './FeedModal';
+import { updateValuesToDatabase } from '../../miscFunctions/actions';
 
 import GaugeUI from '../ui/GaugeUI';
 import SliderUI from '../ui/SliderUI';
 import ToggleUI from '../ui/ToggleUI';
 import ColourPickerUI from '../ui/ColourPickerUI';
+import FeedSettingsModal from '@/app/feeds/ui/FeedSettingsModal'
 
 
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
@@ -18,31 +17,14 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [longAging, setLongAging] = useState(false);
     const [millis, setMillis] = useState(0);
     const [sliderValue, setSliderValue] = useState(feed.value);
-    const [GPIO, setGPIO] = useState(feed.GPIO || 0);
-    const [feedType, setFeedType] = useState(feed.type || 'Card');
-    const [minValue, setMinValue] = useState(feed.rangeMin || 0);
-    const [maxValue, setMaxValue] = useState(feed.rangeMax || 100);
-    const [mcuType, setMcuType] = useState(feed.mcu || 'ESP32');
-    const [rPIN, setRPIN] = useState(0);
-    const [gPIN, setGPIN] = useState(0);
-    const [bPIN, setBPIN] = useState(0);
-    const [isSwapped, setIsSwapped] = useState(false);
+
 
     const dbTimestamp = feed.time ? feed.time : null;
 
 
     useEffect(() => {
-        setMcuType(feed.mcu || 'ESP32');
         setSliderValue(feed.value);
-        setGPIO(feed.GPIO || 0);
-        setRPIN(feed.rPIN || 0);
-        setGPIN(feed.gPIN || 0);
-        setBPIN(feed.bPIN || 0);
-        setFeedType(feed.type || 'Card');
-        setMinValue(feed.rangeMin || 0);
-        setMaxValue(feed.rangeMax || 100);
-        setIsSwapped(feed.isSwapped || false);
-    }, [feed.value, feed.type, feed.rangeMin, feed.rangeMax]);
+    }, [feed]);
 
     useEffect(() => {
         if (longAging) return;
@@ -65,50 +47,7 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
 
     if (!feed) return null;
 
-    const handleCreateFeed = () => {
 
-        if (!feedName) {
-            alert("Feed name is required.");
-            return;
-        }
-        const reference = `${uid}/${deviceCode}/devFeeds/${feedName}`;
-        const updatedFeed = { type: feedType };
-        if (feedType === 'Gauge' || feedType === 'Slider') {
-            updatedFeed.rangeMin = parseFloat(minValue);
-            updatedFeed.rangeMax = parseFloat(maxValue);
-        }
-
-        if (feedType === 'Toggle') {
-
-            if (isNaN(parseInt(GPIO))) {
-                alert("GPIO must be a number.");
-                return;
-            }
-
-            updatedFeed.GPIO = parseInt(GPIO);
-            updatedFeed.mcu = mcuType;
-            updatedFeed.isSwapped = isSwapped;
-
-        }
-
-        if (feedType === 'Colour') {
-            if (isNaN(parseInt(rPIN)) || isNaN(parseInt(gPIN)) || isNaN(parseInt(bPIN))) {
-                alert("PINs must be numbers.");
-                return;
-            }
-            updatedFeed.rPIN = parseInt(rPIN);
-            updatedFeed.gPIN = parseInt(gPIN);
-            updatedFeed.bPIN = parseInt(bPIN);
-        }
-
-        updateValuesToDatabase(reference, updatedFeed);
-        setShowModal(false);
-    }
-
-    const handleDeleteFeed = (feedName, uid, deviceCode) => {
-        setValueToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, null);
-        setShowModal(false);
-    }
 
 
     const sliderValueChange = (type, value) => {
@@ -171,9 +110,9 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                     ) : type === 'Colour' ? (
                         <ColourPickerUI
                             value={sliderValue}
-                            rPIN={rPIN}
-                            gPIN={gPIN}
-                            bPIN={bPIN}
+                            rPIN={feed.rPIN}
+                            gPIN={feed.gPIN}
+                            bPIN={feed.bPIN}
                             onBlur={(value) => {
                                 setSliderValue(value)
                                 sliderValueChange("Colour", value)
@@ -196,36 +135,8 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                     </div>
                 </div>
             </div>
-            <FeedModal
-                purpose={"settings"}
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                feed={feed}
-                boardName={boardName}
-                feedName={feedName}
-                deviceCode={deviceCode}
-                uid={uid}
-                setGPIO={setGPIO}
-                setBPIN={setBPIN}
-                setGPIN={setGPIN}
-                setRPIN={setRPIN}
-                rPIN={rPIN}
-                gPIN={gPIN}
-                bPIN={bPIN}
-                GPIO={GPIO}
-                handleDeleteFeed={handleDeleteFeed}
-                handleCreateFeed={handleCreateFeed}
-                feedType={feedType}
-                setFeedType={setFeedType}
-                minValue={minValue}
-                setMinValue={setMinValue}
-                maxValue={maxValue}
-                setMaxValue={setMaxValue}
-                mcuType={mcuType}
-                setMcuType={setMcuType}
-                setIsSwapped={setIsSwapped}
-                isSwapped={isSwapped}
-            />
+
+            <FeedSettingsModal isOpen={showModal} setShowModal={() => setShowModal(false)} feed={feed} uid={uid} />
         </>
     );
 };

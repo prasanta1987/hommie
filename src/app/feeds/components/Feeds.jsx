@@ -20,7 +20,8 @@ const Feeds = React.memo((props) => {
                             boardName: board.deviceName,
                             feedName: feedName,
                             id: `${board.deviceCode}-${feedName}`,
-                            deviceCode: board.deviceCode
+                            deviceCode: board.deviceCode,
+                            deviceType: board.deviceType
                         }));
                 }
                 return [];
