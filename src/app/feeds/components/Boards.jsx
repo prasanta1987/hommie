@@ -12,7 +12,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(boardData.deviceName || '');
-    const [deviceType, setDeviceType] = useState(boardData.deviceType);
+    const [deviceType, setDeviceType] = useState(boardData.deviceType || null);
 
     const deviceCode = boardData.deviceCode;
 
@@ -71,7 +71,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
         if (!boardData.deviceType) {
             setShowModal(true);
         }
-    }, [boardData, showModal])
+    }, [boardData])
 
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
@@ -89,7 +89,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
                     {/* {isOpen ? <FiChevronUp /> : <FiChevronDown />} */}
                 </button>
                 <div className='board-settings' onClick={handleShowModal}>
-                    <FiSettings style={{ cursor: 'pointer', color: '#eef3f3' }} />
+                    <FiSettings style={{ cursor: 'pointer', color: '#00fff2' }} />
                 </div>
                 {isOpen && (
                     <div className="boards-dropdown-menu">
@@ -132,9 +132,9 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
                         </Form.Group>
 
                         <Form.Group className="w-100 mb-3">
-                            <Form.Label className={!boardData.deviceType && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
+                            <Form.Label className={(deviceType=="Select MCU" || !boardData.deviceType) && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
                             <Form.Select
-                                value={boardData.deviceType}
+                                value={deviceType || boardData.deviceType}
                                 className={!deviceType && 'border-danger'}
                                 onChange={(e) => setDeviceType(e.target.value)}
                                 required={true}
