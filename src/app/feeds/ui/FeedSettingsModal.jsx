@@ -72,7 +72,7 @@ export default function FeedSettingsModal({
         <Modal show={isOpen} onHide={setShowModal} centered data-bs-theme="dark" size='lg'>
             <Modal.Header closeButton>
                 <Modal.Title>
-                    "{feedName}" Settings
+                    {feedName} Settings
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
