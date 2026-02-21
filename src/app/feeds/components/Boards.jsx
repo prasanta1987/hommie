@@ -8,29 +8,44 @@ import './Boards.css';
 
 import { setValueToDatabase, updateValuesToDatabase } from '../../miscFunctions/actions';
 
-export default function Boards(props) {
+export default function Boards({ boardData, uid, sendSelectedBoard }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [boardName, setBoardName] = useState(props.boardData.deviceName);
-    const [deviceCode, setDeviceCode] = useState(props.boardData.deviceCode);
-    const [deviceType, setDeviceType] = useState(props.boardData.deviceType || 'ESP32');
+    const [boardName, setBoardName] = useState(boardData.deviceName || '');
+    const [deviceType, setDeviceType] = useState(boardData.deviceType);
+
+    const deviceCode = boardData.deviceCode;
 
 
     const onFeedSelect = (devCode, devFeed) => {
-        props.sendSelectedBoard(devCode, devFeed);
+        sendSelectedBoard(devCode, devFeed);
         setIsOpen(false); // Close dropdown after selection
     };
 
     const toggleDropdown = () => setIsOpen(!isOpen);
 
     const handleShowModal = () => {
-        setBoardName(boardName); // Reset input field to current name
+        // setBoardName(boardName); // Reset input field to current name
         setShowModal(true);
         setIsOpen(false); // Close dropdown when opening modal
     };
-    const handleCloseModal = () => setShowModal(false);
+    const handleCloseModal = () => {
+
+        if (!deviceType) {
+            alert("Please Select Device Type")
+            return
+        }
+
+        setShowModal(false)
+    };
 
     const handleSaveName = () => {
+
+        if (!deviceType) {
+            alert("Please Select Device Type")
+            return
+        }
+
         setBoardName(boardName);
 
         const data = {
@@ -39,44 +54,50 @@ export default function Boards(props) {
             deviceType: deviceType
         }
 
-        updateValuesToDatabase(`${props.uid}/${deviceCode}`, data);
+        updateValuesToDatabase(`${uid}/${deviceCode}`, data);
         handleCloseModal();
     };
 
 
 
     const deleteBoard = () => {
-        updateValuesToDatabase(`${props.uid}/${deviceCode}`, {
-            "isDeleted": props.boardData.isDeleted ? false : true
-        })
+        if (!confirm("Are Sure Want to Delete?")) return;
+
+        setValueToDatabase(`${uid}/${deviceCode}`, null)
         setShowModal(false);
     };
 
     const forceDeleteBoard = () => {
-        setValueToDatabase(`${props.uid}/${deviceCode}`, null)
+        setValueToDatabase(`${uid}/${deviceCode}`, null)
         setShowModal(false);
     }
 
+    useEffect(() => {
+        if (!boardData.deviceType) {
+            setShowModal(true);
+        }
+    }, [boardData])
+
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
-        (typeof props.boardData == 'object')
+        (typeof boardData == 'object')
         &&
         <>
             <div className={"boards-dropdown"}>
-                <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${props.boardData.isDeleted && "bg-warning"}`}>
+                <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${(!boardData.deviceType) && "bg-warning"}`}>
                     <BiSolidBoltCircle size={20} color="#ebf1eb" className="boards-dropdown-item-icon" />
-                    <span>{boardName || props.boardKey}</span>
+                    <span>{boardName || deviceCode}</span>
                     {isOpen ? <FiChevronUp /> : <FiChevronDown />}
                 </button>
                 {isOpen && (
                     <div className="boards-dropdown-menu">
                         <div className="boards-dropdown-header">
-                            {boardName || props.boardKey}
+                            {boardName || deviceCode}
                             <FiEdit onClick={handleShowModal} style={{ cursor: 'pointer', marginLeft: '10px' }} />
                         </div>
-                        {(props.boardData.devFeeds) &&
-                            Object.keys(props.boardData.devFeeds).map(devFeed => {
-                                const isSelected = props.boardData.devFeeds[devFeed].isSelected;
+                        {(boardData.devFeeds) &&
+                            Object.keys(boardData.devFeeds).map(devFeed => {
+                                const isSelected = boardData.devFeeds[devFeed].isSelected;
                                 return (
                                     <div
                                         className={`boards-dropdown-item ${isSelected ? "bg-primary text-light" : ""}`}
@@ -84,7 +105,7 @@ export default function Boards(props) {
                                         onClick={() => onFeedSelect(deviceCode, devFeed)}
                                     >
                                         <span>{devFeed}</span>
-                                        <Badge className='bg-dark'>{props.boardData.devFeeds[devFeed].value}</Badge>
+                                        <Badge className='bg-dark'>{boardData.devFeeds[devFeed].value}</Badge>
                                     </div>
                                 )
                             })
@@ -93,9 +114,9 @@ export default function Boards(props) {
                 )}
             </div>
 
-            <Modal show={showModal} onHide={handleCloseModal}>
+            <Modal show={showModal} onHide={handleCloseModal} centered={true}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edit Board Name</Modal.Title>
+                    <Modal.Title>Edit Board Name ~ {deviceCode}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -109,11 +130,13 @@ export default function Boards(props) {
                         </Form.Group>
 
                         <Form.Group className="w-100 mb-3">
-                            <Form.Label>Select Microcontroller</Form.Label>
+                            <Form.Label className={!deviceType && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
                             <Form.Select
                                 value={deviceType}
+                                className={!deviceType && 'border-danger'}
                                 onChange={(e) => setDeviceType(e.target.value)}
                             >
+                                <option>Select MCU</option>
                                 {Object.keys(mcuTypes).map((key) => (
                                     <option key={key} value={key}>
                                         {mcuTypes[key].name}
@@ -126,12 +149,12 @@ export default function Boards(props) {
                 </Modal.Body>
                 <Modal.Footer className='d-flex justify-content-between'>
                     <div className='d-flex justify-content-between gap-1'>
-                        <Button variant={`${props.boardData.isDeleted ? "success" : "warning"}`}
+                        <Button variant={`${boardData.isDeleted ? "success" : "warning"}`}
                             onClick={deleteBoard}>
-                            {props.boardData.isDeleted ? "Restore" : "Delete"}
+                            {boardData.isDeleted ? "Restore" : "Delete"}
                         </Button>
                         {
-                            props.boardData.isDeleted &&
+                            boardData.isDeleted &&
                             <Button variant="danger" onClick={forceDeleteBoard}>
                                 Force Delete
                             </Button>
