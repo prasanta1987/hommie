@@ -53,6 +53,7 @@ export default function FeedSettingsModal({
                 alert("PINs must be numbers.");
                 return;
             }
+            updatedFeed.isSwapped = isSwapped;
             updatedFeed.rPIN = parseInt(rPIN);
             updatedFeed.gPIN = parseInt(gPIN);
             updatedFeed.bPIN = parseInt(bPIN);
@@ -71,7 +72,7 @@ export default function FeedSettingsModal({
         <Modal show={isOpen} onHide={setShowModal} centered data-bs-theme="dark" size='lg'>
             <Modal.Header closeButton>
                 <Modal.Title>
-                    Feed Settings
+                    "{feedName}" Settings
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -107,43 +108,44 @@ export default function FeedSettingsModal({
 
                     {(feedType === 'Toggle') && (
 
-                        <div className='gap-2 justify-content-between align-items-end d-flex'>
-                            {/* Dynamic GPIO Dropdown (mapping objects) */}
-                            <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select {mcuTypes[feed.deviceType || "ESP8266"].name} GPIO Pin</Form.Label>
-                                <Form.Select
-                                    value={GPIO}
-                                    onChange={
-                                        (e) => {
-                                            setGPIO(e.target.value)
-                                            const selectedOption = e.target.selectedOptions[0];
-                                            const description = selectedOption.getAttribute("desc");
-                                            setPinDescription(description);
+                        <>
+                            <div className='gap-2 justify-content-between align-items-end d-flex'>
+                                {/* Dynamic GPIO Dropdown (mapping objects) */}
+                                <Form.Group className="w-100 mb-3">
+                                    <Form.Label>Select GPIO Pin</Form.Label>
+                                    <Form.Select
+                                        value={GPIO}
+                                        onChange={
+                                            (e) => {
+                                                setGPIO(e.target.value)
+                                                const selectedOption = e.target.selectedOptions[0];
+                                                const description = selectedOption.getAttribute("desc");
+                                                setPinDescription(description);
+                                            }
                                         }
-                                    }
-                                >
-                                    <option value="">-- Choose a Pin --</option>
-                                    {currentSafePins.map((pin) => (
-                                        <option key={pin.value} value={pin.value} desc={pin.desc}>
-                                            {pin.name} (GPIO {pin.value})
-                                        </option>
-                                    ))}
-                                </Form.Select>
-                                {/* <Form.Label>{pinDescription}</Form.Label> */}
-                            </Form.Group>
+                                    >
+                                        <option value="">-- Choose a Pin --</option>
+                                        {currentSafePins.map((pin) => (
+                                            <option key={pin.value} value={pin.value} desc={pin.desc}>
+                                                {pin.name} (GPIO {pin.value})
+                                            </option>
+                                        ))}
+                                    </Form.Select>
+                                    {/* <Form.Label>{pinDescription}</Form.Label> */}
+                                </Form.Group>
+                            </div>
 
-                            {/* Dynamic GPIO Dropdown (mapping objects) */}
+                            {/* Swap PIN Output on Board */}
                             <Form.Group className="w-20 mb-3">
                                 <Form.Check
                                     type="checkbox"
-                                    label="Swap"
+                                    label="Swap PIN(s) Value on Board"
                                     checked={isSwapped} // Use your state here
                                     onChange={(e) => setIsSwapped(e.target.checked)}
                                 // label="Enable Swapping" // Optional: You can put the label here instead of Form.Label
                                 />
                             </Form.Group>
-
-                        </div>
+                        </>
                     )}
 
                     {(feedType === 'Colour') && (
@@ -209,6 +211,19 @@ export default function FeedSettingsModal({
                                 </div>
 
                             </div>
+                            <div className='d-flex flex-column w-100'>
+
+                                <Form.Group className="w-20 mb-3">
+                                    <Form.Check
+                                        type="checkbox"
+                                        label="Swap PIN(s) Value on Board"
+                                        checked={isSwapped} // Use your state here
+                                        onChange={(e) => setIsSwapped(e.target.checked)}
+                                    // label="Enable Swapping" // Optional: You can put the label here instead of Form.Label
+                                    />
+                                </Form.Group>
+                            </div>
+
                         </>
 
                     )}

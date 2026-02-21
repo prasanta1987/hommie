@@ -20,12 +20,13 @@
     padding: 10px 10px;
     border-radius: 0px 5px 5px 0px;
     cursor: pointer;
-    box-shadow: inset 2px 0px 15px 0px #212529;
+    /* box-shadow: inset 2px 0px 15px 0px #212529; */
     transition: 0.2s ease-in-out;
 }
 
 .board-settings:hover {
     background-color: var(--bgHoverColour);
+    box-shadow: inset 2px 0px 15px 0px #212529;
 }
 
 .boards-dropdown-toggle {
@@ -39,7 +40,7 @@
     display: flex;
     align-items: center;
     font-size: 16px;
-    box-shadow: inset -2px 0px 6px #141516;
+    /* box-shadow: inset -2px 0px 6px #141516; */
     transition: 0.2s ease-in-out;
 }
 

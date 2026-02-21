@@ -96,7 +96,7 @@ export default function FeedModal({
                         >
                             {devices.map((device) => (
                                 <option key={device.deviceCode} value={device.deviceCode}>
-                                    {device.deviceName} ({device.deviceCode})
+                                    {device.deviceName} ({device.deviceCode}) ~ {device.deviceType}
                                 </option>
                             ))}
                         </Form.Select>
@@ -148,26 +148,10 @@ export default function FeedModal({
                     {(feedType === 'Toggle') && (
 
                         <div className='gap-2 justify-content-between align-items-end d-flex'>
-                            <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select Microcontroller</Form.Label>
-                                <Form.Select
-                                    value={mcuType}
-                                    onChange={(e) => {
-                                        setMcuType(e.target.value);
-                                        setGPIO(''); // Reset pin selection on MCU change
-                                    }}
-                                >
-                                    {Object.keys(mcuTypes).map((key) => (
-                                        <option key={key} value={key}>
-                                            {mcuTypes[key].name}
-                                        </option>
-                                    ))}
-                                </Form.Select>
-                            </Form.Group>
 
                             {/* Dynamic GPIO Dropdown (mapping objects) */}
                             <Form.Group className="w-100 mb-3">
-                                <Form.Label>Select {mcuTypes[mcuType || "ESP8266"].name} GPIO Pin</Form.Label>
+                                <Form.Label>Select GPIO Pin</Form.Label>
                                 <Form.Select
                                     value={GPIO}
                                     onChange={
@@ -194,24 +178,6 @@ export default function FeedModal({
 
                     {(feedType === 'Colour') && (
                         <>
-                            <div className='gap-2 justify-content-between d-flex'>
-                                <Form.Group className="w-100 mb-3">
-                                    <Form.Label>Select Microcontroller</Form.Label>
-                                    <Form.Select
-                                        value={mcuType}
-                                        onChange={(e) => {
-                                            setMcuType(e.target.value);
-                                            setGPIO(''); // Reset pin selection on MCU change
-                                        }}
-                                    >
-                                        {Object.keys(mcuTypes).map((key) => (
-                                            <option key={key} value={key}>
-                                                {mcuTypes[key].name}
-                                            </option>
-                                        ))}
-                                    </Form.Select>
-                                </Form.Group>
-                            </div>
                             <div className='d-flex justify-content-between gap-1 text-center mb-3'>
                                 <div className='d-flex flex-column w-100'>
                                     <Form.Label>Select Red PIN</Form.Label>

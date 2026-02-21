@@ -41,7 +41,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
 
     const handleSaveName = () => {
 
-        if (!deviceType) {
+        if (!deviceType || deviceType == "Select MCU") {
             alert("Please Select Device Type")
             return
         }
@@ -71,7 +71,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
         if (!boardData.deviceType) {
             setShowModal(true);
         }
-    }, [boardData])
+    }, [boardData, showModal])
 
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
