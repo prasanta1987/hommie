@@ -1,27 +1,51 @@
+.boards-dropdown {
+    --height: 40px;
+    --width: 150px;
+    --bgcolour: #055b5a;
+    --bgHoverColour: #153b68;
+}
 
 .boards-dropdown {
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+}
+
+.board-settings {
+    display: flex;
+    height: var(--height);
+    height: var(--height);
+    align-items: center;
+    background-color: var(--bgcolour);
+    padding: 10px 10px;
+    border-radius: 0px 5px 5px 0px;
+    cursor: pointer;
+    box-shadow: inset 2px 0px 15px 0px #212529;
+    transition: 0.2s ease-in-out;
+}
+
+.board-settings:hover {
+    background-color: var(--bgHoverColour);
 }
 
 .boards-dropdown-toggle {
-    background-color: #055b5a;
+    background-color: var(--bgcolour);
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    height: var(--height);
+    min-width: var(--width);
+    border-radius: 5px 0px 0px 5px;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    min-width: 200px;
     font-size: 16px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: background-color 0.3s ease;
+    box-shadow: inset -2px 0px 6px #141516;
+    transition: 0.2s ease-in-out;
 }
 
 .boards-dropdown-toggle:hover {
-    background-color: #153b68;
+    background-color: var(--bgHoverColour);
+    box-shadow: inset -4px 0px 6px #141516;
 }
 
 .boards-dropdown-menu {
@@ -30,7 +54,7 @@
     left: 0;
     background-color: #ffffff;
     min-width: 200px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     border-radius: 5px;
     padding: 5px 0;

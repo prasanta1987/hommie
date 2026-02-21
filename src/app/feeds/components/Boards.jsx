@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Badge, Modal, Button, Form } from 'react-bootstrap';
-import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit } from 'react-icons/fi';
+import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit, FiSettings } from 'react-icons/fi';
 import { BiSolidBoltCircle } from "react-icons/bi"
 import { mcuTypes } from '@/app/miscFunctions/espSafeGPIOs';
 
@@ -67,11 +67,6 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
         setShowModal(false);
     };
 
-    const forceDeleteBoard = () => {
-        setValueToDatabase(`${uid}/${deviceCode}`, null)
-        setShowModal(false);
-    }
-
     useEffect(() => {
         if (!boardData.deviceType) {
             setShowModal(true);
@@ -84,17 +79,24 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
         &&
         <>
             <div className={"boards-dropdown"}>
-                <button onClick={toggleDropdown} className={`boards-dropdown-toggle ${(!boardData.deviceType) && "bg-warning"}`}>
+                <button
+                    onClick={toggleDropdown}
+                    className={`boards-dropdown-toggle ${(!boardData.deviceType) && "bg-warning"}`}
+                    style={{ backgroundColor: isOpen && '#153b68' }}
+                >
                     <BiSolidBoltCircle size={20} color="#ebf1eb" className="boards-dropdown-item-icon" />
-                    <span>{boardName || deviceCode}</span>
-                    {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+                    <span className='m-2'>{boardName || deviceCode}</span>
+                    {/* {isOpen ? <FiChevronUp /> : <FiChevronDown />} */}
                 </button>
+                <div className='board-settings' onClick={handleShowModal}>
+                    <FiSettings style={{ cursor: 'pointer', color: '#eef3f3' }} />
+                </div>
                 {isOpen && (
                     <div className="boards-dropdown-menu">
-                        <div className="boards-dropdown-header">
+                        {/* <div className="boards-dropdown-header">
                             {boardName || deviceCode}
                             <FiEdit onClick={handleShowModal} style={{ cursor: 'pointer', marginLeft: '10px' }} />
-                        </div>
+                        </div> */}
                         {(boardData.devFeeds) &&
                             Object.keys(boardData.devFeeds).map(devFeed => {
                                 const isSelected = boardData.devFeeds[devFeed].isSelected;
@@ -114,7 +116,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
                 )}
             </div>
 
-            <Modal show={showModal} onHide={handleCloseModal} centered={true}>
+            <Modal show={showModal} onHide={handleCloseModal} centered data-bs-theme="dark">
                 <Modal.Header closeButton>
                     <Modal.Title>Edit Board Name ~ {deviceCode}</Modal.Title>
                 </Modal.Header>
@@ -130,11 +132,12 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
                         </Form.Group>
 
                         <Form.Group className="w-100 mb-3">
-                            <Form.Label className={!deviceType && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
+                            <Form.Label className={!boardData.deviceType && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
                             <Form.Select
-                                value={deviceType}
+                                value={boardData.deviceType}
                                 className={!deviceType && 'border-danger'}
                                 onChange={(e) => setDeviceType(e.target.value)}
+                                required={true}
                             >
                                 <option>Select MCU</option>
                                 {Object.keys(mcuTypes).map((key) => (
@@ -149,16 +152,10 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
                 </Modal.Body>
                 <Modal.Footer className='d-flex justify-content-between'>
                     <div className='d-flex justify-content-between gap-1'>
-                        <Button variant={`${boardData.isDeleted ? "success" : "warning"}`}
+                        <Button variant="danger"
                             onClick={deleteBoard}>
-                            {boardData.isDeleted ? "Restore" : "Delete"}
+                            Delete
                         </Button>
-                        {
-                            boardData.isDeleted &&
-                            <Button variant="danger" onClick={forceDeleteBoard}>
-                                Force Delete
-                            </Button>
-                        }
                     </div>
                     <Button variant="primary" onClick={handleSaveName}>
                         Save Changes
