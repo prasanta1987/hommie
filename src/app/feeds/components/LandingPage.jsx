@@ -26,11 +26,11 @@ const LandingPage = ({ userDbData, userData }) => {
       // .filter(([key]) => key !== 'display')
       .map(([key, data]) => ({
         deviceCode: data.deviceCode,
-        deviceName: data.deviceName
+        deviceName: data.deviceName,
+        deviceType: data.deviceType || "ESP8266"
       }));
     setDevices(deviceList);
 
-    console.log(deviceList)
     if (deviceList.length > 0 && !selectedDeviceCode) {
       setSelectedDeviceCode(deviceList[0].deviceCode);
     }

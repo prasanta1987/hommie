@@ -5,7 +5,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SiArduino } from "react-icons/si";
 import { useState } from 'react';
 
-import { esp32Imports, esp32Code, esp8266Imports, esp8266Code } from '../../miscFunctions/arduinoCode';
+import { esp32Imports, esp32Code, esp8266Imports, esp8266Code } from '@/app/miscFunctions/arduinoCode';
 
 export default function ArduinoCode({ apiKey }) {
 

@@ -13,16 +13,20 @@ export default function FeedModal({
     const [feedType, setFeedType] = useState('Card');
     const [minValue, setMinValue] = useState(0);
     const [maxValue, setMaxValue] = useState(100);
-    const [mcuType, setMcuType] = useState('ESP32');
     const [GPIO, setGPIO] = useState(0);
     const [rPIN, setRPIN] = useState(0);
     const [gPIN, setGPIN] = useState(0);
     const [bPIN, setBPIN] = useState(0);
-
     const [pinDescription, setPinDescription] = useState('');
-    const currentSafePins = mcuTypes[mcuType || "ESP8266"].safeGPIOs;
+    // const [mcuType, setMcuType] = useState('');
+
 
     if (!isOpen) return null;
+
+    const selectedMcu = Object.values(devices).find(data => data.deviceCode === selectedDeviceCode);
+    const mcuType = (selectedMcu?.deviceType || 'ESP8266');
+    const currentSafePins = mcuTypes[mcuType].safeGPIOs;
+
 
 
     const handleCreateFeed = () => {
@@ -51,7 +55,6 @@ export default function FeedModal({
             }
             newFeed.GPIO = parseInt(GPIO);
             newFeed.value = 0;
-            newFeed.mcu = mcuType;
         }
 
         if (feedType === 'Colour') {
@@ -62,7 +65,6 @@ export default function FeedModal({
             newFeed.rPIN = parseInt(rPIN);
             newFeed.gPIN = parseInt(gPIN);
             newFeed.bPIN = parseInt(bPIN);
-            newFeed.mcu = mcuType;
             newFeed.value = "#2576b9";
         }
 
@@ -80,7 +82,7 @@ export default function FeedModal({
         <Modal show={isOpen} onHide={setShowModal} centered data-bs-theme="dark" size='lg'>
             <Modal.Header closeButton>
                 <Modal.Title>
-                    Create New Feed
+                    Create New Feeds
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
