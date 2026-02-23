@@ -68,9 +68,8 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
     };
 
     useEffect(() => {
-        if (!boardData.deviceType) {
-            setShowModal(true);
-        }
+        if (!boardData.deviceType) setShowModal(true);
+        setDeviceType(boardData.deviceType);
     }, [boardData])
 
     return (
@@ -132,7 +131,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
                         </Form.Group>
 
                         <Form.Group className="w-100 mb-3">
-                            <Form.Label className={(deviceType=="Select MCU" || !boardData.deviceType) && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
+                            <Form.Label className={(deviceType == "Select MCU" || !boardData.deviceType) && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
                             <Form.Select
                                 value={deviceType || boardData.deviceType}
                                 className={!deviceType && 'border-danger'}
