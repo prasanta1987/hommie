@@ -7,11 +7,13 @@ import AppNavbar from './components/Navbar.jsx';
 
 const inter = Inter({ subsets: ["latin"] });
 
-{/* <meta name="google-site-verification" content="k_-75L4T1YQTQDm61h9Aazvkn1u_MmddZy7vSGy6MNk" /> */ }
 
 export const metadata = {
   title: "Hommie",
   description: "A Simple IOT Project",
+  icons: {
+    icon: '/icon.png', // Path to your image in the public folder
+  },
   verification: {
     google: "k_-75L4T1YQTQDm61h9Aazvkn1u_MmddZy7vSGy6MNk",
   },
