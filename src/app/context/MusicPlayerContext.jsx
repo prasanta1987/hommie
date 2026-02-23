@@ -17,7 +17,7 @@ export function MusicPlayerProvider({ children }) {
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [shuffle, setShuffle] = useState(false);
+  const [shuffle, setShuffle] = useState(true);
   const audioRef = useRef(null);
 
   const searchSong = useCallback(async (e) => {
