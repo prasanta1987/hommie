@@ -63,8 +63,8 @@ export default function ArduinoCode({ apiKey }) {
                         <Tab className="w-100" eventKey="SSE" title="SSE">
                             <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
                                 {codeSelectedText === 'ESP32'
-                                    ? `${esp32Imports}\n#define apiKey = "${apiKey}";${esp32Code}`
-                                    : `${esp8266Imports}\n#define apiKey = "${apiKey}";${esp8266Code}`
+                                    ? `${esp32Imports}\n#define apiKey "${apiKey}";${esp32Code}`
+                                    : `${esp8266Imports}\n#define apiKey "${apiKey}";${esp8266Code}`
                                 }
                             </SyntaxHighlighter>
                         </Tab>

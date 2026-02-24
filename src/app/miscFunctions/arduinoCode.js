@@ -26,7 +26,7 @@ const esp8266Imports = String.raw
 
 const esp32Code = String.raw
   `
-#define hostUrl = "https://hommily.vercel.app/api/iot";
+#define hostUrl "https://hommily.vercel.app/api/iot";
 
 HommilyIoT iot;
 
