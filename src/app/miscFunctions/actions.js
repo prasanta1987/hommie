@@ -75,8 +75,8 @@ const handleSignUp = async (email, password, displayName, setError) => {
 
       const multiUpdate = {};
 
-      multiUpdate[`userCred/UIDtoAPI/${userCredential.user.uid}`] = apiKey;
-      multiUpdate[`userCred/APItoUID/${apiKey}`] = userCredential.user.uid;
+      multiUpdate[`userCred/UIDtoAPI/${user.uid}/fbAPIKey`] = newKey;
+      multiUpdate[`userCred/APItoUID/${newKey}/fbUID`] = user.uid;
 
       updateValuesToDatabase(`/`, multiUpdate);
 

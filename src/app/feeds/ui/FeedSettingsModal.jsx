@@ -64,6 +64,7 @@ export default function FeedSettingsModal({
     }
 
     const handleDeleteFeed = (feedName, uid, deviceCode) => {
+        if (!confirm("Are Sure Want to Delete?")) return;
         setValueToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`, null);
         setShowModal(false);
     }
