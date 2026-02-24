@@ -4,7 +4,8 @@
 
 :root {
   --primary-color: #6a20c2;
-  --secondary-color: #3f0f7f;
+  --secondary-color: #d521bf;
+  --end-colour:#2bbfc9;
   --background-color: #121212;
   --text-color: #ffffff;
   --card-background: #1e1e1e;
@@ -35,7 +36,7 @@
   font-size: 4rem;
   font-weight: 700;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--end-colour));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }

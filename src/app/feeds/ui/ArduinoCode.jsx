@@ -5,7 +5,10 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { SiArduino } from "react-icons/si";
 import { useState } from 'react';
 
-import { esp32Imports, esp32Code, esp8266Imports, esp8266Code } from '@/app/miscFunctions/arduinoCode';
+import {
+    esp32Imports, esp32Code, esp32Class,
+    esp8266Imports, esp8266Code, esp8266Class
+} from '@/app/miscFunctions/arduinoCode';
 
 export default function ArduinoCode({ apiKey }) {
 
@@ -26,7 +29,9 @@ export default function ArduinoCode({ apiKey }) {
 
     const handleCopyCode = () => {
 
-        let variableData = codeSelectedText == 'ESP32' ? esp32Code : esp8266Code
+        let variableData = codeSelectedText == 'ESP32'
+            ? `${esp32Imports}+${esp32Code}+${esp32Class}`
+            : `${esp8266Imports}+${esp8266Code}+${esp8266Class}`
 
         navigator.clipboard.writeText(variableData).then(() => {
             setShowModal(false);;
@@ -58,13 +63,18 @@ export default function ArduinoCode({ apiKey }) {
                         <Tab className="w-100" eventKey="SSE" title="SSE">
                             <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
                                 {codeSelectedText === 'ESP32'
-                                    ? `${esp32Imports}\nString apiKey = "${apiKey}";\n${esp32Code}`
-                                    : `${esp8266Imports}\nString apiKey = "${apiKey}";\n${esp8266Code}`
+                                    ? `${esp32Imports}\n#define apiKey = "${apiKey}";${esp32Code}`
+                                    : `${esp8266Imports}\n#define apiKey = "${apiKey}";${esp8266Code}`
                                 }
                             </SyntaxHighlighter>
                         </Tab>
-                        <Tab className="w-100" eventKey="Data Send" title="Data Send">
-                            Coming Soon...
+                        <Tab className="w-100" eventKey="Data Send" title="Hommily.h">
+                            <SyntaxHighlighter language="arduino" style={vscDarkPlus}>
+                                {codeSelectedText === 'ESP32'
+                                    ? esp32Class
+                                    : "Coming Soon"
+                                }
+                            </SyntaxHighlighter>
                         </Tab>
                     </Tabs>
                 </Modal.Body>
