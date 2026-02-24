@@ -10,10 +10,11 @@ import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { FiLogOut, FiLogIn } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import Link from 'next/link';
-import { regenerateApiKey, deleteUserAccount } from '@/app/miscFunctions/actions';
-import SignIn from './sign-in';
+import { regenerateApiKey } from '@/app/miscFunctions/actions';
 import './NavBar.css'
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
+import SingInModal from '@/app/components/ui/signInModal';
+import { updateValuesToDatabase } from '@/app/miscFunctions/actions';
 
 import ArduinoCode from '@/app/feeds/ui/ArduinoCode'
 
@@ -22,7 +23,7 @@ const AppNavbar = () => {
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [apiKeyBTN, setIsApiKeyBTN] = useState(false);
-
+  const [userDelMode, setUserDelMode] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
   const { data: apiKey, loading: dataLoading } = useRTDB(
@@ -50,6 +51,34 @@ const AppNavbar = () => {
       console.log(error);
     });
   }
+
+
+  const deleteUserAccount = async (user, apiKey) => {
+
+
+    if (!user) return;
+
+    if (apiKey) {
+      const uid = user.uid;
+
+      const multiUpdate = {};
+      multiUpdate[`userCred/UIDtoAPI/${uid}`] = null;
+      multiUpdate[`userCred/APItoUID/${apiKey}`] = null;
+      multiUpdate[uid] = null;
+
+      await updateValuesToDatabase(`/`, multiUpdate);
+    }
+
+    try {
+
+      await user.delete();
+
+    }
+    catch (error) {
+      setUserDelMode(true);
+      setShowSignInModal(true);
+    }
+  };
 
 
   return (
@@ -140,7 +169,7 @@ const AppNavbar = () => {
         <Modal.Footer className='d-flex justify-content-between'>
           <Button variant='danger' onClick={(e) => {
             e.preventDefault();
-            deleteUserAccount(user, setShowProfileModal, setUser);
+            deleteUserAccount(user, apiKey, setShowProfileModal);
           }}>
             Delete Account
           </Button>
@@ -150,14 +179,12 @@ const AppNavbar = () => {
         </Modal.Footer>
       </Modal>
 
-      <Modal show={showSignInModal} onHide={() => setShowSignInModal(false)} centered data-bs-theme="dark">
-        <Modal.Header closeButton>
-          {/* <Modal.Title>{isSignUp ? 'Create an Account' : 'Sign In'}</Modal.Title> */}
-        </Modal.Header>
-        <Modal.Body>
-          <SignIn />
-        </Modal.Body>
-      </Modal>
+      <SingInModal
+        showSignInModal={showSignInModal}
+        setShowSignInModal={setShowSignInModal}
+        userDelMode={userDelMode}
+      />
+
     </>
   );
 };

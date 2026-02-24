@@ -1,9 +1,10 @@
 import { Modal, Form, Button, Navbar, Nav, Container } from 'react-bootstrap';
 import { useState } from 'react';
 import { handleSignIn, handleSignUp, getFirebaseErrorMessage } from '@/app/miscFunctions/actions';
+import { EmailAuthProvider, reauthenticateWithCredential, deleteUser } from "firebase/auth";
 
 export default function SingInModal({
-    showSignInModal, setShowSignInModal, userDelMode
+    showSignInModal, setShowSignInModal
 }) {
 
 
@@ -16,14 +17,19 @@ export default function SingInModal({
 
     const singInHandler = async (e) => {
         e.preventDefault();
-        handleSignIn(email, password)
-            .then(() => {
-                setError(null);
-            })
-            .catch((error) => {
-                setError(getFirebaseErrorMessage(error.code));
-            });
+        setError(null);
+
+        try {
+            await handleSignIn(email, password);
+        } catch (error) {
+            console.log(error.code);
+            const message = getFirebaseErrorMessage(error.code);
+            console.log(message);
+            setError(message);
+        }
     }
+
+
     const handleSubmit = (e) => {
         if (isSignUp) {
             singUpHandler(e);
@@ -42,6 +48,18 @@ export default function SingInModal({
                 console.error(error);
                 setError(getFirebaseErrorMessage(error.code));
             });
+    }
+
+    const deleteUser = async () => {
+        if (!email || !password) {
+            alert('Email and Password Required')
+            return;
+        };
+
+        const credential = EmailAuthProvider.credential(user.email, password); // You need the user's password
+        await reauthenticateWithCredential(user, credential);
+        await deleteUser(user);
+
     }
 
 
@@ -92,16 +110,6 @@ export default function SingInModal({
                             {isSignUp ? 'Sign Up' : 'Sign In'}
                         </button>
                     </div>
-                    {
-                        !userDelMode &&
-                        <p className="mt-3 text-center">
-                            {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                            <a href="#" onClick={(e) => { e.preventDefault(); setIsSignUp(!isSignUp); }}>
-                                {isSignUp ? 'Sign In' : 'Sign Up'}
-                            </a>
-                        </p>
-                    }
-
                 </form>
             </Modal.Body>
         </Modal>

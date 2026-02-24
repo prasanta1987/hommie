@@ -11,7 +11,7 @@ import { randomBytes } from 'crypto';
 import { getAuth } from 'firebase/auth';
 
 
-const regenerateApiKey = (apiKey, setIsApiKeyBTN, user) => {
+const regenerateApiKey = async (apiKey, setIsApiKeyBTN, user) => {
 
   setIsApiKeyBTN(true);
 
@@ -28,7 +28,7 @@ const regenerateApiKey = (apiKey, setIsApiKeyBTN, user) => {
   }
 
   // CRITICAL: Call the update on the root of the database
-  updateValuesToDatabase("/", multiUpdate);
+  await updateValuesToDatabase("/", multiUpdate);
 
   setTimeout(() => {
     setIsApiKeyBTN(false);
@@ -37,14 +37,14 @@ const regenerateApiKey = (apiKey, setIsApiKeyBTN, user) => {
 }
 
 
-function updateValuesToDatabase(reference, feed) {
+const updateValuesToDatabase = async (reference, feed) => {
   const dbRef = ref(db, reference);
   update(dbRef, feed)
     .then(() => console.log('Data Written Successfully'))
     .catch(err => console.log(err));
 }
 
-const setValueToDatabase = (reference, feed) => {
+const setValueToDatabase = async (reference, feed) => {
   const dbRef = ref(db, reference);
   set(dbRef, feed)
     .then(() => console.log('Data Written Successfully'))
@@ -55,7 +55,7 @@ const handleSignIn = async (email, password) => {
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
-    console.error(error);
+    throw error
   }
 };
 
@@ -72,29 +72,31 @@ const handleSignUp = async (email, password, displayName, setError) => {
 
     try {
       const apiKey = randomBytes(16).toString('hex');
+      const user = userCredential.user;
 
       const multiUpdate = {};
 
-      multiUpdate[`userCred/UIDtoAPI/${user.uid}/fbAPIKey`] = newKey;
-      multiUpdate[`userCred/APItoUID/${newKey}/fbUID`] = user.uid;
+      multiUpdate[`userCred/UIDtoAPI/${user.uid}/fbAPIKey`] = apiKey;
+      multiUpdate[`userCred/APItoUID/${apiKey}/fbUID`] = user.uid;
 
       updateValuesToDatabase(`/`, multiUpdate);
 
     } catch (error) {
       deleteUser(userCredential.user);
       setError('An error occurred while generating the API key.');
+      throw error
     }
 
   } catch (error) {
-    setError(getFirebaseErrorMessage(error.code));
     console.error(error);
+    throw error
   }
 };
 
-const getFirebaseErrorMessage = (errorCode) => {
-  switch (errorCode) {
-    case 'auth/invalid-email':
-      return 'Invalid email address.';
+const getFirebaseErrorMessage = (code) => {
+  switch (code) {
+    case 'auth/invalid-credential':
+      return 'Invalid Credentials.';
     case 'auth/user-disabled':
       return 'This account has been disabled.';
     case 'auth/user-not-found':
@@ -106,45 +108,15 @@ const getFirebaseErrorMessage = (errorCode) => {
     case 'auth/weak-password':
       return 'Password should be at least 6 characters.';
     default:
-      return 'An unexpected error occurred. Please try again.';
+      return code;
   }
 };
 
-const deleteUserAccount = (user, setShowProfileModal) => {
-  if (user) {
-    const uid = user.uid;
-    const keyRef = ref(db, `userCred/UIDtoAPI/${uid}`);
 
-    get(keyRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        const apiKey = snapshot.val();
-        const multiUpdate = {};
-        multiUpdate[`userCred/UIDtoAPI/${uid}`] = null;
-        multiUpdate[`userCred/APItoUID/${apiKey}`] = null;
-        multiUpdate[uid] = null;
-
-        updateValuesToDatabase(`/`, multiUpdate);
-      } else {
-        console.log('No API key found for this user.');
-      }
-    }).catch((error) => {
-      console.log(error);
-    });
-
-    user.delete().then(() => {
-      console.log('User account deleted successfully.');
-    }).catch((error) => {
-      console.log('Error deleting user account:', error);
-    });
-
-
-    setShowProfileModal(false);
-  }
-};
 
 export {
   handleSignUp, handleSignIn,
   updateValuesToDatabase, setValueToDatabase,
   getFirebaseErrorMessage, regenerateApiKey,
-  updateProfile, deleteUserAccount
+  updateProfile
 }
