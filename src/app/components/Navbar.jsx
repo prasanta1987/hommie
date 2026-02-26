@@ -97,6 +97,7 @@ const AppNavbar = () => {
               {user && <Nav.Link as={Link} href="/photos" className="text-light">Photos</Nav.Link>}
               <Nav.Link as={Link} href="/music" className="text-light">Music</Nav.Link>
               <Nav.Link as={Link} href="/drawing" className="text-light">Drawing</Nav.Link>
+              <Nav.Link as={Link} href="/quiz" className="text-light">Quizzes</Nav.Link>
             </Nav>
             <Nav>
               <div className='d-flex gap-2 align-items-center'>
