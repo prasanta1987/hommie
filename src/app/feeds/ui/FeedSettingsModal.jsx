@@ -69,8 +69,21 @@ export default function FeedSettingsModal({
         setShowModal(false);
     }
 
+    const closeModal = () => {
+        setShowModal(false);
+        setFeedType(feed.type || 'Card');
+        setMinValue(feed.rangeMin || 0);
+        setMaxValue(feed.rangeMax || 100);
+        setIsSwapped(feed.isSwapped || false);
+        setGPIO(feed.GPIO || 0);
+        setRPIN(feed.rPIN || 0);
+        setGPIN(feed.gPIN || 0);
+        setBPIN(feed.bPIN || 0);
+        setPinDescription('');
+    }
+
     return (
-        <Modal show={isOpen} onHide={setShowModal} centered data-bs-theme="dark" size='lg'>
+        <Modal show={isOpen} onHide={closeModal} centered data-bs-theme="dark" size='lg'>
             <Modal.Header closeButton>
                 <Modal.Title>
                     {feedName} Settings
