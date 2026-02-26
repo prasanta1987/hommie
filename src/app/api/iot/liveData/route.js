@@ -7,7 +7,7 @@ export async function GET(request) {
     const deviceCode = searchParams.get('deviceCode');
     const feedName = searchParams.get('feedName');
 
-    if (!apiKey || !deviceCode || !feedName) {
+    if (!apiKey || !deviceCode) {
         return NextResponse.json({ error: 'Missing apiKey or deviceCode or feedName' }, { status: 400 });
     }
 
@@ -34,41 +34,48 @@ export async function GET(request) {
 
     const readableStream = new ReadableStream({
         start(controller) {
-            if (feedName === "display") {
+            let dbRef;
+            const keysToRemove = ['isSelected', "time"];
+            const typesToRemove = ['Gauge'];
+
+            if (feedName && feedName === "display") {
                 dbRef = db.ref(`${userUID}/${deviceCode}/display/`);
-            } else if (feedName !== "all") {
-                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
-            } else {
+            } else if (!feedName || feedName == 'all') {
                 dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/`);
+            } else {
+                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
             }
 
             const listener = dbRef.on('value', (snapshot) => {
                 let data = snapshot.val();
-                const keysToRemove = ['isSelected', "time"];
+                if (!data) return controller.enqueue(`data: null\n\n`);
 
+                let processedData;
 
-                if (feedName === "all") {
-
-                    data = Object.fromEntries(
-                        Object.entries(data).map(([key, value]) => {
-                            const filteredValue = Object.fromEntries(
-                                Object.entries(value).filter(([innerKey]) => !keysToRemove.includes(innerKey))
-                            );
-                            return [key, filteredValue];
-                        })
-                    );
+                // 2. Structural handling based on the scope of data loaded
+                if (!feedName || feedName === "all") {
+                    processedData = {};
+                    Object.entries(data).forEach(([key, feed]) => {
+                        // Filter by type and clean keys for the bulk object
+                        if (feed && feed.type && !typesToRemove.includes(feed.type)) {
+                            const cleanedFeed = { ...feed };
+                            keysToRemove.forEach(k => delete cleanedFeed[k]);
+                            processedData[key] = cleanedFeed;
+                        }
+                    });
                 } else {
-                    data && typeof data === 'object' && keysToRemove.forEach(key => delete data[key]);
+                    // Single object handling (for "display" or a specific feedName)
+                    processedData = typeof data === 'object' ? { ...data } : data;
+                    
+                    if (typeof processedData === 'object' && processedData !== null) {
+                        keysToRemove.forEach(k => delete processedData[k]);
+                    }
                 }
 
-                controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
-
-
-
+                controller.enqueue(`data: ${JSON.stringify(processedData)}\n\n`);
             }, (error) => {
                 console.error("Firebase listener error:", error);
                 controller.error(error);
-                controller.close();
             });
 
             const intervalId = setInterval(() => {
@@ -79,11 +86,7 @@ export async function GET(request) {
                 dbRef.off('value', listener);
                 clearInterval(intervalId);
                 controller.close();
-                console.log("Client disconnected, stream closed.");
             });
-        },
-        cancel(reason) {
-            console.log("Stream canceled:", reason);
         }
     });
 

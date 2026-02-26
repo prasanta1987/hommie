@@ -10,7 +10,7 @@ export const GET = withAuth(async (request) => {
     // Get the UID passed from our middleware
     const userUID = request.userUID;
 
-    if (!deviceCode || !feedName) {
+    if (!deviceCode) {
         return Response.json({ error: 'Missing deviceCode or feedName' }, { status: 400 });
     }
 
@@ -22,35 +22,51 @@ export const GET = withAuth(async (request) => {
     const readableStream = new ReadableStream({
         start(controller) {
             let dbRef;
+            const keysToRemove = ['isSelected', "time"];
+            const typesToRemove = ['Gauge'];
+
             if (feedName === "display") {
                 dbRef = db.ref(`${userUID}/${deviceCode}/display/`);
-            } else if (feedName !== "all") {
-                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
-            } else {
+            } else if (!feedName || feedName == 'all') {
                 dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/`);
+            } else {
+                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
             }
 
             const listener = dbRef.on('value', (snapshot) => {
                 let data = snapshot.val();
-                const keysToRemove = ['isSelected', "time"];
+                if (!data) return controller.enqueue(`data: null\n\n`);
 
-                if (data && typeof data === 'object') {
-                    if (feedName === "all") {
-                        data = Object.fromEntries(
-                            Object.entries(data).map(([key, value]) => [
-                                key,
-                                Object.fromEntries(Object.entries(value).filter(([k]) => !keysToRemove.includes(k)))
-                            ])
-                        );
-                    } else {
-                        keysToRemove.forEach(key => delete data[key]);
+                let processedData;
+
+                // 2. Structural handling based on the scope of data loaded
+                if (!feedName || feedName === "all") {
+                    processedData = {};
+                    Object.entries(data).forEach(([key, feed]) => {
+                        // Filter by type and clean keys for the bulk object
+                        if (feed && feed.type && !typesToRemove.includes(feed.type)) {
+                            const cleanedFeed = { ...feed };
+                            keysToRemove.forEach(k => delete cleanedFeed[k]);
+                            processedData[key] = cleanedFeed;
+                        }
+                    });
+                } else {
+                    // Single object handling (for "display" or a specific feedName)
+                    processedData = typeof data === 'object' ? { ...data } : data;
+                    if (typeof processedData === 'object' && processedData !== null) {
+                        keysToRemove.forEach(k => delete processedData[k]);
                     }
                 }
 
-                controller.enqueue(`data: ${JSON.stringify(data)}\n\n`);
+                controller.enqueue(`data: ${JSON.stringify(processedData)}\n\n`);
+            }, (error) => {
+                console.error("Firebase listener error:", error);
+                controller.error(error);
             });
 
-            const intervalId = setInterval(() => controller.enqueue(': heartbeat\n\n'), 15000);
+            const intervalId = setInterval(() => {
+                controller.enqueue(': heartbeat\n\n');
+            }, 10000);
 
             request.signal.addEventListener('abort', () => {
                 dbRef.off('value', listener);
@@ -59,6 +75,7 @@ export const GET = withAuth(async (request) => {
             });
         }
     });
+
 
     return new Response(readableStream, {
         headers: {
