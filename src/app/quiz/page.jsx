@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { db } from '@/firebaseConfig/config';
-import { ref, onValue } from 'firebase/database';
 import { setValueToDatabase } from '@/app/miscFunctions/actions';
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
+import { Spinner } from 'react-bootstrap';
+import { FiEdit3, FiTrash2 } from 'react-icons/fi'
 
 export default function QuizPage() {
     const [quizzes, setQuizzes] = useState([]);
@@ -13,7 +13,6 @@ export default function QuizPage() {
     const { user, loading, error } = useAuth();
     const { data, loading: dataLoading, error: dataError } = useRTDB(`quizzes`);
 
-    // 1. Fetch live data for the table
     useEffect(() => {
 
         if (data) {
@@ -63,6 +62,16 @@ export default function QuizPage() {
             await setValueToDatabase(reference, null);
         }
     };
+
+
+    if (dataLoading) {
+        return (
+            <div className='text-center bg-dark flex-grow-1 d-flex justify-content-center align-items-center'>
+                <Spinner animation="grow" variant="info" size="lg" />
+            </div>
+        );
+    }
+
 
     return (
         <div className="container py-5">
@@ -122,22 +131,26 @@ export default function QuizPage() {
                             <tr>
                                 <th>Type</th>
                                 <th>Question</th>
-                                <th>Options</th>
+                                <th className='d-none d-md-table-cell'>Options</th>
                                 <th>Answer</th>
                                 <th className="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {quizzes.map((q) => (
-                                <tr key={q.id}>
+                                <tr className='' key={q.id}>
                                     <td><span className="badge bg-info text-dark">{q.type}</span></td>
                                     <td className="fw-bold">{q.question}</td>
-                                    <td><small>{q.a} | {q.b} | {q.c}</small></td>
+                                    <td className='d-none d-md-table-cell'><small>{q.a} | {q.b} | {q.c}</small></td>
                                     <td className="text-success fw-bold">{q.answer}</td>
                                     <td className="text-center">
                                         <div className="btn-group">
-                                            <button onClick={() => handleEdit(q)} className="btn btn-sm btn-outline-primary">Edit</button>
-                                            <button onClick={() => handleDelete(q.id)} className="btn btn-sm btn-outline-danger">Delete</button>
+                                            <button onClick={() => handleEdit(q)} className="btn btn-sm btn-outline-primary">
+                                                <FiEdit3 />
+                                            </button>
+                                            <button onClick={() => handleDelete(q.id)} className="btn btn-sm btn-outline-danger">
+                                                <FiTrash2 />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
