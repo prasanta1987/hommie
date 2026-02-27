@@ -22,7 +22,6 @@ export default function QuizPage() {
                 // Map each quiz in this category
                 return Object.keys(categoryData).map(quizId => ({
                     id: quizId,
-                    category: category, // useful for filtering
                     ...categoryData[quizId]
                 }));
             });
@@ -65,10 +64,10 @@ export default function QuizPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll up to the form
     };
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (q) => {
         if (confirm("Are you sure you want to delete this question?")) {
-            const reference = `quizzes/${id}`;
-            // Using your helper to set value to null for deletion
+            const reference = `quizzes/${q.type}/${q.id}`;
+
             await setValueToDatabase(reference, null);
         }
     };
@@ -158,7 +157,7 @@ export default function QuizPage() {
                                             <button onClick={() => handleEdit(q)} className="btn btn-sm btn-outline-primary">
                                                 <FiEdit3 />
                                             </button>
-                                            <button onClick={() => handleDelete(q.id)} className="btn btn-sm btn-outline-danger">
+                                            <button onClick={() => handleDelete(q)} className="btn btn-sm btn-outline-danger">
                                                 <FiTrash2 />
                                             </button>
                                         </div>

@@ -1,3 +1,9 @@
-.active{
+.active {
     font-weight: bold;
+}
+
+.dpName {
+    background: linear-gradient(90deg, #00ffe7, #edf32c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }

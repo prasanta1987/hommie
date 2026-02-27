@@ -85,7 +85,7 @@ const AppNavbar = () => {
     <>
       <Navbar style={{ backgroundColor: '#21344f', boxShadow: '0px 2px 4px 1px #000' }} className='navbar-dark' expand="md" sticky="top">
         <Container>
-          <Navbar.Brand as={Link} href="/" className='text-info'>
+          <Navbar.Brand as={Link} href="/" className='dpName'>
             {user ? ` ${displayName ? displayName : user.displayName || user.email}` : 'Hommie'}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
