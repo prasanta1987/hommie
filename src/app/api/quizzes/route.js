@@ -4,7 +4,7 @@ import admin from '@/firebaseConfig/adminConfig';
 export async function GET(req) {
     try {
         const { searchParams } = new URL(req.url);
-        const category = searchParams.get('category');
+        const category = searchParams.get('category').toLowerCase();
 
         const db = admin.database();
         
