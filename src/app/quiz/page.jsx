@@ -15,16 +15,24 @@ export default function QuizPage() {
 
     useEffect(() => {
         if (data) {
-            // Flatten the nested categories into a single array
-            const allQuizzes = Object.keys(data).flatMap(category => {
-                const categoryData = data[category];
+            // Flatten the categories (math, spelling, etc.) into a single array
+            const allQuizzes = Object.keys(data).flatMap(categoryName => {
+                const categoryData = data[categoryName];
 
-                // Map each quiz in this category
-                return Object.keys(categoryData).map(quizId => ({
-                    id: quizId,
-                    ...categoryData[quizId]
-                }));
+                // Convert each quiz object into an array element
+                return Object.keys(categoryData).map(quizId => {
+                    // Destructure to EXCLUDE the "type" property from the original data
+                    const { type, ...restOfData } = categoryData[quizId];
+
+                    return {
+                        id: quizId,
+                        category: categoryName, // Use the folder name instead
+                        ...restOfData           // Only include question, a, b, c, answer
+                    };
+                });
             });
+
+            // reverse() ensures newest entries appear first in the summary
 
             setQuizzes(allQuizzes.reverse());
         } else {
@@ -33,16 +41,19 @@ export default function QuizPage() {
     }, [data]);
 
 
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.answer) return alert("Please select the correct answer!");
 
-        // If editing, use the old ID; if new, generate a timestamp ID
+        const { type, ...rest } = form;
+
         const id = editingId || `q_${Date.now()}`;
-        const reference = `quizzes/${form.type}/${id}`;
+        const reference = `quizzes/${type}/${id}`;
 
         try {
-            await setValueToDatabase(reference, form);
+            await setValueToDatabase(reference, rest);
             alert(editingId ? "Question Updated!" : "Question Saved!");
             setForm({ type: 'math', question: '', a: '', b: '', c: '', answer: '' });
             setEditingId(null);
@@ -53,7 +64,7 @@ export default function QuizPage() {
 
     const handleEdit = (quiz) => {
         setForm({
-            type: quiz.type,
+            type: quiz.category,
             question: quiz.question,
             a: quiz.a,
             b: quiz.b,
@@ -148,7 +159,7 @@ export default function QuizPage() {
                         <tbody>
                             {quizzes.map((q) => (
                                 <tr className='' key={q.id}>
-                                    <td><span className="badge bg-info text-dark">{q.type}</span></td>
+                                    <td><span className="badge bg-info text-dark">{q.category}</span></td>
                                     <td className="fw-bold">{q.question}</td>
                                     <td className='d-none d-md-table-cell'><small>{q.a} | {q.b} | {q.c}</small></td>
                                     <td className="text-success fw-bold">{q.answer}</td>
