@@ -14,15 +14,25 @@ export default function QuizPage() {
     const { data, loading: dataLoading, error: dataError } = useRTDB(`quizzes`);
 
     useEffect(() => {
-
         if (data) {
-            const list = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            setQuizzes(list.reverse());
+            // Flatten the nested categories into a single array
+            const allQuizzes = Object.keys(data).flatMap(category => {
+                const categoryData = data[category];
+
+                // Map each quiz in this category
+                return Object.keys(categoryData).map(quizId => ({
+                    id: quizId,
+                    category: category, // useful for filtering
+                    ...categoryData[quizId]
+                }));
+            });
+
+            setQuizzes(allQuizzes.reverse());
         } else {
             setQuizzes([]);
         }
-
     }, [data]);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -30,7 +40,7 @@ export default function QuizPage() {
 
         // If editing, use the old ID; if new, generate a timestamp ID
         const id = editingId || `q_${Date.now()}`;
-        const reference = `quizzes/${id}`;
+        const reference = `quizzes/${form.type}/${id}`;
 
         try {
             await setValueToDatabase(reference, form);
