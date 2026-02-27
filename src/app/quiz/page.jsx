@@ -77,7 +77,7 @@ export default function QuizPage() {
 
     const handleDelete = async (q) => {
         if (confirm("Are you sure you want to delete this question?")) {
-            const reference = `quizzes/${q.type}/${q.id}`;
+            const reference = `quizzes/${q.category}/${q.id}`;
 
             await setValueToDatabase(reference, null);
         }
