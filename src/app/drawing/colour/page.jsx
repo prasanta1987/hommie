@@ -55,7 +55,7 @@ export default function TftColorApp() {
           {/* RGB SECTION */}
           <div className="list-group-item bg-transparent text-white border-secondary">
             <small className="text-secondary d-block">RGB VALUES</small>
-            <span className="h4 font-monospace text-info">
+            <span className="h4 font-monospace text-light">
               {r}, {g}, {b}
             </span>
           </div>
