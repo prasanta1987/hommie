@@ -4,10 +4,12 @@ import admin from '@/firebaseConfig/adminConfig';
 export async function GET(req) {
     try {
         const { searchParams } = new URL(req.url);
-        const category = searchParams.get('category').toLowerCase();
+        const category = searchParams.get('category')?.toLowerCase();
 
         const db = admin.database();
 
+        // 1. Determine the reference path
+        // If category is 'all' or null, we fetch the whole 'quizzes' node
         const path = (category && category !== 'all') ? `quizzes/${category}` : `quizzes`;
         const ref = db.ref(path);
         const snapshot = await ref.once('value');
