@@ -18,7 +18,19 @@ export async function GET(request) {
   try {
     const response = await fetch(url);
     const data = await response.json();
-    return NextResponse.json(data);
+
+    let filteredData = {};
+
+    filteredData.name = data.location.name;
+    filteredData.temp = data.current.temp_c;
+    filteredData.feelsLike = data.current.feelslike_c;
+    filteredData.condition = data.current.condition.text;
+    filteredData.pressureMB = data.current.pressure_mb;
+    filteredData.humidity = data.current.humidity;
+    filteredData.uv = data.current.uv;
+
+
+    return NextResponse.json(filteredData);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch weather data' }, { status: 500 });
   }

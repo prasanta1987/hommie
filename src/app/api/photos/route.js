@@ -9,7 +9,7 @@ export async function GET(request) {
     const apiKey = searchParams.get('apiKey');
     const limit = parseInt(searchParams.get('limit') || '12');
     const skip = parseInt(searchParams.get('skip') || '0');
-    const tag = searchParams.get('tags'); // Fetch tag from query params
+    const tag = searchParams.get('tags');
 
 
     if (!apiKey) {
