@@ -318,6 +318,11 @@ tft.drawCentreString("START", 160, 112);
 
 `);
 
+    useEffect(() => {
+        // Dynamic import inside useEffect ensures window/document exist
+        require("bootstrap/dist/js/bootstrap.bundle.min.js");
+    }, []);
+
     const runCode = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -335,63 +340,119 @@ tft.drawCentreString("START", 160, 112);
     };
 
     return (
-        <div className="container-fluid py-4 bg-dark text-light">
-            <div className="row justify-content-center">
-                {/* <div className="col-12 text-center mb-4">
+        <>
+            <div className="container-fluid py-4 bg-dark text-light">
+                <div className="row justify-content-center">
+                    {/* <div className="col-12 text-center mb-4">
                     <h2 className="display-6 fw-bold border-bottom pb-2 d-inline-block">
                         TFT_eSPI <span className="text-info">Simulator</span>
                     </h2>
                 </div> */}
 
-                <div className="col-lg-8 mb-4">
-                    <div className="card bg-black border-secondary shadow">
-                        <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                            <span className="font-monospace small">sketch.ino (JS Mode)</span>
-                            <button
-                                onClick={runCode}
-                                className="btn btn-primary btn-sm px-4 fw-bold"
-                            >
-                                ▶ Run Code
-                            </button>
-                        </div>
-                        <div className="card-body p-0">
-                            <textarea
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
-                                className="form-control bg-black text-success border-0 font-monospace p-3"
-                                style={{ height: '400px', resize: 'none', outline: 'none' }}
-                                spellCheck="false"
-                            />
+                    <div className="col-lg-8 mb-4">
+                        <div className="card bg-black border-secondary shadow">
+                            <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                                <span className="font-monospace small">sketch.ino (JS Mode)</span>
+                                <div>
+                                    <button
+                                        className="btn btn-info btn-sm me-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#methodsModal"
+                                    >
+                                        📋 Library Methods
+                                    </button>
+
+                                    <button
+                                        onClick={runCode}
+                                        className="btn btn-primary btn-sm px-4 fw-bold"
+                                    >
+                                        ▶ Run Code
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="card-body p-0">
+                                <textarea
+                                    value={code}
+                                    onChange={(e) => setCode(e.target.value)}
+                                    className="form-control bg-black text-success border-0 font-monospace p-3"
+                                    style={{ height: '400px', resize: 'none', outline: 'none' }}
+                                    spellCheck="false"
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="col-lg-4 text-center">
-                    <div className="sticky-top" style={{ top: '20px' }}>
-                        <p className="text-secondary small mb-2 uppercase fw-bold">Output: 320x240 px</p>
-                        <div
-                            className="d-inline-block shadow-lg border border-4 border-secondary rounded"
-                            style={{ lineHeight: 0 }}
-                        >
-                            <canvas
-                                ref={canvasRef}
-                                width={320}
-                                height={240}
-                                className="bg-black rounded-1"
-                            />
-                        </div>
-                        <div className="mt-3 text-start bg-secondary bg-opacity-10 p-3 rounded border border-secondary border-opacity-25">
-                            <h6 className="text-info">Quick Reference:</h6>
-                            <ul className="list-unstyled small mb-0 font-monospace">
-                                <li>• tft.fillScreen(color)</li>
-                                <li>• tft.color565(r, g, b)</li>
-                                <li>• tft.fillRoundRect(x,y,w,h,r,color)</li>
-                                <li>• tft.drawSmoothArc(...)</li>
-                            </ul>
+                    <div className="col-lg-4 text-center">
+                        <div className="sticky-top" style={{ top: '20px' }}>
+                            <p className="text-secondary small mb-2 uppercase fw-bold">Output: 320x240 px</p>
+                            <div
+                                className="d-inline-block shadow-lg border border-4 border-secondary rounded"
+                                style={{ lineHeight: 0 }}
+                            >
+                                <canvas
+                                    ref={canvasRef}
+                                    width={320}
+                                    height={240}
+                                    className="bg-black rounded-1"
+                                />
+                            </div>
+                            <div className="mt-3 text-start bg-secondary bg-opacity-10 p-3 rounded border border-secondary border-opacity-25">
+                                <h6 className="text-info">Quick Reference:</h6>
+                                <ul className="list-unstyled small mb-0 font-monospace">
+                                    <li>• tft.fillScreen(color)</li>
+                                    <li>• tft.color565(r, g, b)</li>
+                                    <li>• tft.fillRoundRect(x,y,w,h,r,color)</li>
+                                    <li>• tft.drawSmoothArc(...)</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+
+            <div className="modal fade" id="methodsModal" tabIndex="-1" aria-hidden="true">
+                <div className="modal-dialog modal-fullscreen modal-lg modal-dialog-scrollable">
+                    <div className="modal-content bg-dark text-white border-secondary">
+                        <div className="modal-header border-secondary">
+                            <h5 className="modal-title text-info">TFT_eSPI Simulator Methods</h5>
+                            <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <table className="table table-dark table-hover small font-monospace">
+                                <thead>
+                                    <tr className="text-secondary">
+                                        <th>Method Signature</th>
+                                        <th>Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>tft.init() / tft.begin()</td><td>Reset screen to black</td></tr>
+                                    <tr><td>tft.fillScreen(color)</td><td>Fill entire 320x240 area</td></tr>
+                                    <tr><td>tft.color565(r, g, b)</td><td>Convert 0-255 RGB to 16-bit hex</td></tr>
+                                    <tr><td>tft.drawPixel(x, y, color)</td><td>Draw single point</td></tr>
+                                    <tr><td>tft.drawLine(x0, y0, x1, y1, color)</td><td>Draw line between points</td></tr>
+                                    <tr><td>tft.drawRect / tft.fillRect(x, y, w, h, color)</td><td>Standard rectangles</td></tr>
+                                    <tr><td>tft.drawRoundRect / tft.fillRoundRect(x, y, w, h, r, color)</td><td>Rounded rectangles</td></tr>
+                                    <tr><td>tft.drawCircle / tft.fillCircle(x, y, r, color)</td><td>Draw circles</td></tr>
+                                    <tr><td>tft.drawTriangle / tft.fillTriangle(x0,y0,x1,y1,x2,y2,color)</td><td>Draw triangles</td></tr>
+                                    <tr><td>tft.drawSmoothArc(cx, cy, or, ir, start, end, color, bg)</td><td>AA Arcs (0=6 o'clock)</td></tr>
+                                    <tr><td>tft.setTextColor(color, bg)</td><td>Set global text color</td></tr>
+                                    <tr><td>tft.setTextSize(1-7)</td><td>Set global font multiplier</td></tr>
+                                    <tr><td>tft.drawString(text, x, y, font)</td><td>Standard text (Font 7 = 7seg)</td></tr>
+                                    <tr><td>tft.drawCenterString(text, dX, dY, font)</td><td>Horizontal centered text</td></tr>
+                                    <tr><td>tft.print / tft.println(text)</td><td>Serial-style printing</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="modal-footer border-secondary text-secondary small">
+                            Note: Use JS syntax (const/let) instead of C++ types (int/float).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 }
+
+
