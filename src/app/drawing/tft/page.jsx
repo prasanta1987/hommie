@@ -98,6 +98,33 @@ class TFTSimulator {
         this.ctx.fillRect(x, y, w, h);
     }
 
+    fillRoundRect(x, y, w, h, r, color) {
+        this.ctx.beginPath();
+        // The Canvas roundRect method handles the corner radius 'r'
+        if (this.ctx.roundRect) {
+            this.ctx.roundRect(x, y, w, h, r);
+        } else {
+            // Fallback for very old browsers (Next.js usually doesn't need this)
+            this.ctx.rect(x, y, w, h);
+        }
+
+        this.ctx.fillStyle = this._colorToHex(color);
+        this.ctx.fill();
+    }
+
+    // You might also want the outline version
+    drawRoundRect(x, y, w, h, r, color) {
+        this.ctx.beginPath();
+        if (this.ctx.roundRect) {
+            this.ctx.roundRect(x, y, w, h, r);
+        } else {
+            this.ctx.rect(x, y, w, h);
+        }
+
+        this.ctx.strokeStyle = this._colorToHex(color);
+        this.ctx.stroke();
+    }
+
     drawCircle(x, y, r, color) {
         this.ctx.strokeStyle = this._colorToHex(color);
         this.ctx.beginPath();
@@ -181,15 +208,59 @@ class TFTSimulator {
 
 export default function TFTSimulatorPage() {
     const canvasRef = useRef(null);
-    const [code, setCode] = useState(`tft.fillScreen(0x0000);
-tft.setCursor(20, 30);
-tft.setTextColor(0xFFFF); // White
-tft.setTextSize(2);
-tft.println("TFT_eSPI Demo");
+    const [code, setCode] = useState(`
 
-tft.drawRect(20, 60, 100, 50, 0xF800); // Red Rect
-tft.fillCircle(200, 100, 30, 0x07E0); // Green Circle
-tft.drawTriangle(160, 200, 200, 150, 240, 200, 0x001F); // Blue Triangle`);
+const bgColor = tft.color565(0,0,255);
+const color = tft.color565(255,200,50);
+const orange = tft.color565(255, 165, 0);
+
+const _x = 5;
+const _y = 5;
+const _w = 50;
+const _h = 50;
+
+const pad = Math.min(_w, _h) * 0.05;
+const availableW = _w - (pad * 2);
+const availableH = _h - (pad * 2);
+
+const cx = _x + (_w / 2);
+const cy = _y + (_h / 2);
+    
+const scale = (Math.min(availableW, availableH)) / 100.0;
+
+tft.drawRect(_x, _y, _w, _h, bgColor);
+
+
+const houseW = (35 * scale);    // Half-width of the base
+const houseH = (35 * scale);    // Height of the base
+const roofH  = (45 * scale);
+
+const doorW = (15 * scale);
+const doorH = (25 * scale);
+
+
+tft.fillTriangle(cx - (50 * scale), cy, cx + (50 * scale), cy, cx, cy - roofH, color);
+tft.fillRect(cx - houseW, cy, houseW * 2, houseH, color);
+tft.fillRect(cx - (doorW / 2), cy + houseH - doorH, doorW, doorH, bgColor);
+
+
+
+
+
+tft.setTextColor(tft.color565(255,0,255)); // White
+tft.setTextSize(2);
+tft.drawCentreString("MENU", 160, 20);
+
+
+tft.fillRoundRect(110, 100, 100, 40, 5, orange);
+tft.setTextColor(0x0000); // Black text
+tft.drawCentreString("START", 160, 112);
+
+
+
+
+
+`);
 
     const runCode = () => {
         const canvas = canvasRef.current;
@@ -208,21 +279,61 @@ tft.drawTriangle(160, 200, 200, 150, 240, 200, 0x001F); // Blue Triangle`);
     };
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif', backgroundColor: '#1a1a1a', color: 'white', minHeight: '100vh' }}>
-            <h2>TFT_eSPI 320x240 Simulator (JS)</h2>
-            <div style={{ display: 'flex', gap: '20px' }}>
-                <div style={{ flex: 1 }}>
-                    <textarea
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        style={{ width: '100%', height: '300px', backgroundColor: '#000', color: '#0f0', padding: '10px', fontFamily: 'monospace' }}
-                    />
-                    <button onClick={runCode} style={{ marginTop: '10px', padding: '10px 20px', cursor: 'pointer' }}>
-                        Run Simulation
-                    </button>
+        <div className="container-fluid py-4 bg-dark text-light">
+            <div className="row justify-content-center">
+                {/* <div className="col-12 text-center mb-4">
+                    <h2 className="display-6 fw-bold border-bottom pb-2 d-inline-block">
+                        TFT_eSPI <span className="text-info">Simulator</span>
+                    </h2>
+                </div> */}
+
+                <div className="col-lg-8 mb-4">
+                    <div className="card bg-black border-secondary shadow">
+                        <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                            <span className="font-monospace small">sketch.ino (JS Mode)</span>
+                            <button
+                                onClick={runCode}
+                                className="btn btn-primary btn-sm px-4 fw-bold"
+                            >
+                                ▶ Run Code
+                            </button>
+                        </div>
+                        <div className="card-body p-0">
+                            <textarea
+                                value={code}
+                                onChange={(e) => setCode(e.target.value)}
+                                className="form-control bg-black text-success border-0 font-monospace p-3"
+                                style={{ height: '400px', resize: 'none', outline: 'none' }}
+                                spellCheck="false"
+                            />
+                        </div>
+                    </div>
                 </div>
-                <div style={{ border: '5px solid #333' }}>
-                    <canvas ref={canvasRef} width={320} height={240} style={{ backgroundColor: '#000' }} />
+
+                <div className="col-lg-4 text-center">
+                    <div className="sticky-top" style={{ top: '20px' }}>
+                        <p className="text-secondary small mb-2 uppercase fw-bold">Output: 320x240 px</p>
+                        <div
+                            className="d-inline-block shadow-lg border border-4 border-secondary rounded"
+                            style={{ lineHeight: 0 }}
+                        >
+                            <canvas
+                                ref={canvasRef}
+                                width={320}
+                                height={240}
+                                className="bg-black rounded-1"
+                            />
+                        </div>
+                        <div className="mt-3 text-start bg-secondary bg-opacity-10 p-3 rounded border border-secondary border-opacity-25">
+                            <h6 className="text-info">Quick Reference:</h6>
+                            <ul className="list-unstyled small mb-0 font-monospace">
+                                <li>• tft.fillScreen(color)</li>
+                                <li>• tft.color565(r, g, b)</li>
+                                <li>• tft.fillRoundRect(x,y,w,h,r,color)</li>
+                                <li>• tft.drawSmoothArc(...)</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
