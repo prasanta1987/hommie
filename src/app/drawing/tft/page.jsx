@@ -12,6 +12,36 @@ class TFTSimulator {
         this._textColor = "#FFFFFF";
         this._textSize = 1;
         this._bgColor = "#000000";
+        this._textSize = 1;
+        this.SEG_MAP = [0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x6F];
+    }
+
+    _getFontHeight(font) {
+        const heights = { 1: 8, 2: 16, 4: 32, 6: 48, 7: 48, 8: 75 };
+        return heights[font] || 8;
+    }
+
+    _draw7Seg(x, y, char, size, color) {
+        const mask = this.SEG_MAP[parseInt(char)] || (char === ':' ? 0x80 : 0);
+        const w = 10 * size;
+        const h = 18 * size;
+        const t = 2 * size;
+
+        // Internal helper function (allowed inside a method)
+        const drawS = (sx, sy, sw, sh) => this.fillRect(sx, sy, sw, sh, color);
+
+        if (mask & 0x01) drawS(x + t, y, w - 2 * t, t);       // A
+        if (mask & 0x02) drawS(x + w - t, y + t, t, h / 2 - t); // B
+        if (mask & 0x04) drawS(x + w - t, y + h / 2, t, h / 2 - t); // C
+        if (mask & 0x08) drawS(x + t, y + h - t, w - 2 * t, t); // D
+        if (mask & 0x10) drawS(x, y + h / 2, t, h / 2 - t);    // E
+        if (mask & 0x20) drawS(x, y + t, t, h / 2 - t);       // F
+        if (mask & 0x40) drawS(x + t, y + h / 2 - t / 2, w - 2 * t, t); // G
+
+        if (mask & 0x80) { // Colon
+            drawS(x + w / 2 - t / 2, y + h / 4, t, t);
+            drawS(x + w / 2 - t / 2, y + 3 * h / 4, t, t);
+        }
     }
 
     color565(r, g, b) {
@@ -168,30 +198,56 @@ class TFTSimulator {
         this._textColor = this._colorToHex(color);
         if (bg !== undefined) this._bgColor = this._colorToHex(bg);
     }
+
     setTextSize(size) { this._textSize = size; }
 
-    drawCentreString(string, dX, dY, font) {
+    drawString(string, x, y, font) {
         const text = string.toString();
-        // Set the font size based on the current _textSize or a passed font index
-        const fontSize = (font || this._textSize) * 12;
-        this.ctx.font = `${fontSize}px monospace`;
+        const fNum = font || this._currentFont || 1;
+        const size = this._textSize || 1;
+        const baseHeight = this._getFontHeight(fNum);
+        const finalHeight = baseHeight * size;
 
-        // Calculate text width to find the center offset
-        const metrics = this.ctx.measureText(text);
-        const textWidth = metrics.width;
-
-        // Calculate the starting X so that the middle of the text is at dX
-        const x = dX - (textWidth / 2);
-
-        this.ctx.fillStyle = this._textColor;
-        // Offset Y by font size because Canvas draws from the baseline
-        this.ctx.fillText(text, x, dY + (fontSize * 0.8));
+        if (fNum === 7) {
+            // Font 7: Seven-Segment Logic
+            let curX = x;
+            for (let char of text) {
+                this._draw7Seg(curX, y, char, size, this._textColor);
+                curX += (14 * size); // Standard spacing for Font 7
+            }
+        } else {
+            // Standard Fonts
+            this.ctx.fillStyle = this._textColor;
+            // Using monospace to mimic the fixed-width nature of many TFT fonts
+            this.ctx.font = `${finalHeight}px monospace`;
+            // Offset Y by 85% of height because Canvas draws from bottom baseline
+            this.ctx.fillText(text, x, y + (finalHeight * 0.85));
+        }
     }
 
-    drawString(string, x, y) {
-        this.ctx.fillStyle = this._textColor;
-        this.ctx.font = `${this._textSize * 12}px monospace`;
-        this.ctx.fillText(string, x, y + (this._textSize * 10));
+    drawCenterString(string, dX, dY, font) {
+        const text = string.toString();
+        const fNum = font || this._currentFont || 1;
+        const size = this._textSize || 1;
+        let textWidth = 0;
+
+        if (fNum === 7) {
+            // Fixed width calculation for 7-segment
+            textWidth = text.length * (14 * size);
+        } else {
+            // Dynamic width calculation for standard fonts
+            const baseHeight = this._getFontHeight(fNum);
+            this.ctx.font = `${baseHeight * size}px monospace`;
+            textWidth = this.ctx.measureText(text).width;
+        }
+
+        const x = dX - (textWidth / 2);
+        this.drawString(text, x, dY, fNum);
+    }
+
+    // Alias for British spelling support
+    drawCentreString(string, dX, dY, font) {
+        this.drawCenterString(string, dX, dY, font);
     }
 
     print(text) {
