@@ -1,39 +1,33 @@
 const defaultCode = `
 
 const bgColor = tft.color565(0,0,255);
-const color = tft.color565(255,200,50);
+const color = tft.color565(255,0,100);
 const orange = tft.color565(255, 165, 0);
 
-const _x = 5;
-const _y = 5;
-const _w = 50;
-const _h = 50;
+const _x = 10;
+const _y = 10;
+const _w = 100;
+const _h = 100;
+const padding = 0.1;
 
-const pad = Math.min(_w, _h) * 0.05;
+
+const pad = (Math.min(_w, _h) * padding); 
 const availableW = _w - (pad * 2);
 const availableH = _h - (pad * 2);
 
-const cx = _x + (_w / 2);
-const cy = _y + (_h / 2);
-    
 const scale = (Math.min(availableW, availableH)) / 100.0;
 
-tft.drawRect(_x, _y, _w, _h, bgColor);
+const heartW = (38 * scale);
+const circleR = (25 * scale);
 
+const cx = _x + (_w / 2);
+const cy = _y + (_h / 2);
 
-const houseW = (35 * scale);    // Half-width of the base
-const houseH = (35 * scale);    // Height of the base
-const roofH  = (45 * scale);
+tft.drawRoundRect(_x,_y,_w,_h,5,color);
 
-const doorW = (15 * scale);
-const doorH = (25 * scale);
-
-
-tft.fillTriangle(cx - (50 * scale), cy, cx + (50 * scale), cy, cx, cy - roofH, color);
-tft.fillRect(cx - houseW, cy, houseW * 2, houseH, color);
-tft.fillRect(cx - (doorW / 2), cy + houseH - doorH, doorW, doorH, bgColor);
-
-
+tft.fillCircle(cx - (18 * scale), cy - (15 * scale), circleR,color);
+tft.fillCircle(cx + (18 * scale), cy - (15 * scale), circleR, color);
+tft.fillTriangle(cx - (37 * scale), cy + (2 * scale),cx + (37 * scale), cy + (2 * scale),cx, cy + (45 * scale), color);
 
 
 
