@@ -305,6 +305,7 @@ export default function TFTSimulatorPage() {
         if (isLoaded.current) {
             sessionStorage.setItem("tft_code_draft", code);
         }
+        runCode()
     }, [code]);
 
     const runCode = () => {
@@ -323,43 +324,43 @@ export default function TFTSimulatorPage() {
         }
     };
 
-const generateInoCode = () => {
-  let inoBody = code;
+    const generateInoCode = () => {
+        let inoBody = code;
 
-  // 1. Convert Math functions
-  inoBody = inoBody.replace(/Math\.min/g, 'min');
-  inoBody = inoBody.replace(/Math\.max/g, 'max');
-  inoBody = inoBody.replace(/Math\.abs/g, 'abs');
+        // 1. Convert Math functions
+        inoBody = inoBody.replace(/Math\.min/g, 'min');
+        inoBody = inoBody.replace(/Math\.max/g, 'max');
+        inoBody = inoBody.replace(/Math\.abs/g, 'abs');
 
-  // 2. Convert variables to C++ types
-  // This rule finds 'const/let name = ...' and decides if it's an int or float
-  inoBody = inoBody.split('\n').map(line => {
-    if (!line.trim()) return line;
-    
-    const varMatch = line.match(/(const|let|var)\s+(\w+)\s*=\s*(.*);/);
-    if (varMatch) {
-      const name = varMatch[2];
-      const value = varMatch[3];
-      
-      let type = "int"; // Default
-      
-      // 1. Color Type (Must be uint16_t)
-      if (value.includes('color565') || value.includes('0x')) {
-        type = "uint16_t";
-      } 
-      // 2. Float Type (Decimals or division)
-      else if (value.includes('.') || value.includes('/') || value.includes('min') || name.includes('scale')) {
-        type = "float";
-      }
+        // 2. Convert variables to C++ types
+        // This rule finds 'const/let name = ...' and decides if it's an int or float
+        inoBody = inoBody.split('\n').map(line => {
+            if (!line.trim()) return line;
 
-      // Reconstruct: e.g., "uint16_t bgColor = tft.color565(0,0,255);"
-      return `  ${type} ${name} = ${value};`;
-    }
-    return '  ' + line;
-  }).join('\n');
+            const varMatch = line.match(/(const|let|var)\s+(\w+)\s*=\s*(.*);/);
+            if (varMatch) {
+                const name = varMatch[2];
+                const value = varMatch[3];
 
-  // 3. Final Template
-  return `
+                let type = "int"; // Default
+
+                // 1. Color Type (Must be uint16_t)
+                if (value.includes('color565') || value.includes('0x')) {
+                    type = "uint16_t";
+                }
+                // 2. Float Type (Decimals or division)
+                else if (value.includes('.') || value.includes('/') || value.includes('min') || name.includes('scale')) {
+                    type = "float";
+                }
+
+                // Reconstruct: e.g., "uint16_t bgColor = tft.color565(0,0,255);"
+                return `  ${type} ${name} = ${value};`;
+            }
+            return '  ' + line;
+        }).join('\n');
+
+        // 3. Final Template
+        return `
 #include <SPI.h>
 #include <TFT_eSPI.h>
 
@@ -377,7 +378,7 @@ ${inoBody.split('\n').map(line => '  ' + line).join('\n')}
 
 void loop() {}
 `.trim();
-};
+    };
 
 
     return (
