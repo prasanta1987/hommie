@@ -267,6 +267,7 @@ export default function TFTSimulatorPage() {
     const canvasRef = useRef(null);
     // const [code, setCode] = useState('');
     const isLoaded = useRef(false);
+    const [inoPreview, setInoPreview] = useState("");
 
     const [code, setCode] = useState(() => {
         // Check if we are in the browser (client-side)
@@ -321,6 +322,63 @@ export default function TFTSimulatorPage() {
         }
     };
 
+const generateInoCode = () => {
+  let inoBody = code;
+
+  // 1. Convert Math functions
+  inoBody = inoBody.replace(/Math\.min/g, 'min');
+  inoBody = inoBody.replace(/Math\.max/g, 'max');
+  inoBody = inoBody.replace(/Math\.abs/g, 'abs');
+
+  // 2. Convert variables to C++ types
+  // This rule finds 'const/let name = ...' and decides if it's an int or float
+  inoBody = inoBody.split('\n').map(line => {
+    if (!line.trim()) return line;
+    
+    const varMatch = line.match(/(const|let|var)\s+(\w+)\s*=\s*(.*);/);
+    if (varMatch) {
+      const name = varMatch[2];
+      const value = varMatch[3];
+      
+      let type = "int"; // Default
+      
+      // 1. Color Type (Must be uint16_t)
+      if (value.includes('color565') || value.includes('0x')) {
+        type = "uint16_t";
+      } 
+      // 2. Float Type (Decimals or division)
+      else if (value.includes('.') || value.includes('/') || value.includes('min') || name.includes('scale')) {
+        type = "float";
+      }
+
+      // Reconstruct: e.g., "uint16_t bgColor = tft.color565(0,0,255);"
+      return `  ${type} ${name} = ${value};`;
+    }
+    return '  ' + line;
+  }).join('\n');
+
+  // 3. Final Template
+  return `
+#include <SPI.h>
+#include <TFT_eSPI.h>
+
+TFT_eSPI tft = TFT_eSPI();
+
+void setup() {
+  tft.init();
+  tft.setRotation(1); 
+  tft.fillScreen(TFT_BLACK);
+
+  // --- Converted Code ---
+${inoBody.split('\n').map(line => '  ' + line).join('\n')}
+  // --- End of Converted Code ---
+}
+
+void loop() {}
+`.trim();
+};
+
+
     return (
         <>
             <div className="container-fluid py-4 bg-dark text-light">
@@ -336,6 +394,14 @@ export default function TFTSimulatorPage() {
                             <div className="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                                 <span className="font-monospace small">sketch.ino (JS Mode)</span>
                                 <div>
+                                    <button
+                                        className="btn btn-warning btn-sm fw-bold shadow-sm me-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#inoExportModal"
+                                        onClick={() => setInoPreview(generateInoCode())}
+                                    >
+                                        Generate .ino
+                                    </button>
                                     <button
                                         className="btn btn-info btn-sm me-2"
                                         data-bs-toggle="modal"
@@ -433,6 +499,29 @@ export default function TFTSimulatorPage() {
                     </div>
                 </div>
             </div>
+
+            <div className="modal fade" id="inoExportModal" tabIndex="-1">
+                <div className="modal-dialog modal-fullscreen">
+                    <div className="modal-content bg-black text-white border-0 rounded-0">
+                        <div className="modal-header border-secondary py-2">
+                            <h5 className="modal-title text-warning font-monospace">Generated Arduino Sketch (.ino)</h5>
+                            <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div className="modal-body p-0">
+                            <pre className="p-4 m-0 text-success font-monospace" style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                                <code>{inoPreview}</code>
+                            </pre>
+                        </div>
+                        <div className="modal-footer border-secondary">
+                            {/* <button className="btn btn-success px-4" onClick={() => downloadIno(inoPreview)}>
+                                ⬇️ Download File
+                            </button> */}
+                            <button className="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </>
     );
 }
