@@ -272,7 +272,7 @@ export default function TFTSimulatorPage() {
     const [code, setCode] = useState(() => {
         // Check if we are in the browser (client-side)
         if (typeof window !== "undefined") {
-            const saved = sessionStorage.getItem("tft_code_draft");
+            const saved = localStorage.getItem("tft_code_draft");
             // Return saved code if it exists and isn't just whitespace
             if (saved && saved.trim() !== "") {
                 return saved;
@@ -290,7 +290,7 @@ export default function TFTSimulatorPage() {
     }, []);
 
     useEffect(() => {
-        const saved = sessionStorage.getItem("tft_code_draft");
+        const saved = localStorage.getItem("tft_code_draft");
         if (saved && saved.trim() !== "") {
             setCode(saved);
         } else {
@@ -303,7 +303,7 @@ export default function TFTSimulatorPage() {
     useEffect(() => {
         // ONLY save if the initial load has already happened
         if (isLoaded.current) {
-            sessionStorage.setItem("tft_code_draft", code);
+            localStorage.setItem("tft_code_draft", code);
         }
         runCode()
     }, [code]);
