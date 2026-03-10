@@ -412,12 +412,12 @@ void loop() {}
                                         📋 Library Methods
                                     </button>
 
-                                    <button
+                                    {/* <button
                                         onClick={runCode}
                                         className="btn btn-primary btn-sm px-4 fw-bold"
                                     >
                                         ▶ Run Code
-                                    </button>
+                                    </button> */}
                                 </div>
                             </div>
                             <div className="card-body p-0">
