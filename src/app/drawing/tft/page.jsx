@@ -286,6 +286,7 @@ export default function TFTSimulatorPage() {
     useEffect(() => {
         // Dynamic import inside useEffect ensures window/document exist
         require("bootstrap/dist/js/bootstrap.bundle.min.js");
+        runCode()
     }, []);
 
     useEffect(() => {
