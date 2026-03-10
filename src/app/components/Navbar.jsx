@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { auth } from '@/firebaseConfig/config';
+import { usePathname } from 'next/navigation';
 import {
   signOut,
   updateProfile,
@@ -29,6 +30,8 @@ const AppNavbar = () => {
   const { data: apiKey, loading: dataLoading } = useRTDB(
     user ? `userCred/UIDtoAPI/${user.uid}/fbAPIKey` : null
   );
+
+  const pathname = usePathname();
 
   useEffect(() => {
     if (user) {
@@ -95,9 +98,11 @@ const AppNavbar = () => {
               {user && <Nav.Link as={Link} href="/feeds" className="text-light">Feeds</Nav.Link>}
               {user && <Nav.Link as={Link} href="/display" className="text-light">Display</Nav.Link>}
               {user && <Nav.Link as={Link} href="/photos" className="text-light">Photos</Nav.Link>}
-              <Nav.Link as={Link} href="/music" className="text-light">Music</Nav.Link>
+              {user && <Nav.Link as={Link} href="/quiz" className="text-light">Quizzes</Nav.Link>}
               <Nav.Link as={Link} href="/drawing" className="text-light">Drawing</Nav.Link>
-              <Nav.Link as={Link} href="/quiz" className="text-light">Quizzes</Nav.Link>
+              {pathname === '/drawing'&& <Nav.Link as={Link} href="/drawing/colour" className="text-light">TFT Colour</Nav.Link>}
+              {pathname === '/drawing'&& <Nav.Link as={Link} href="/drawing/tft" className="text-light">TFT_eSPI</Nav.Link>}
+              <Nav.Link as={Link} href="/music" className="text-light">Music</Nav.Link>
             </Nav>
             <Nav>
               <div className='d-flex gap-2 align-items-center'>
