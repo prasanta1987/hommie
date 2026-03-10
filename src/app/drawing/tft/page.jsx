@@ -115,6 +115,22 @@ class TFTSimulator {
         }
     }
 
+    fillSmoothRoundRect(x, y, w, h, r, color, bgColor) {
+        // In the simulator, smooth and regular are both AA by the browser
+        this.fillRoundRect(x, y, w, h, r, color);
+    }
+
+    drawSmoothRoundRect(x, y, w, h, r, color, bgColor) {
+        this.drawRoundRect(x, y, w, h, r, color);
+    }
+
+    // If you use 'Math' inside the editor, it works natively in JS.
+    // But if you want to support 'sin', 'cos', 'PI' without the 'Math.' prefix 
+    // (to match Arduino style), add these helpers:
+    sin(rad) { return Math.sin(rad); }
+    cos(rad) { return Math.cos(rad); }
+    min(a, b) { return Math.min(a, b); }
+    max(a, b) { return Math.max(a, b); }
 
     drawFastVLine(x, y, h, color) { this.fillRect(x, y, 1, h, color); }
     drawFastHLine(x, y, w, color) { this.fillRect(x, y, w, 1, color); }
@@ -315,51 +331,54 @@ export default function TFTSimulatorPage() {
         const tft = new TFTSimulator(ctx);
 
         try {
-            // Clear previous canvas state before running new code
             ctx.clearRect(0, 0, 320, 240);
-            const execute = new Function("tft", code);
-            execute(tft);
+
+            // We pass 'tft' and also spread tft's math helpers into the scope
+            // This allows the user to write: cos(angle) instead of Math.cos(angle)
+            const execute = new Function("tft", "cos", "sin", "min", "max", code);
+            execute(tft, tft.cos, tft.sin, tft.min, tft.max);
+
         } catch (err) {
             console.error("Execution Error:", err);
         }
     };
 
+
     const generateInoCode = () => {
-        let inoBody = code;
+        let lines = code.split('\n');
 
-        // 1. Convert Math functions
-        inoBody = inoBody.replace(/Math\.min/g, 'min');
-        inoBody = inoBody.replace(/Math\.max/g, 'max');
-        inoBody = inoBody.replace(/Math\.abs/g, 'abs');
+        const convertedLines = lines.map(line => {
+            let l = line.trim();
+            if (!l) return "";
 
-        // 2. Convert variables to C++ types
-        // This rule finds 'const/let name = ...' and decides if it's an int or float
-        inoBody = inoBody.split('\n').map(line => {
-            if (!line.trim()) return line;
+            // 1. Convert 'for (let i' to 'for (int i'
+            l = l.replace(/for\s*\(\s*let\s+/g, 'for (int ');
 
-            const varMatch = line.match(/(const|let|var)\s+(\w+)\s*=\s*(.*);/);
+            // 2. Convert variables (const/let/var)
+            const varMatch = l.match(/(const|let|var)\s+(\w+)\s*=\s*(.*);/);
             if (varMatch) {
                 const name = varMatch[2];
                 const value = varMatch[3];
+                let type = "int";
 
-                let type = "int"; // Default
-
-                // 1. Color Type (Must be uint16_t)
                 if (value.includes('color565') || value.includes('0x')) {
                     type = "uint16_t";
-                }
-                // 2. Float Type (Decimals or division)
-                else if (value.includes('.') || value.includes('/') || value.includes('min') || name.includes('scale')) {
+                } else if (value.includes('.') || value.includes('/') || value.includes('Math') || name.includes('scale')) {
                     type = "float";
                 }
-
-                // Reconstruct: e.g., "uint16_t bgColor = tft.color565(0,0,255);"
                 return `  ${type} ${name} = ${value};`;
             }
-            return '  ' + line;
-        }).join('\n');
 
-        // 3. Final Template
+            // 3. Clean up Math functions and constants
+            l = l.replace(/Math\.min/g, 'min');
+            l = l.replace(/Math\.max/g, 'max');
+            l = l.replace(/Math\.sin/g, 'sin');
+            l = l.replace(/Math\.cos/g, 'cos');
+            l = l.replace(/Math\.PI/g, '3.14159');
+
+            return "  " + l;
+        });
+
         return `
 #include <SPI.h>
 #include <TFT_eSPI.h>
@@ -368,17 +387,18 @@ TFT_eSPI tft = TFT_eSPI();
 
 void setup() {
   tft.init();
-  tft.setRotation(1); 
+  tft.setRotation(1);
   tft.fillScreen(TFT_BLACK);
 
-  // --- Converted Code ---
-${inoBody.split('\n').map(line => '  ' + line).join('\n')}
-  // --- End of Converted Code ---
+  // --- CONVERTED CODE ---
+${convertedLines.join('\n')}
+  // --- END ---
 }
 
 void loop() {}
 `.trim();
     };
+
 
 
     return (
