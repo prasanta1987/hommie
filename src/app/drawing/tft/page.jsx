@@ -507,6 +507,10 @@ void loop() {}
                                     <tr><td>tft.drawCircle / tft.fillCircle(x, y, r, color)</td><td>Draw circles</td></tr>
                                     <tr><td>tft.drawTriangle / tft.fillTriangle(x0,y0,x1,y1,x2,y2,color)</td><td>Draw triangles</td></tr>
                                     <tr><td>tft.drawSmoothArc(cx, cy, or, ir, start, end, color, bg)</td><td>AA Arcs (0=6 o&apos;clock)</td></tr>
+                                    <tr>
+                                        <td>tft.drawSmoothRoundRect / tft.fillSmoothRoundRect(x, y, w, h, r, color, bg)</td>
+                                        <td>Anti-aliased (AA) rounded rectangles; &apos;bg&apos; is used for pixel blending.</td>
+                                    </tr>
                                     <tr><td>tft.setTextColor(color, bg)</td><td>Set global text color</td></tr>
                                     <tr><td>tft.setTextSize(1-7)</td><td>Set global font multiplier</td></tr>
                                     <tr><td>tft.drawString(text, x, y, font)</td><td>Standard text (Font 7 = 7seg)</td></tr>
