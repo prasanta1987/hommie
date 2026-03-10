@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
+import { defaultCode } from './defaultCode'
 
 // --- TFT_eSPI Library Simulation Class ---
 class TFTSimulator {
@@ -264,64 +265,45 @@ class TFTSimulator {
 
 export default function TFTSimulatorPage() {
     const canvasRef = useRef(null);
-    const [code, setCode] = useState(`
+    // const [code, setCode] = useState('');
+    const isLoaded = useRef(false);
 
-const bgColor = tft.color565(0,0,255);
-const color = tft.color565(255,200,50);
-const orange = tft.color565(255, 165, 0);
-
-const _x = 5;
-const _y = 5;
-const _w = 50;
-const _h = 50;
-
-const pad = Math.min(_w, _h) * 0.05;
-const availableW = _w - (pad * 2);
-const availableH = _h - (pad * 2);
-
-const cx = _x + (_w / 2);
-const cy = _y + (_h / 2);
-    
-const scale = (Math.min(availableW, availableH)) / 100.0;
-
-tft.drawRect(_x, _y, _w, _h, bgColor);
+    const [code, setCode] = useState(() => {
+        // Check if we are in the browser (client-side)
+        if (typeof window !== "undefined") {
+            const saved = sessionStorage.getItem("tft_code_draft");
+            // Return saved code if it exists and isn't just whitespace
+            if (saved && saved.trim() !== "") {
+                return saved;
+            }
+        }
+        return defaultCode;
+    });
 
 
-const houseW = (35 * scale);    // Half-width of the base
-const houseH = (35 * scale);    // Height of the base
-const roofH  = (45 * scale);
-
-const doorW = (15 * scale);
-const doorH = (25 * scale);
-
-
-tft.fillTriangle(cx - (50 * scale), cy, cx + (50 * scale), cy, cx, cy - roofH, color);
-tft.fillRect(cx - houseW, cy, houseW * 2, houseH, color);
-tft.fillRect(cx - (doorW / 2), cy + houseH - doorH, doorW, doorH, bgColor);
-
-
-
-
-
-tft.setTextColor(tft.color565(255,0,255)); // White
-tft.setTextSize(2);
-tft.drawCentreString("MENU", 160, 20);
-
-
-tft.fillRoundRect(110, 100, 100, 40, 5, orange);
-tft.setTextColor(0x0000); // Black text
-tft.drawCentreString("START", 160, 112);
-
-
-
-
-
-`);
 
     useEffect(() => {
         // Dynamic import inside useEffect ensures window/document exist
         require("bootstrap/dist/js/bootstrap.bundle.min.js");
     }, []);
+
+    useEffect(() => {
+        const saved = sessionStorage.getItem("tft_code_draft");
+        if (saved && saved.trim() !== "") {
+            setCode(saved);
+        } else {
+            // setCode(defaultCode);
+        }
+        isLoaded.current = true; // Mark as ready for saving
+    }, []);
+
+    // 2. Auto-Save (Runs when code changes)
+    useEffect(() => {
+        // ONLY save if the initial load has already happened
+        if (isLoaded.current) {
+            sessionStorage.setItem("tft_code_draft", code);
+        }
+    }, [code]);
 
     const runCode = () => {
         const canvas = canvasRef.current;
