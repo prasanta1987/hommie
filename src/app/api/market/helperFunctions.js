@@ -1,6 +1,7 @@
 
 const fetchData = async (url) => {
 
+    console.log("=> ", url)
     try {
         const response = await fetch(url);
 
@@ -27,6 +28,8 @@ const searchMCIds = async (param) => {
         return "INDVIX"
     } else if (param == "USDINR") {
         return "USDINR"
+    } else if (param == "NASDAQ") {
+        return "NASDAQ"
     } else {
         const data = await fetchData(`https://www.moneycontrol.com/mccode/common/autosuggestion_solr.php?query=${param}&type=0&format=json`);
         return data[0].sc_id
@@ -51,9 +54,10 @@ const spotDataUrl = async (scripCode) => {
         spotUrl = "https://priceapi.moneycontrol.com/pricefeed/nse/equitycash/" + scripCode;
     }
 
-    console.log(spotUrl);
+
 
     let data = await fetchData(spotUrl);
+
     data = await structuredSpotData(data, scripCode);
     return data;
 
@@ -62,18 +66,20 @@ const spotDataUrl = async (scripCode) => {
 
 const structuredSpotData = async (data, scripCode) => {
 
+    console.log(data);
+
     let dataObj = {};
 
     if (scripCode != "USDINR") {
-        dataObj.name = data.data.NSEID || data.data.company;
-        dataObj.cmp = data.data.pricecurrent;
-        dataObj.open = data.data.OPN || data.data.OPEN;
-        dataObj.high = data.data.HIGH || data.data.HP;
-        dataObj.low = data.data.LOW || data.data.LP;
-        dataObj.preClose = data.data.LOW || data.data.priceprevclose;
+        dataObj.name = data.data.NSEID || data.data.company || data.data.name;
+        dataObj.cmp = data.data.pricecurrent || data.data.current_price;
+        dataObj.open = data.data.OPN || data.data.OPEN || data.data.open;
+        dataObj.high = data.data.HIGH || data.data.HP || data.data.high;
+        dataObj.low = data.data.LOW || data.data.LP || data.data.low;
+        dataObj.preClose = data.data.LOW || data.data.priceprevclose || data.data.prev_close;
         dataObj.lotSize = data.data.MKT_LOT;
-        dataObj.change = data.data.pricechange;
-        dataObj.changePct = data.data.pricepercentchange;
+        dataObj.change = data.data.pricechange || data.data.net_change;
+        dataObj.changePct = data.data.pricepercentchange || data.data.percent_change;
         dataObj.adv = data.data.adv;
         dataObj.decl = data.data.decl;
 
