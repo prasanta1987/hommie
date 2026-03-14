@@ -42,27 +42,28 @@ export default function ColorConverter() {
 
   return (
     <div>
-        <h6 className="text-info mb-2">Color Converter:</h6>
-        <div className="row g-2 align-items-center">
-            <div className="col-auto">
-                 <input
+        <h6 className="text-info mb-3 text-center">TFT Color Converter</h6>
+        <div className="row g-2">
+            <div className="col-6">
+                <input
                     type="color"
-                    className="form-control form-control-color border-0 shadow-sm"
+                    className="form-control form-control-color w-100 border-secondary shadow-sm"
                     value={color}
                     onChange={(e) => handlePickerChange(e.target.value)}
-                    style={{ width: '60px', height: '38px' }}
+                    style={{ height: '50px', borderRadius: '0.75rem' }}
                 />
             </div>
-            <div className="col">
+            <div className="col-6 d-flex align-items-center">
                 <div className="input-group">
                     <input
                         type="text"
-                        className="form-control font-monospace"
+                        className="form-control font-monospace bg-dark text-light border-secondary"
                         value={tftValue}
                         onChange={(e) => handleTftInput(e.target.value.toUpperCase())}
+                        aria-label="TFT Hex Code"
                     />
                     <button
-                        className="btn btn-outline-secondary"
+                        className="btn btn-outline-info"
                         onClick={() => navigator.clipboard.writeText(tftValue)}
                     >
                         Copy
