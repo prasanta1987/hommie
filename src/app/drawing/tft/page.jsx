@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { defaultCode } from './defaultCode'
+import ColorConverter from './ColorConverter';
 
 // --- TFT_eSPI Library Simulation Class ---
 class TFTSimulator {
@@ -467,13 +468,7 @@ void loop() {}
                                 />
                             </div>
                             <div className="mt-3 text-start bg-secondary bg-opacity-10 p-3 rounded border border-secondary border-opacity-25">
-                                <h6 className="text-info">Quick Reference:</h6>
-                                <ul className="list-unstyled small mb-0 font-monospace">
-                                    <li>• tft.fillScreen(color)</li>
-                                    <li>• tft.color565(r, g, b)</li>
-                                    <li>• tft.fillRoundRect(x,y,w,h,r,color)</li>
-                                    <li>• tft.drawSmoothArc(...)</li>
-                                </ul>
+                                <ColorConverter />
                             </div>
                         </div>
                     </div>
@@ -551,5 +546,3 @@ void loop() {}
         </>
     );
 }
-
-
