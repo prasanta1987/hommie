@@ -23,7 +23,7 @@ const AppNavbar = () => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [apiKeyBTN, setIsApiKeyBTN] = useState(false);
+  const [apiKeyBTN, setIsApiKeyBTN] = useState(true);
   const [userDelMode, setUserDelMode] = useState(false);
 
   const { user, loading: authLoading } = useAuth();
