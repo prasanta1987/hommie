@@ -40,6 +40,7 @@ export const GET = async (request) => {
         async start(controller) {
             const reader = fbResponse.body.getReader();
             const decoder = new TextDecoder();
+            const encoder = new TextEncoder();
             
             const keysToRemove = ['isSelected', 'time', 'rangeMax', 'rangeMin', 'timerEndTime'];
             const typesToRemove = ['Gauge'];
@@ -70,7 +71,7 @@ export const GET = async (request) => {
                         }
 
                         if (!rawData || rawData === "null" || rawData === "keep-alive") {
-                            controller.enqueue(`event: ${eventType}\ndata: ${rawData}\n\n`);
+                            controller.enqueue(encoder.encode(`event: ${eventType}\ndata: ${rawData}\n\n`));
                             continue;
                         }
 
@@ -105,9 +106,9 @@ export const GET = async (request) => {
                                 }
                             }
 
-                            controller.enqueue(`event: ${eventType}\ndata: ${JSON.stringify(processed || parsed)}\n\n`);
+                            controller.enqueue(encoder.encode(`event: ${eventType}\ndata: ${JSON.stringify(processed || parsed)}\n\n`));
                         } catch (e) {
-                            controller.enqueue(`event: ${eventType}\ndata: ${rawData}\n\n`);
+                            controller.enqueue(encoder.encode(`event: ${eventType}\ndata: ${rawData}\n\n`));
                         }
                     }
                 }
