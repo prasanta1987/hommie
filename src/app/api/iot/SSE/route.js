@@ -48,7 +48,7 @@ export const GET = async (request) => {
 
             let masterState = {};
             const keysToRemove = ['isSelected', 'time', 'rangeMax', 'rangeMin']; // Keeping timerEndTime as it was in your example
-            const typesToRemove = ['Gauge'];
+            const typesToRemove = ['Gauge',"Card"];
 
             function clean(obj) {
                 if (!obj || typeof obj !== 'object') return obj;
@@ -56,6 +56,14 @@ export const GET = async (request) => {
                 keysToRemove.forEach(k => delete newObj[k]);
                 return newObj;
             }
+
+            const heartbeatInterval = setInterval(() => {
+                try {
+                    controller.enqueue(encoder.encode(": heartbeat\n\n"));
+                } catch (e) {
+                    clearInterval(heartbeatInterval);
+                }
+            }, 30000);
 
             try {
                 while (true) {
@@ -113,6 +121,7 @@ export const GET = async (request) => {
             } catch (err) {
                 controller.error(err);
             } finally {
+                clearInterval(heartbeatInterval);
                 reader.releaseLock();
                 controller.close();
             }
