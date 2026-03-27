@@ -68,6 +68,8 @@ const UnoGame = () => {
         return color + value;
       };
 
+      console.log(game.discardPile);
+
       const topCard = game.discardPile[game.discardPile.length - 1];
       const dadCardCount = game.players[1].hand.length;
       const daughterCardCount = game.players[2].hand.length;

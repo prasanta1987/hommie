@@ -27,11 +27,15 @@ export const initGame = () => {
     players[2].hand.push(deck.pop());
   }
 
-  let discardPile = [deck.pop()];
-  if (discardPile[0].color === COLORS.BLACK) {
-    discardPile[0].color = COLORS.RED; // Set a default color for wild cards
-  }
+  const initialCard = deck.pop();
+  let discardPile = [initialCard];
+  let currentColor = initialCard.color;
 
+  if (initialCard.color === COLORS.BLACK) {
+    const randomColor = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN, COLORS.BLUE][Math.floor(Math.random() * 4)];
+    discardPile = [{ ...initialCard, color: randomColor }];
+    currentColor = randomColor;
+  }
 
   return {
     deck,
@@ -41,7 +45,7 @@ export const initGame = () => {
     direction: 1,
     unoCalled: false,
     isColorPickerOpen: false,
-    currentColor: discardPile[0].color,
+    currentColor,
   };
 };
 
@@ -112,14 +116,17 @@ export const handleCardClick = (game, card) => {
 };
 
 export const handleColorSelect = (game, color) => {
+  const topOfDiscard = game.discardPile[0];
+  const newTopOfDiscard = { ...topOfDiscard, color: color };
+
   let gameAfterColorSelect = {
     ...game,
     currentColor: color,
     isColorPickerOpen: false,
+    discardPile: [newTopOfDiscard, ...game.discardPile.slice(1)],
   };
 
-  const card = game.discardPile[0];
-  gameAfterColorSelect = applyCardEffects(gameAfterColorSelect, card);
+  gameAfterColorSelect = applyCardEffects(gameAfterColorSelect, topOfDiscard);
 
   return {
     ...gameAfterColorSelect,
@@ -166,22 +173,27 @@ export const handlePCPlay = (game) => {
       (c) => !(c.color === cardToPlay.color && c.value === cardToPlay.value)
     );
 
+    let playedCard = cardToPlay;
+    let newCurrentColor;
+
+    if (cardToPlay.color === COLORS.BLACK) {
+      const colors = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN, COLORS.BLUE];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      playedCard = { ...cardToPlay, color: randomColor };
+      newCurrentColor = randomColor;
+    } else {
+      newCurrentColor = cardToPlay.color;
+    }
+
     let gameAfterPlay = {
       ...game,
       players: {
         ...game.players,
         2: { ...game.players[2], hand: newHand },
       },
-      discardPile: [cardToPlay, ...game.discardPile],
+      discardPile: [playedCard, ...game.discardPile],
+      currentColor: newCurrentColor,
     };
-
-    if (cardToPlay.color === COLORS.BLACK) {
-      const colors = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN, COLORS.BLUE];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      gameAfterPlay.currentColor = randomColor;
-    } else {
-      gameAfterPlay.currentColor = cardToPlay.color;
-    }
 
     gameAfterPlay = applyCardEffects(gameAfterPlay, cardToPlay);
     return { ...gameAfterPlay, currentPlayer: getNextPlayer(gameAfterPlay) };
@@ -199,8 +211,6 @@ export const handlePCPlay = (game) => {
     };
   }
 };
-
-
 
 export const checkGameOver = (game) => {
   return Object.values(game.players).some((player) => player.hand.length === 0);
