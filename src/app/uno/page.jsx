@@ -42,9 +42,49 @@ const UnoGame = () => {
 
   useEffect(() => {
     if (game) {
-      console.log(JSON.stringify(game, null, 2));
+      const formatCard = (card) => {
+        if (!card) return '';
+        const color = card.color.charAt(0);
+        let value;
+        switch (card.value) {
+          case 'skip':
+            value = 's';
+            break;
+          case 'reverse':
+            value = 'r';
+            break;
+          case 'draw-two':
+            value = 'd2';
+            break;
+          case 'wild':
+            value = 'w';
+            break;
+          case 'wild-draw-four':
+            value = 'w4';
+            break;
+          default:
+            value = card.value;
+        }
+        return color + value;
+      };
+
+      const topCard = game.discardPile[game.discardPile.length - 1];
+      const dadCardCount = game.players[1].hand.length;
+      const daughterCardCount = game.players[2].hand.length;
+      const isDadsTurn = game.currentPlayer === 1;
+
+      const compactObject = {
+        u: {
+          d: formatCard(topCard),
+          oc: isDadsTurn ? daughterCardCount : dadCardCount,
+          t: game.currentPlayer - 1, // 0 for Dad (player 1), 1 for Daughter (player 2)
+          p: game.deck.length,
+        },
+      };
+
+      console.log('Compact Game State:', JSON.stringify(compactObject));
     }
-  }, [game]);
+  }, [game, winner]);
 
   const handleCardClickWrapper = (card) => {
     const newGame = handleCardClick(game, card);

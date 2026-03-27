@@ -24,7 +24,7 @@ This document outlines the plan to create a playable Uno game that can be played
     *   Icons on Draw 2, Draw 4, Reverse, Skip, and Wild cards for clarity.
     *   A color picker pop-up for Wild and Wild Draw 4 cards.
 *   **Logging:**
-    *   The game state is logged to the console as a JSON object every time it changes.
+    *   The game state is logged to the console in a compact JSON format, suitable for low-power devices like an ESP32.
 
 ## Plan
 
