@@ -23,6 +23,8 @@ This document outlines the plan to create a playable Uno game that can be played
     *   Responsive design for different screen sizes.
     *   Icons on Draw 2, Draw 4, Reverse, Skip, and Wild cards for clarity.
     *   A color picker pop-up for Wild and Wild Draw 4 cards.
+*   **Logging:**
+    *   The game state is logged to the console as a JSON object every time it changes.
 
 ## Plan
 

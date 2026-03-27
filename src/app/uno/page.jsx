@@ -40,6 +40,12 @@ const UnoGame = () => {
     }
   }, [game, winner]);
 
+  useEffect(() => {
+    if (game) {
+      console.log(JSON.stringify(game, null, 2));
+    }
+  }, [game]);
+
   const handleCardClickWrapper = (card) => {
     const newGame = handleCardClick(game, card);
     setGame(newGame);
