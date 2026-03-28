@@ -3,14 +3,16 @@
 .container {
   background-color: #1a1a1a;
   color: white;
-  min-height: 100vh;
-  padding: 20px;
+  /* min-height: 90vh; */
+  min-height: calc(100vh - 56px);
+  /* padding: 20px; */
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
-  position: relative; /* For absolute positioning of Uno button */
+  position: relative;
+  /* For absolute positioning of Uno button */
 }
 
 .game {
@@ -68,11 +70,30 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-.red { background-color: #ff5555; color: white; }
-.yellow { background-color: #ffff55; color: #333; }
-.green { background-color: #55ff55; color: #333; }
-.blue { background-color: #5555ff; color: white; }
-.black { background-color: #333; color: white; }
+.red {
+  background-color: #ff5555;
+  color: white;
+}
+
+.yellow {
+  background-color: #ffff55;
+  color: #333;
+}
+
+.green {
+  background-color: #55ff55;
+  color: #333;
+}
+
+.blue {
+  background-color: #5555ff;
+  color: white;
+}
+
+.black {
+  background-color: #333;
+  color: white;
+}
 
 .cardValue {
   display: flex;
@@ -128,11 +149,30 @@
 }
 
 /* Create stack effect */
-.drawPileCard:nth-child(1) { transform: translate(0, 0); z-index: 5; }
-.drawPileCard:nth-child(2) { transform: translate(2px, 2px); z-index: 4; }
-.drawPileCard:nth-child(3) { transform: translate(4px, 4px); z-index: 3; }
-.drawPileCard:nth-child(4) { transform: translate(6px, 6px); z-index: 2; }
-.drawPileCard:nth-child(5) { transform: translate(8px, 8px); z-index: 1; }
+.drawPileCard:nth-child(1) {
+  transform: translate(0, 0);
+  z-index: 5;
+}
+
+.drawPileCard:nth-child(2) {
+  transform: translate(2px, 2px);
+  z-index: 4;
+}
+
+.drawPileCard:nth-child(3) {
+  transform: translate(4px, 4px);
+  z-index: 3;
+}
+
+.drawPileCard:nth-child(4) {
+  transform: translate(6px, 6px);
+  z-index: 2;
+}
+
+.drawPileCard:nth-child(5) {
+  transform: translate(8px, 8px);
+  z-index: 1;
+}
 
 .unoGameButton {
   position: absolute;
@@ -201,6 +241,9 @@
 }
 
 .modeBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
   background-color: #333;
   color: #ffeb3b;
   padding: 5px 15px;
