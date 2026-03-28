@@ -100,9 +100,10 @@ const AppNavbar = () => {
               {user && <Nav.Link as={Link} href="/photos" className="text-light">Photos</Nav.Link>}
               {user && <Nav.Link as={Link} href="/quiz" className="text-light">Quizzes</Nav.Link>}
               <Nav.Link as={Link} href="/drawing" className="text-light">Drawing</Nav.Link>
-              {pathname === '/drawing'&& <Nav.Link as={Link} href="/drawing/colour" className="text-light">TFT Colour</Nav.Link>}
-              {pathname === '/drawing'&& <Nav.Link as={Link} href="/drawing/tft" className="text-light">TFT_eSPI</Nav.Link>}
+              {pathname === '/drawing' && <Nav.Link as={Link} href="/drawing/colour" className="text-light">TFT Colour</Nav.Link>}
+              {pathname === '/drawing' && <Nav.Link as={Link} href="/drawing/tft" className="text-light">TFT_eSPI</Nav.Link>}
               <Nav.Link as={Link} href="/music" className="text-light">Music</Nav.Link>
+              <Nav.Link as={Link} href="/uno" className="text-light">UNO</Nav.Link>
             </Nav>
             <Nav>
               <div className='d-flex gap-2 align-items-center'>
