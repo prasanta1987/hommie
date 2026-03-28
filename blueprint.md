@@ -11,7 +11,8 @@ This document outlines the plan to create a playable Uno game that can be played
     *   **Local:** Play against a PC opponent.
     *   **Remote:** Play against another person on a different device (to be implemented later).
 *   **Gameplay:**
-    *   Standard Uno rules.
+    *   Standard Uno rules with tactical improvements.
+    *   Wild and Wild Draw Four cards are only added to the discard pile after a color is selected, improving gameplay flow.
     *   Playable cards light up.
     *   Special cards (Skip, Reverse, Draw Two, Wild, Wild Draw Four) are fully functional.
     *   The game ends when a player has no cards left.
@@ -21,6 +22,8 @@ This document outlines the plan to create a playable Uno game that can be played
 *   **UI:**
     *   A clean and intuitive interface with a dark theme.
     *   Responsive design for different screen sizes.
+    *   Beautified draw pile with a 3D stacked card effect and "UNO" branding.
+    *   Prominent, glowing "Uno" action button positioned for easy access during gameplay.
     *   Icons on Draw 2, Draw 4, Reverse, Skip, and Wild cards for clarity.
     *   A color picker pop-up for Wild and Wild Draw 4 cards.
 *   **Logging:**

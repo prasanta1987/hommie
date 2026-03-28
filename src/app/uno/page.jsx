@@ -5,11 +5,11 @@ import React, { useState, useEffect } from 'react';
 import Game from './components/Game';
 import ColorPicker from './components/ColorPicker';
 import {
-  initGame, 
-  checkGameOver, 
-  checkWinner, 
-  handleCardClick, 
-  handleDrawCard, 
+  initGame,
+  checkGameOver,
+  checkWinner,
+  handleCardClick,
+  handleDrawCard,
   handleUnoClick,
   handlePCPlay,
   handleColorSelect
@@ -70,7 +70,8 @@ const UnoGame = () => {
 
       console.log(game.discardPile);
 
-      const topCard = game.discardPile[game.discardPile.length - 1];
+      const topCard = game.discardPile[0];
+      // const topCard = game.discardPile[game.discardPile.length - 1];
       const dadCardCount = game.players[1].hand.length;
       const daughterCardCount = game.players[2].hand.length;
       const isDadsTurn = game.currentPlayer === 1;

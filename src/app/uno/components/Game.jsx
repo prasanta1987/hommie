@@ -11,13 +11,17 @@ const Game = ({ game, handleCardClick, handleDrawCard, handleUnoClick }) => {
       <Opponent player={game.players[2]} />
       <div className={styles.board}>
         <Card card={game.discardPile[0]} />
-        <div className={styles.deck} onClick={handleDrawCard}>
-          Draw
+        <div className={styles.drawPile} onClick={handleDrawCard} title="Draw Card">
+          <div className={styles.drawPileCard}></div>
+          <div className={styles.drawPileCard}></div>
+          <div className={styles.drawPileCard}></div>
+          <div className={styles.drawPileCard}></div>
+          <div className={styles.drawPileCard}></div>
         </div>
-        <button className={styles.unoButton} onClick={handleUnoClick}>
-          Uno
-        </button>
       </div>
+      <button className={styles.unoGameButton} onClick={handleUnoClick}>
+        Uno
+      </button>
       <Player
         player={game.players[1]}
         isCurrentPlayer={game.currentPlayer === 1}

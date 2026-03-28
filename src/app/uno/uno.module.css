@@ -9,7 +9,8 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  overflow: hidden; /* Prevents scrollbars on the main page */
+  overflow: hidden;
+  position: relative; /* For absolute positioning of Uno button */
 }
 
 .game {
@@ -29,14 +30,14 @@
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 20px;
-  /* Constrain the player hand area to prevent page overflow */
   max-width: 90vw;
 }
 
 .currentPlayer {
-  border: 2px solid #ffeb3b;
-  border-radius: 10px;
-  padding: 10px;
+  border: 4px solid #ffeb3b;
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 0 20px rgba(255, 235, 59, 0.3);
 }
 
 .card {
@@ -49,48 +50,117 @@
   font-size: 36px;
   font-weight: bold;
   margin: 5px;
-  margin-left: -40px; /* Overlap cards */
+  margin-left: -40px;
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .card:first-child {
-  margin-left: 5px; /* Ensure first card is not overlapped */
+  margin-left: 5px;
 }
 
 .card:hover {
-  transform: scale(1.05) translateY(-10px); /* Lift card on hover */
-  z-index: 100; /* Bring card to the front */
+  transform: scale(1.1) translateY(-15px);
+  z-index: 100;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-.red {
-  background-color: #ff5555;
-}
+.red { background-color: #ff5555; color: white; }
+.yellow { background-color: #ffff55; color: #333; }
+.green { background-color: #55ff55; color: #333; }
+.blue { background-color: #5555ff; color: white; }
+.black { background-color: #333; color: white; }
 
-.yellow {
-  background-color: #ffff55;
-  color: #333;
-}
-
-.green {
-  background-color: #55ff55;
-  color: #333;
-}
-
-.blue {
-  background-color: #5555ff;
-}
-
-.black {
-  background-color: #333;
-}
-
-.deck {
+.cardValue {
   display: flex;
-  gap: 20px;
-  margin: 20px 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin: 40px 0;
+  perspective: 1000px;
+}
+
+.drawPile {
+  position: relative;
+  width: 80px;
+  height: 120px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.drawPile:hover {
+  transform: translateY(-5px) scale(1.05);
+}
+
+.drawPileCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2c3e50, #000000);
+  border: 4px solid white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.drawPileCard::after {
+  content: "UNO";
+  color: #ffeb3b;
+  font-size: 20px;
+  font-weight: 900;
+  transform: rotate(-45deg);
+  text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+}
+
+/* Create stack effect */
+.drawPileCard:nth-child(1) { transform: translate(0, 0); z-index: 5; }
+.drawPileCard:nth-child(2) { transform: translate(2px, 2px); z-index: 4; }
+.drawPileCard:nth-child(3) { transform: translate(4px, 4px); z-index: 3; }
+.drawPileCard:nth-child(4) { transform: translate(6px, 6px); z-index: 2; }
+.drawPileCard:nth-child(5) { transform: translate(8px, 8px); z-index: 1; }
+
+.unoGameButton {
+  position: absolute;
+  right: 10%;
+  bottom: 15%;
+  background: radial-gradient(circle, #ffeb3b, #fbc02d);
+  color: #333;
+  border: 4px solid #333;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(255, 235, 59, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1000;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.unoGameButton:hover {
+  transform: scale(1.1) rotate(-3deg);
+  box-shadow: 0 0 25px rgba(255, 235, 59, 0.9), 0 12px 20px rgba(0, 0, 0, 0.5);
+  background: radial-gradient(circle, #fff176, #ffeb3b);
+}
+
+.unoGameButton:active {
+  transform: scale(0.95);
 }
 
 .unoButton {
@@ -102,6 +172,11 @@
   font-size: 16px;
   cursor: pointer;
   margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.unoButton:hover {
+  background-color: #fbc02d;
 }
 
 .winner {

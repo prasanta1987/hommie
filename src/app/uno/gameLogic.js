@@ -46,6 +46,7 @@ export const initGame = () => {
     unoCalled: false,
     isColorPickerOpen: false,
     currentColor,
+    pendingWildCard: null,
   };
 };
 
@@ -93,6 +94,19 @@ export const handleCardClick = (game, card) => {
     (c) => !(c.color === card.color && c.value === card.value)
   );
 
+  if (card.color === COLORS.BLACK) {
+    return {
+      ...game,
+      players: {
+        ...game.players,
+        1: { ...game.players[1], hand: newHand },
+      },
+      isColorPickerOpen: true,
+      pendingWildCard: card,
+      unoCalled: false,
+    };
+  }
+
   let gameAfterPlay = {
     ...game,
     players: {
@@ -101,37 +115,27 @@ export const handleCardClick = (game, card) => {
     },
     discardPile: [card, ...game.discardPile],
     unoCalled: false,
-  };
-
-  if (card.color === COLORS.BLACK) {
-    return { ...gameAfterPlay, isColorPickerOpen: true };
-  }
-
-  gameAfterPlay = applyCardEffects(gameAfterPlay, card);
-  return {
-    ...gameAfterPlay,
-    currentPlayer: getNextPlayer(gameAfterPlay),
     currentColor: card.color,
   };
+
+  return applyCardEffects(gameAfterPlay, card);
 };
 
 export const handleColorSelect = (game, color) => {
-  const topOfDiscard = game.discardPile[0];
-  const newTopOfDiscard = { ...topOfDiscard, color: color };
+  const pendingCard = game.pendingWildCard;
+  if (!pendingCard) return game;
+
+  const playedCard = { ...pendingCard, color: color };
 
   let gameAfterColorSelect = {
     ...game,
     currentColor: color,
     isColorPickerOpen: false,
-    discardPile: [newTopOfDiscard, ...game.discardPile.slice(1)],
+    pendingWildCard: null,
+    discardPile: [playedCard, ...game.discardPile],
   };
 
-  gameAfterColorSelect = applyCardEffects(gameAfterColorSelect, topOfDiscard);
-
-  return {
-    ...gameAfterColorSelect,
-    currentPlayer: getNextPlayer(gameAfterColorSelect),
-  };
+  return applyCardEffects(gameAfterColorSelect, pendingCard);
 };
 
 export const handleDrawCard = (game) => {
@@ -142,14 +146,18 @@ export const handleDrawCard = (game) => {
   const newDeck = [...game.deck];
   const newCard = newDeck.pop();
 
-  return {
+  const newGame = {
     ...game,
     deck: newDeck,
     players: {
       ...game.players,
       1: { ...game.players[1], hand: [...game.players[1].hand, newCard] },
     },
-    currentPlayer: getNextPlayer(game),
+  };
+
+  return {
+    ...newGame,
+    currentPlayer: getNextPlayer(newGame),
   };
 };
 
@@ -174,15 +182,12 @@ export const handlePCPlay = (game) => {
     );
 
     let playedCard = cardToPlay;
-    let newCurrentColor;
+    let newCurrentColor = cardToPlay.color;
 
     if (cardToPlay.color === COLORS.BLACK) {
       const colors = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN, COLORS.BLUE];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      playedCard = { ...cardToPlay, color: randomColor };
-      newCurrentColor = randomColor;
-    } else {
-      newCurrentColor = cardToPlay.color;
+      newCurrentColor = colors[Math.floor(Math.random() * colors.length)];
+      playedCard = { ...cardToPlay, color: newCurrentColor };
     }
 
     let gameAfterPlay = {
@@ -195,19 +200,21 @@ export const handlePCPlay = (game) => {
       currentColor: newCurrentColor,
     };
 
-    gameAfterPlay = applyCardEffects(gameAfterPlay, cardToPlay);
-    return { ...gameAfterPlay, currentPlayer: getNextPlayer(gameAfterPlay) };
+    return applyCardEffects(gameAfterPlay, cardToPlay);
   } else {
     const newDeck = [...game.deck];
     const newCard = newDeck.pop();
-    return {
+    const newGame = {
       ...game,
       deck: newDeck,
       players: {
         ...game.players,
         2: { ...game.players[2], hand: [...game.players[2].hand, newCard] },
       },
-      currentPlayer: getNextPlayer(game),
+    };
+    return {
+      ...newGame,
+      currentPlayer: getNextPlayer(newGame),
     };
   }
 };
@@ -235,10 +242,10 @@ export const isCardPlayable = (card, topOfDiscard, currentColor) => {
 
 export const getNextPlayer = (game) => {
   let nextPlayer = game.currentPlayer + game.direction;
-  if (nextPlayer > Object.keys(game.players).length) {
+  if (nextPlayer > 2) {
     nextPlayer = 1;
   } else if (nextPlayer < 1) {
-    nextPlayer = Object.keys(game.players).length;
+    nextPlayer = 2;
   }
   return nextPlayer;
 };
@@ -246,12 +253,17 @@ export const getNextPlayer = (game) => {
 const applyCardEffects = (game, card) => {
   let newGame = { ...game };
   
+  // Default turn transition
+  newGame.currentPlayer = getNextPlayer(newGame);
+
   switch (card.value) {
     case SPECIAL_CARDS.SKIP:
       newGame.currentPlayer = getNextPlayer(newGame);
       break;
     case SPECIAL_CARDS.REVERSE:
       newGame.direction *= -1;
+      // In 2-player mode, Reverse acts like a Skip
+      newGame.currentPlayer = getNextPlayer(game); 
       break;
     case SPECIAL_CARDS.DRAW_TWO:
       const nextPlayerId_DT = getNextPlayer(game);
