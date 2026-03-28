@@ -15,6 +15,36 @@ export const SPECIAL_CARDS = {
   WILD_DRAW_FOUR: 'wild-draw-four',
 };
 
+export const formatCard = (card) => {
+  if (!card) return '';
+  const color = card.color.charAt(0);
+  let value;
+  switch (card.value) {
+    case SPECIAL_CARDS.SKIP:
+      value = 's';
+      break;
+    case SPECIAL_CARDS.REVERSE:
+      value = 'r';
+      break;
+    case SPECIAL_CARDS.DRAW_TWO:
+      value = 'd2';
+      break;
+    case SPECIAL_CARDS.WILD:
+      value = 'w';
+      break;
+    case SPECIAL_CARDS.WILD_DRAW_FOUR:
+      value = 'w4';
+      break;
+    default:
+      value = card.value;
+  }
+  return color + value;
+};
+
+export const formatHandString = (hand) => {
+  return hand.map(formatCard).join(',');
+};
+
 export const initGame = () => {
   let deck = createDeck();
   const players = {

@@ -2,6 +2,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
+import { ref, set, onValue } from 'firebase/database';
+import { db } from '@/firebaseConfig/config';
 import Game from './components/Game';
 import ColorPicker from './components/ColorPicker';
 import {
@@ -12,18 +14,34 @@ import {
   handleDrawCard,
   handleUnoClick,
   handlePCPlay,
-  handleColorSelect
+  handleColorSelect,
+  formatCard,
+  formatHandString
 } from './gameLogic';
 import styles from './uno.module.css';
 
 const UnoGame = () => {
   const [game, setGame] = useState(null);
   const [winner, setWinner] = useState(null);
+  const [isRemote, setIsRemote] = useState(false);
+  const [playerRole, setPlayerRole] = useState(1); // 1 for P1 (Host), 2 for P2 (Guest/ESP32)
+  const [loading, setLoading] = useState(false);
 
+  // Remote Sync Logic
   useEffect(() => {
-    const newGame = initGame();
-    setGame(newGame);
-  }, []);
+    if (isRemote) {
+      setLoading(true);
+      const gameRef = ref(db, 'uno/game');
+      const unsubscribe = onValue(gameRef, (snapshot) => {
+        const val = snapshot.val();
+        if (val) {
+          setGame(val);
+          setLoading(false);
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [isRemote]);
 
   useEffect(() => {
     if (game && checkGameOver(game)) {
@@ -31,112 +49,166 @@ const UnoGame = () => {
     }
   }, [game]);
 
+  // PC Auto-play (only in Local mode)
   useEffect(() => {
-    if (game && game.currentPlayer === 2 && !winner) {
+    if (!isRemote && game && game.currentPlayer === 2 && !winner) {
       setTimeout(() => {
         const newGame = handlePCPlay(game);
         setGame(newGame);
       }, 1000);
     }
-  }, [game, winner]);
+  }, [game, winner, isRemote]);
 
+  // Firebase Compact State Updates
   useEffect(() => {
-    if (game) {
-      const formatCard = (card) => {
-        if (!card) return '';
-        const color = card.color.charAt(0);
-        let value;
-        switch (card.value) {
-          case 'skip':
-            value = 's';
-            break;
-          case 'reverse':
-            value = 'r';
-            break;
-          case 'draw-two':
-            value = 'd2';
-            break;
-          case 'wild':
-            value = 'w';
-            break;
-          case 'wild-draw-four':
-            value = 'w4';
-            break;
-          default:
-            value = card.value;
-        }
-        return color + value;
-      };
-
-      console.log(game.discardPile);
-
+    if (game && isRemote) {
       const topCard = game.discardPile[0];
-      // const topCard = game.discardPile[game.discardPile.length - 1];
-      const dadCardCount = game.players[1].hand.length;
-      const daughterCardCount = game.players[2].hand.length;
-      const isDadsTurn = game.currentPlayer === 1;
+      const p1Hand = game.players[1].hand;
+      const p2Hand = game.players[2].hand;
 
-      const compactObject = {
-        u: {
-          d: formatCard(topCard),
-          oc: isDadsTurn ? daughterCardCount : dadCardCount,
-          t: game.currentPlayer - 1, // 0 for Dad (player 1), 1 for Daughter (player 2)
-          p: game.deck.length,
-        },
+      const compactState = {
+        d: formatCard(topCard),
+        c: game.currentColor.charAt(0),
+        t: game.currentPlayer - 1,
+        p: game.deck.length,
+        h1: formatHandString(p1Hand),
+        h2: formatHandString(p2Hand),
+        oc1: p1Hand.length,
+        oc2: p2Hand.length
       };
 
-      console.log('Compact Game State:', JSON.stringify(compactObject));
+      set(ref(db, 'uno/compact'), compactState);
     }
-  }, [game, winner]);
+  }, [game, isRemote]);
+
+  const updateGameState = (newGame) => {
+    setGame(newGame);
+    if (isRemote) {
+      set(ref(db, 'uno/game'), newGame);
+    }
+  };
 
   const handleCardClickWrapper = (card) => {
+    if (isRemote && game.currentPlayer !== playerRole) return;
     const newGame = handleCardClick(game, card);
-    setGame(newGame);
+    updateGameState(newGame);
   };
 
   const handleDrawCardWrapper = () => {
+    if (isRemote && game.currentPlayer !== playerRole) return;
     const newGame = handleDrawCard(game);
-    setGame(newGame);
+    updateGameState(newGame);
   };
 
   const handleUnoClickWrapper = () => {
+    if (isRemote && game.currentPlayer !== playerRole) return;
     const newGame = handleUnoClick(game);
-    setGame(newGame);
+    updateGameState(newGame);
   };
 
   const handleColorSelectWrapper = (color) => {
     const newGame = handleColorSelect(game, color);
-    setGame(newGame);
+    updateGameState(newGame);
   };
 
-  const handleRestart = () => {
+  const handleHostGame = () => {
     const newGame = initGame();
+    setIsRemote(true);
+    setPlayerRole(1);
+    setWinner(null);
+    setGame(newGame); // Set locally immediately
+    set(ref(db, 'uno/game'), newGame);
+  };
+
+  const handleJoinGame = () => {
+    setIsRemote(true);
+    setPlayerRole(2);
+    setWinner(null);
+  };
+
+  const handleLocalGame = () => {
+    const newGame = initGame();
+    setIsRemote(false);
+    setPlayerRole(1);
     setGame(newGame);
     setWinner(null);
   };
 
+  const handleRestart = () => {
+    if (isRemote) {
+      if (playerRole === 1) handleHostGame();
+    } else {
+      handleLocalGame();
+    }
+  };
+
+  // Prepare roles for Game component
+  const getGameProps = () => {
+    if (!game) return null;
+    if (isRemote && playerRole === 2) {
+      return {
+        game: {
+          ...game,
+          players: {
+            1: game.players[2], // Swap for display
+            2: game.players[1]
+          },
+          currentPlayer: game.currentPlayer === 2 ? 1 : 2 // Swap turn indicator for display
+        }
+      };
+    }
+    return { game };
+  };
+
+  const gameProps = getGameProps();
+
   return (
     <div className={styles.container}>
-      {winner ? (
-        <div className={styles.winner}>
-          {`Player ${winner} wins!`}
-          <button className={styles.unoButton} onClick={handleRestart}>
-            Restart
-          </button>
+      {!game && !isRemote ? (
+        <div className={styles.menu}>
+          <h1>UNO Game</h1>
+          <div className={styles.menuButtons}>
+            <button className={styles.unoGameButton} onClick={handleLocalGame} style={{ position: 'static', margin: '10px' }}>
+              Play vs PC
+            </button>
+            <button className={styles.unoGameButton} onClick={handleHostGame} style={{ position: 'static', margin: '10px' }}>
+              Host PvP
+            </button>
+            <button className={styles.unoGameButton} onClick={handleJoinGame} style={{ position: 'static', margin: '10px' }}>
+              Join PvP
+            </button>
+          </div>
+        </div>
+      ) : loading ? (
+        <div className={styles.menu}>
+          <h1>Connecting...</h1>
+          <p>Please wait while we sync the game state.</p>
         </div>
       ) : (
-        game && (
-          <>
-            <Game
-              game={game}
-              handleCardClick={handleCardClickWrapper}
-              handleDrawCard={handleDrawCardWrapper}
-              handleUnoClick={handleUnoClickWrapper}
-            />
-            {game.isColorPickerOpen && (
-              <ColorPicker onSelectColor={handleColorSelectWrapper} />
-            )}
-          </>
+        winner ? (
+          <div className={styles.winner}>
+            {`Player ${winner} wins!`}
+            <button className={styles.unoButton} onClick={handleRestart}>
+              Restart
+            </button>
+          </div>
+        ) : (
+          game && (
+            <>
+              <div className={styles.modeBadge}>
+                {isRemote ? `PvP (Player ${playerRole})` : 'vs PC'}
+              </div>
+              <Game
+                {...gameProps}
+                handleCardClick={handleCardClickWrapper}
+                handleDrawCard={handleDrawCardWrapper}
+                handleUnoClick={handleUnoClickWrapper}
+              />
+              {game.isColorPickerOpen && (game.currentPlayer === playerRole || !isRemote) && (
+                <ColorPicker onSelectColor={handleColorSelectWrapper} />
+              )}
+            </>
+          )
         )
       )}
     </div>
