@@ -90,9 +90,11 @@ export const handleCardClick = (game, card) => {
     return game;
   }
 
-  const newHand = game.players[1].hand.filter(
-    (c) => !(c.color === card.color && c.value === card.value)
+  const cardIndex = game.players[1].hand.findIndex(
+    (c) => c.color === card.color && c.value === card.value
   );
+  const newHand = [...game.players[1].hand];
+  newHand.splice(cardIndex, 1);
 
   if (card.color === COLORS.BLACK) {
     return {
@@ -177,9 +179,11 @@ export const handlePCPlay = (game) => {
 
   if (playableCards.length > 0) {
     const cardToPlay = playableCards[0];
-    const newHand = game.players[2].hand.filter(
-      (c) => !(c.color === cardToPlay.color && c.value === cardToPlay.value)
+    const cardToPlayIndex = game.players[2].hand.findIndex(
+      (c) => c.color === cardToPlay.color && c.value === cardToPlay.value
     );
+    const newHand = [...game.players[2].hand];
+    newHand.splice(cardToPlayIndex, 1);
 
     let playedCard = cardToPlay;
     let newCurrentColor = cardToPlay.color;
