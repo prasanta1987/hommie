@@ -19,6 +19,7 @@ import {
   formatHandString
 } from './gameLogic';
 import styles from './uno.module.css';
+import {updateValuesToDatabase} from '@/app/miscFunctions/actions.js'
 
 const UnoGame = () => {
   const [game, setGame] = useState(null);
@@ -61,7 +62,7 @@ const UnoGame = () => {
 
   // Firebase Compact State Updates
   useEffect(() => {
-    if (game && isRemote) {
+    if (game || isRemote) {
       const topCard = game.discardPile[0];
       const p1Hand = game.players[1].hand;
       const p2Hand = game.players[2].hand;
@@ -77,14 +78,18 @@ const UnoGame = () => {
         oc2: p2Hand.length
       };
 
-      set(ref(db, 'uno/compact'), compactState);
+      console.log(compactState)
+
+      // updateValuesToDatabase('uno/compact',compactState);
+      // set(ref(db, 'uno/compact'), compactState);
     }
   }, [game, isRemote]);
 
   const updateGameState = (newGame) => {
     setGame(newGame);
     if (isRemote) {
-      set(ref(db, 'uno/game'), newGame);
+      console.log(newGame);
+      // set(ref(db, 'uno/game'), newGame);
     }
   };
 
@@ -117,7 +122,7 @@ const UnoGame = () => {
     setPlayerRole(1);
     setWinner(null);
     setGame(newGame); // Set locally immediately
-    set(ref(db, 'uno/game'), newGame);
+    // set(ref(db, 'uno/game'), newGame);
   };
 
   const handleJoinGame = () => {
