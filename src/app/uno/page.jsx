@@ -19,7 +19,7 @@ import {
   formatHandString
 } from './gameLogic';
 import styles from './uno.module.css';
-import {updateValuesToDatabase} from '@/app/miscFunctions/actions.js'
+import { updateValuesToDatabase } from '@/app/miscFunctions/actions.js'
 
 const UnoGame = () => {
   const [game, setGame] = useState(null);
@@ -80,7 +80,7 @@ const UnoGame = () => {
 
       console.log(compactState)
 
-      // updateValuesToDatabase('uno/compact',compactState);
+      updateValuesToDatabase('uno/compact', compactState);
       // set(ref(db, 'uno/compact'), compactState);
     }
   }, [game, isRemote]);
