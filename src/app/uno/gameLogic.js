@@ -47,7 +47,7 @@ export const formatHandString = (hand) => {
 
 export const parseCompactCard = (s) => {
   if (!s || s === 'null') return { color: COLORS.RED, value: 0 }; // Default fallback
-  
+
   const colorMap = {
     'r': COLORS.RED,
     'y': COLORS.YELLOW,
@@ -76,7 +76,7 @@ export const parseCompactState = (compact, playerRole) => {
   if (!compact) return null;
 
   const topCard = parseCompactCard(compact.d || 'r0');
-  const currentColor = compact.c ? 
+  const currentColor = compact.c ?
     ({ 'r': COLORS.RED, 'y': COLORS.YELLOW, 'g': COLORS.GREEN, 'b': COLORS.BLUE, 'k': COLORS.BLACK }[compact.c] || topCard.color)
     : topCard.color;
 
@@ -184,7 +184,8 @@ export const shuffle = (array) => {
 
 export const handleCardClick = (game, card, isRemote = false) => {
   const pId = game.currentPlayer;
-  if (!isCardPlayable(card, game.discardPile[0], game.currentColor)) {
+  const hand = game.players[pId].hand;
+  if (!isCardPlayable(card, game.discardPile[0], game.currentColor, hand)) {
     return game;
   }
 
@@ -224,18 +225,18 @@ export const handleCardClick = (game, card, isRemote = false) => {
 };
 
 export const getRandomCard = () => {
-    const colors = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN, COLORS.BLUE];
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const roll = Math.random() * 100;
-    if (roll < 70) {
-      return { color, value: Math.floor(Math.random() * 10) };
-    } else if (roll < 90) {
-      const specials = [SPECIAL_CARDS.SKIP, SPECIAL_CARDS.REVERSE, SPECIAL_CARDS.DRAW_TWO];
-      return { color, value: specials[Math.floor(Math.random() * specials.length)] };
-    } else {
-      const wilds = [SPECIAL_CARDS.WILD, SPECIAL_CARDS.WILD_DRAW_FOUR];
-      return { color: COLORS.BLACK, value: wilds[Math.floor(Math.random() * wilds.length)] };
-    }
+  const colors = [COLORS.RED, COLORS.YELLOW, COLORS.GREEN, COLORS.BLUE];
+  const color = colors[Math.floor(Math.random() * colors.length)];
+  const roll = Math.random() * 100;
+  if (roll < 70) {
+    return { color, value: Math.floor(Math.random() * 10) };
+  } else if (roll < 90) {
+    const specials = [SPECIAL_CARDS.SKIP, SPECIAL_CARDS.REVERSE, SPECIAL_CARDS.DRAW_TWO];
+    return { color, value: specials[Math.floor(Math.random() * specials.length)] };
+  } else {
+    const wilds = [SPECIAL_CARDS.WILD, SPECIAL_CARDS.WILD_DRAW_FOUR];
+    return { color: COLORS.BLACK, value: wilds[Math.floor(Math.random() * wilds.length)] };
+  }
 };
 
 export const handleColorSelect = (game, color, isRemote = false) => {
@@ -257,7 +258,7 @@ export const handleColorSelect = (game, color, isRemote = false) => {
 
 export const handleDrawCard = (game, isRemote = false) => {
   const pId = game.currentPlayer;
-  
+
   let newCard;
   let newDeck = [...game.deck];
 
@@ -302,9 +303,10 @@ export const handlePCPlay = (game) => {
     return game;
   }
 
-  const topOfDiscard = game.discardPile[0];
-  const playableCards = game.players[2].hand.filter((card) =>
-    isCardPlayable(card, topOfDiscard, game.currentColor)
+  const pId = game.currentPlayer;
+  const hand = game.players[pId].hand;
+  const playableCards = hand.filter((card) =>
+    isCardPlayable(card, topOfDiscard, game.currentColor, hand)
   );
 
   if (playableCards.length > 0) {
@@ -366,12 +368,36 @@ export const checkWinner = (game) => {
   return null;
 };
 
-export const isCardPlayable = (card, topOfDiscard, currentColor) => {
-  if (card.color === COLORS.BLACK) return true;
+// Basic playability check (color/value/wild match)
+export const isBasicPlayable = (card, topOfDiscard, currentColor) => {
+  // Shorthand fix: identify as Black/Wild by value even if shorthand prefix was wrong
+  if (card.color === COLORS.BLACK || 
+      card.value === SPECIAL_CARDS.WILD || 
+      card.value === SPECIAL_CARDS.WILD_DRAW_FOUR) {
+    return true;
+  }
+
   if (topOfDiscard.color === COLORS.BLACK) {
     return card.color === currentColor;
   }
   return card.color === topOfDiscard.color || card.value === topOfDiscard.value;
+};
+
+// Full playability check with special rules (like +4 restriction)
+export const isCardPlayable = (card, topOfDiscard, currentColor, hand = []) => {
+  // Rule for Wild Draw 4 (+4): Only playable if NO other card can be played
+  if (card.value === SPECIAL_CARDS.WILD_DRAW_FOUR) {
+    const hasOtherPlayable = hand.some(c => 
+      c !== card && 
+      c.value !== SPECIAL_CARDS.WILD_DRAW_FOUR && 
+      isBasicPlayable(c, topOfDiscard, currentColor)
+    );
+    if (hasOtherPlayable) return false;
+    return true;
+  }
+  
+  // All other cards (including normal Wilds) use basic logic
+  return isBasicPlayable(card, topOfDiscard, currentColor);
 };
 
 export const getNextPlayer = (game) => {
@@ -386,7 +412,7 @@ export const getNextPlayer = (game) => {
 
 const applyCardEffects = (game, card, isRemote = false) => {
   let newGame = { ...game };
-  
+
   // Default turn transition
   newGame.currentPlayer = getNextPlayer(newGame);
 
@@ -397,7 +423,7 @@ const applyCardEffects = (game, card, isRemote = false) => {
     case SPECIAL_CARDS.REVERSE:
       newGame.direction *= -1;
       // In 2-player mode, Reverse acts like a Skip
-      newGame.currentPlayer = getNextPlayer(game); 
+      newGame.currentPlayer = getNextPlayer(game);
       break;
     case SPECIAL_CARDS.DRAW_TWO:
       const nextPlayerId_DT = getNextPlayer(game);
@@ -419,23 +445,23 @@ const applyCardEffects = (game, card, isRemote = false) => {
       newGame.currentPlayer = getNextPlayer(newGame);
       break;
     case SPECIAL_CARDS.WILD_DRAW_FOUR:
-        const nextPlayerId_WDF = getNextPlayer(game);
-        const deckForDrawFour = [...newGame.deck];
-        const drawnCardsFour = [];
-        if (isRemote) {
-            for(let i=0; i<4; i++) drawnCardsFour.push(getRandomCard());
-        } else {
-            for(let i=0; i<4; i++) drawnCardsFour.push(deckForDrawFour.pop());
-        }
-        newGame.deck = deckForDrawFour;
-        newGame.players = {
-            ...newGame.players,
-            [nextPlayerId_WDF]: {
-            ...newGame.players[nextPlayerId_WDF],
-            hand: [...newGame.players[nextPlayerId_WDF].hand, ...drawnCardsFour],
-            },
-        };
-        newGame.currentPlayer = getNextPlayer(newGame);
+      const nextPlayerId_WDF = getNextPlayer(game);
+      const deckForDrawFour = [...newGame.deck];
+      const drawnCardsFour = [];
+      if (isRemote) {
+        for (let i = 0; i < 4; i++) drawnCardsFour.push(getRandomCard());
+      } else {
+        for (let i = 0; i < 4; i++) drawnCardsFour.push(deckForDrawFour.pop());
+      }
+      newGame.deck = deckForDrawFour;
+      newGame.players = {
+        ...newGame.players,
+        [nextPlayerId_WDF]: {
+          ...newGame.players[nextPlayerId_WDF],
+          hand: [...newGame.players[nextPlayerId_WDF].hand, ...drawnCardsFour],
+        },
+      };
+      newGame.currentPlayer = getNextPlayer(newGame);
       break;
   }
 
