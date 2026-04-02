@@ -9,7 +9,7 @@ This document outlines the plan to create a playable Uno game that can be played
 
 *   **Game Modes:**
     *   **Local:** Play against a PC opponent.
-    *   **Remote:** Play against another person on a different device (to be implemented later).
+    *   **Remote (PvP):** Play against another person or an ESP32 using Firebase Realtime Database.
 *   **Gameplay:**
     *   Standard Uno rules with tactical improvements.
     *   Wild and Wild Draw Four cards are only added to the discard pile after a color is selected, improving gameplay flow.
@@ -27,7 +27,7 @@ This document outlines the plan to create a playable Uno game that can be played
     *   Icons on Draw 2, Draw 4, Reverse, Skip, and Wild cards for clarity.
     *   A color picker pop-up for Wild and Wild Draw 4 cards.
 *   **Logging:**
-    *   The game state is logged to the console in a compact JSON format, suitable for low-power devices like an ESP32.
+    *   The game state is synchronized via a compact JSON format (`uno/compact`), optimized for low-power devices like ESP32 and reduced database overhead.
 
 ## Plan
 

@@ -16,7 +16,8 @@ import {
   handlePCPlay,
   handleColorSelect,
   formatCard,
-  formatHandString
+  formatHandString,
+  parseCompactState
 } from './gameLogic';
 import styles from './uno.module.css';
 import { updateValuesToDatabase } from '@/app/miscFunctions/actions.js'
@@ -32,17 +33,43 @@ const UnoGame = () => {
   useEffect(() => {
     if (isRemote) {
       setLoading(true);
-      const gameRef = ref(db, 'uno/game');
-      const unsubscribe = onValue(gameRef, (snapshot) => {
+      const compactRef = ref(db, 'uno/compact');
+      const unsubscribe = onValue(compactRef, (snapshot) => {
         const val = snapshot.val();
         if (val) {
-          setGame(val);
+          // If we are P1 (Host), we only update if it's NOT our turn
+          // If we are P2 (Joiner), we always update from compact
+          const newState = parseCompactState(val, playerRole);
+          setGame(prevGame => {
+            // Keep the color picker open if it was already open locally
+            if (prevGame && prevGame.isColorPickerOpen) return prevGame;
+            
+            // MASTER DECK LOGIC for Host (Player 1)
+            if (playerRole === 1 && prevGame) {
+              const remoteP = val.p || "";
+              const remoteCards = remoteP ? remoteP.split(',') : [];
+              const localDeckTop10 = prevGame.deck.slice(-10).reverse();
+              
+              if (remoteCards.length < localDeckTop10.length && prevGame.deck.length > 0) {
+                const diff = localDeckTop10.length - remoteCards.length;
+                const newMasterDeck = [...prevGame.deck];
+                for(let i=0; i<diff; i++) {
+                  if (newMasterDeck.length > 0) newMasterDeck.pop();
+                }
+                return { ...newState, deck: newMasterDeck };
+              }
+              // Host always keeps their full master deck if no draw occurred
+              return { ...newState, deck: prevGame.deck };
+            }
+
+            return newState;
+          });
           setLoading(false);
         }
       });
       return () => unsubscribe();
     }
-  }, [isRemote]);
+  }, [isRemote, playerRole]);
 
   useEffect(() => {
     if (game && checkGameOver(game)) {
@@ -62,46 +89,45 @@ const UnoGame = () => {
 
   // Firebase Compact State Updates
   useEffect(() => {
-    if (game || isRemote) {
+    // Only push updates if we are the current player AND we aren't waiting for a color choice
+    if (game && isRemote) {
+      // if (game && isRemote && game.currentPlayer === playerRole && !game.isColorPickerOpen) {
       const topCard = game.discardPile[0];
       const p1Hand = game.players[1].hand;
       const p2Hand = game.players[2].hand;
+      const syncDeck = game.deck.slice(-10).reverse();
 
       const compactState = {
         d: formatCard(topCard),
-        c: game.currentColor.charAt(0),
+        c: game.currentColor === 'black' ? 'k' : (game.currentColor ? game.currentColor.charAt(0) : (topCard?.color === 'black' ? 'k' : (topCard?.color?.charAt(0) || 'r'))),
         t: game.currentPlayer - 1,
-        p: game.deck.length,
+        p: syncDeck.map(formatCard).join(','),
         h1: formatHandString(p1Hand),
         h2: formatHandString(p2Hand),
         oc1: p1Hand.length,
         oc2: p2Hand.length
       };
 
-      console.log(compactState)
-
       updateValuesToDatabase('uno/compact', compactState);
-      // set(ref(db, 'uno/compact'), compactState);
     }
-  }, [game, isRemote]);
+  }, [game, isRemote, playerRole]);
 
   const updateGameState = (newGame) => {
     setGame(newGame);
     if (isRemote) {
-      console.log(newGame);
-      // set(ref(db, 'uno/game'), newGame);
+      // Logic for pushing updates is handled by the useEffect above
     }
   };
 
   const handleCardClickWrapper = (card) => {
     if (isRemote && game.currentPlayer !== playerRole) return;
-    const newGame = handleCardClick(game, card);
+    const newGame = handleCardClick(game, card, isRemote);
     updateGameState(newGame);
   };
 
   const handleDrawCardWrapper = () => {
     if (isRemote && game.currentPlayer !== playerRole) return;
-    const newGame = handleDrawCard(game);
+    const newGame = handleDrawCard(game, isRemote);
     updateGameState(newGame);
   };
 
@@ -112,7 +138,7 @@ const UnoGame = () => {
   };
 
   const handleColorSelectWrapper = (color) => {
-    const newGame = handleColorSelect(game, color);
+    const newGame = handleColorSelect(game, color, isRemote);
     updateGameState(newGame);
   };
 
@@ -121,8 +147,23 @@ const UnoGame = () => {
     setIsRemote(true);
     setPlayerRole(1);
     setWinner(null);
-    setGame(newGame); // Set locally immediately
-    // set(ref(db, 'uno/game'), newGame);
+    setGame(newGame);
+
+    const topCard = newGame.discardPile[0];
+    const p1Hand = newGame.players[1].hand;
+    const p2Hand = newGame.players[2].hand;
+    const syncDeck = newGame.deck.slice(-10).reverse();
+    const compactState = {
+      d: formatCard(topCard),
+      c: newGame.currentColor === 'black' ? 'k' : newGame.currentColor.charAt(0),
+      t: 0,
+      p: syncDeck.map(formatCard).join(','),
+      h1: formatHandString(p1Hand),
+      h2: formatHandString(p2Hand),
+      oc1: p1Hand.length,
+      oc2: p2Hand.length
+    };
+    updateValuesToDatabase('uno/compact', compactState);
   };
 
   const handleJoinGame = () => {
