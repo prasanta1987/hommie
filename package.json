@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "hommily-data-viewer",
   "version": "1.0.0",
   "description": "Simplified Firebase Data Viewer for Hommily UID",
@@ -8,5 +9,34 @@
   },
   "devDependencies": {
     "serve": "^14.2.4"
+=======
+  "name": "out",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "firebase": "^12.7.0",
+    "firebase-admin": "^13.6.0",
+    "imagekit": "^6.0.0",
+    "next": "14.2.35",
+    "react": "18.2.0",
+    "react-bootstrap": "^2.10.10",
+    "react-dom": "18.2.0",
+    "react-gauge-component": "^2.0.23",
+    "react-icons": "^5.6.0",
+    "react-intersection-observer": "^10.0.2",
+    "react-syntax-highlighter": "^16.1.0",
+    "yet-another-react-lightbox": "^3.29.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "eslint-config-next": "^13.5.11"
+>>>>>>> 860141fbd99f6b68a3b7bb79a91410f08a425352
   }
 }
