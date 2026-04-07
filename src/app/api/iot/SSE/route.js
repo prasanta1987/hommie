@@ -63,7 +63,7 @@ export const GET = async (request) => {
                 } catch (e) {
                     clearInterval(heartbeatInterval);
                 }
-            }, 30000);
+            }, 15000);
 
             try {
                 while (true) {
@@ -87,36 +87,59 @@ export const GET = async (request) => {
 
                     try {
                         const parsed = JSON.parse(rawData);
-
+                    
                         // --- MERGE INTO MASTER STATE ---
                         if (eventType === 'put') {
-                            const incoming = (parsed.path === "/") ? parsed.data : parsed;
-                            masterState = {};
-                            for (const [id, dev] of Object.entries(incoming || {})) {
-                                if (dev && !typesToRemove.includes(dev.type)) {
-                                    masterState[id] = clean(dev);
+                            if (parsed.path === "/") {
+                                // Full reset or initial load
+                                masterState = {};
+                                const incoming = parsed.data || {};
+                                for (const [id, dev] of Object.entries(incoming)) {
+                                    if (dev && !typesToRemove.includes(dev.type)) {
+                                        masterState[id] = clean(dev);
+                                    }
+                                }
+                            } else {
+                                const pathKey = parsed.path.replace('/', '');
+                                if (parsed.data === null) {
+                                    // Handle specific item deletion via PUT
+                                    delete masterState[pathKey];
+                                } else if (!typesToRemove.includes(parsed.data.type)) {
+                                    masterState[pathKey] = clean(parsed.data);
                                 }
                             }
                         } else if (eventType === 'patch') {
                             const pathKey = parsed.path.replace('/', '');
-                            if (pathKey === "") {
+                            
+                            if (parsed.data === null) {
+                                // Explicit deletion via PATCH
+                                if (pathKey !== "") delete masterState[pathKey];
+                            } else if (pathKey === "") {
+                                // Multi-path update
                                 Object.entries(parsed.data).forEach(([id, dev]) => {
-                                    masterState[id] = { ...masterState[id], ...clean(dev) };
+                                    if (dev === null) {
+                                        delete masterState[id];
+                                    } else {
+                                        masterState[id] = { ...masterState[id], ...clean(dev) };
+                                    }
                                 });
                             } else {
+                                // Single item update
                                 masterState[pathKey] = { ...masterState[pathKey], ...clean(parsed.data) };
                             }
                         }
-
-                        // --- THE CLEAN OUTPUT ---
-                        // We send ONLY the "data:" prefix followed by the raw masterState object
-                        // No "event:" tag and no Firebase "path" wrapping.
-                        const cleanOutput = `data: ${JSON.stringify(masterState)}\n\n`;
-                        controller.enqueue(encoder.encode(cleanOutput));
-
+                    
+                        // --- THE FILTERED OUTPUT ---
+                        // Only send the state if it's a valid object and NOT an empty "path" noise packet
+                        if (Object.keys(masterState).length > 0 || eventType === 'put' || eventType === 'patch') {
+                            const cleanOutput = `data: ${JSON.stringify(masterState)}\n\n`;
+                            controller.enqueue(encoder.encode(cleanOutput));
+                        }
+                    
                     } catch (e) {
-                        // Ignore parsing errors for non-JSON lines
+                        // Ignore parsing errors
                     }
+
                 }
             } catch (err) {
                 controller.error(err);

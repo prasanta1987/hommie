@@ -25,7 +25,7 @@ const GaugeUI = ({ value, minValue, maxValue }) => {
                 elastic: true,
                 animationDelay: 0,
                 animationDuration: 1141,
-                length: 0.8558179773268897,
+                length: 0.2,
                 // width: 10,
                 // color: "#c8d4d6",
                 // baseColor: "#ffffff",
