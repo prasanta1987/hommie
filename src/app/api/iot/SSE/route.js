@@ -1,19 +1,10 @@
 import { NextResponse } from 'next/server';
+import { getAuthenticatedUID } from '@/middleWare/middleWare';
+
 
 export const runtime = 'edge'; // Crucial for 8-hour sessions and cost savings
 
-async function getAuthenticatedUID(apiKey) {
-    if (!apiKey) return null;
-    try {
-        const fbBase = "https://hommily-default-rtdb.firebaseio.com";
-        const secret = process.env.FIREBASE_DATABASE_SECRET;
-        const authUrl = `${fbBase}/userCred/APItoUID/${apiKey}/fbUID.json?auth=${secret}`;
-        const res = await fetch(authUrl);
-        return await res.json();
-    } catch (e) {
-        return null;
-    }
-}
+
 
 export const GET = async (request) => {
     const { searchParams } = new URL(request.url);

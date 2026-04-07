@@ -1,94 +1,148 @@
 import { NextResponse } from 'next/server';
-import admin from '@/firebaseConfig/adminConfig';
+import { getAuthenticatedUID } from '@/middleWare/middleWare';
 
-export async function GET(request) {
+
+export const runtime = 'edge'; // Crucial for 8-hour sessions and cost savings
+
+
+
+export const GET = async (request) => {
     const { searchParams } = new URL(request.url);
     const apiKey = searchParams.get('apiKey');
     const deviceCode = searchParams.get('deviceCode');
     const feedName = searchParams.get('feedName');
 
-    if (!apiKey || !deviceCode) {
-        return NextResponse.json({ error: 'Missing apiKey or deviceCode or feedName' }, { status: 400 });
+    // 1. Authenticate using your new function
+    const userUID = await getAuthenticatedUID(apiKey);
+    if (!userUID || !deviceCode) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = admin.database();
+    // 2. Setup Firebase Stream Path
+    let fbPath = `${userUID}/${deviceCode}/devFeeds`;
+    if (feedName === "display") fbPath = `${userUID}/${deviceCode}/display`;
 
-    // Verify API key and get user UID
-    const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}/fbUID`);
-    const apiKeySnapshot = await apiKeyRef.once('value');
-    const userUID = apiKeySnapshot.val();
+    const secret = process.env.FIREBASE_DATABASE_SECRET;
+    const fbStreamUrl = `https://hommily-default-rtdb.firebaseio.com/${fbPath}.json?auth=${secret}`;
 
-    if (!userUID) {
-        return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
-    }
+    const fbResponse = await fetch(fbStreamUrl, {
+        headers: { 'Accept': 'text/event-stream' }
+    });
 
-
-    const deviceRef = db.ref(`${userUID}/${deviceCode}`);
-    deviceRef.update(
-        {
-            deviceCode: deviceCode,
-        }
-    );
-
-    let dbRef;
+    // ... (getAuthenticatedUID and initial setup remain the same)
 
     const readableStream = new ReadableStream({
-        start(controller) {
-            let dbRef;
-            const keysToRemove = ['isSelected', "time"];
-            const typesToRemove = ['Gauge'];
+        async start(controller) {
+            const reader = fbResponse.body.getReader();
+            const decoder = new TextDecoder();
+            const encoder = new TextEncoder();
 
-            if (feedName && feedName === "display") {
-                dbRef = db.ref(`${userUID}/${deviceCode}/display/`);
-            } else if (!feedName || feedName == 'all') {
-                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/`);
-            } else {
-                dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
+            let masterState = {};
+            const keysToRemove = ['isSelected', 'time', 'rangeMax', 'rangeMin']; // Keeping timerEndTime as it was in your example
+            const typesToRemove = ['Gauge',"Card"];
+
+            function clean(obj) {
+                if (!obj || typeof obj !== 'object') return obj;
+                const newObj = { ...obj };
+                keysToRemove.forEach(k => delete newObj[k]);
+                return newObj;
             }
 
-            const listener = dbRef.on('value', (snapshot) => {
-                let data = snapshot.val();
-                if (!data) return controller.enqueue(`data: null\n\n`);
-
-                let processedData;
-
-                // 2. Structural handling based on the scope of data loaded
-                if (!feedName || feedName === "all") {
-                    processedData = {};
-                    Object.entries(data).forEach(([key, feed]) => {
-                        // Filter by type and clean keys for the bulk object
-                        if (feed && feed.type && !typesToRemove.includes(feed.type)) {
-                            const cleanedFeed = { ...feed };
-                            keysToRemove.forEach(k => delete cleanedFeed[k]);
-                            processedData[key] = cleanedFeed;
-                        }
-                    });
-                } else {
-                    // Single object handling (for "display" or a specific feedName)
-                    processedData = typeof data === 'object' ? { ...data } : data;
-                    
-                    if (typeof processedData === 'object' && processedData !== null) {
-                        keysToRemove.forEach(k => delete processedData[k]);
-                    }
+            const heartbeatInterval = setInterval(() => {
+                try {
+                    controller.enqueue(encoder.encode(": heartbeat\n\n"));
+                } catch (e) {
+                    clearInterval(heartbeatInterval);
                 }
-
-                controller.enqueue(`data: ${JSON.stringify(processedData)}\n\n`);
-            }, (error) => {
-                console.error("Firebase listener error:", error);
-                controller.error(error);
-            });
-
-            const intervalId = setInterval(() => {
-                controller.enqueue(': heartbeat\n\n');
             }, 10000);
 
-            request.signal.addEventListener('abort', () => {
-                dbRef.off('value', listener);
-                clearInterval(intervalId);
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+                    let eventType = "put";
+                    let rawData = "";
+
+                    for (const line of lines) {
+                        if (line.startsWith('event:')) eventType = line.replace('event:', '').trim();
+                        else if (line.startsWith('data:')) rawData = line.slice(5).trim();
+                    }
+
+                    // Handle Heartbeats/Keep-alive silently
+                    if (!rawData || rawData === "keep-alive" || rawData === "null") {
+                        continue;
+                    }
+
+                    try {
+                        const parsed = JSON.parse(rawData);
+                    
+                        // --- MERGE INTO MASTER STATE ---
+                        if (eventType === 'put') {
+                            if (parsed.path === "/") {
+                                // Full reset or initial load
+                                masterState = {};
+                                const incoming = parsed.data || {};
+                                for (const [id, dev] of Object.entries(incoming)) {
+                                    if (dev && !typesToRemove.includes(dev.type)) {
+                                        masterState[id] = clean(dev);
+                                    }
+                                }
+                            } else {
+                                const pathKey = parsed.path.replace('/', '');
+                                if (parsed.data === null) {
+                                    // Handle specific item deletion via PUT
+                                    delete masterState[pathKey];
+                                } else if (!typesToRemove.includes(parsed.data.type)) {
+                                    masterState[pathKey] = clean(parsed.data);
+                                }
+                            }
+                        } else if (eventType === 'patch') {
+                            const pathKey = parsed.path.replace('/', '');
+                            
+                            if (parsed.data === null) {
+                                // Explicit deletion via PATCH
+                                if (pathKey !== "") delete masterState[pathKey];
+                            } else if (pathKey === "") {
+                                // Multi-path update
+                                Object.entries(parsed.data).forEach(([id, dev]) => {
+                                    if (dev === null) {
+                                        delete masterState[id];
+                                    } else {
+                                        masterState[id] = { ...masterState[id], ...clean(dev) };
+                                    }
+                                });
+                            } else {
+                                // Single item update
+                                masterState[pathKey] = { ...masterState[pathKey], ...clean(parsed.data) };
+                            }
+                        }
+                    
+                        // --- THE FILTERED OUTPUT ---
+                        // Only send the state if it's a valid object and NOT an empty "path" noise packet
+                        if (Object.keys(masterState).length > 0 || eventType === 'put' || eventType === 'patch') {
+                            const cleanOutput = `data: ${JSON.stringify(masterState)}\n\n`;
+                            controller.enqueue(encoder.encode(cleanOutput));
+                        }
+                    
+                    } catch (e) {
+                        // Ignore parsing errors
+                    }
+
+                }
+            } catch (err) {
+                controller.error(err);
+            } finally {
+                clearInterval(heartbeatInterval);
+                reader.releaseLock();
                 controller.close();
-            });
+            }
         }
     });
+
+    // ... (Return Response remains the same)
 
     return new Response(readableStream, {
         headers: {
@@ -98,4 +152,4 @@ export async function GET(request) {
             'X-Accel-Buffering': 'no',
         },
     });
-}
+};
