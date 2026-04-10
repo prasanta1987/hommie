@@ -1,39 +1,47 @@
 import { NextResponse } from 'next/server';
-import { getAuthenticatedUID } from '@/middleWare/middleWare';
-
-export const runtime = 'edge';
+import admin from '@/firebaseConfig/adminConfig';
 
 export async function POST(request) {
     try {
+
         const bodyData = await request.json();
         const { apiKey, deviceCode, purpose } = bodyData;
 
         if (!apiKey || !purpose || !deviceCode) {
             let errors = {};
+
             if (!deviceCode) errors.deviceCode = "Device Code is required";
             if (!apiKey) errors.apiKey = "API Key is required";
             if (!purpose) errors.purpose = "Purpose is required";
+
             return NextResponse.json({ "error": errors }, { status: 400 });
         }
 
-        // Verify API key and get user UID using the Edge-compatible middleware function
-        const userUID = await getAuthenticatedUID(apiKey);
+        const db = admin.database();
+
+        // Verify API key and get user UID
+        const apiKeyRef = db.ref(`userCred/APItoUID/${apiKey}/fbUID`);
+        const apiKeySnapshot = await apiKeyRef.once('value');
+        const userUID = apiKeySnapshot.val();
+
+        // return NextResponse.json({ uid: userUID }, { status: 401 });
 
         if (!userUID) {
             return NextResponse.json({ error: 'Invalid API key' }, { status: 401 });
         }
 
-        const fbBase = "https://hommily-default-rtdb.firebaseio.com";
-        const secret = process.env.FIREBASE_DATABASE_SECRET;
 
-        // 1. Ensure deviceCode is set (equivalent to deviceRef.update({ deviceCode }))
-        const deviceUpdateUrl = `${fbBase}/${userUID}/${deviceCode}.json?auth=${secret}`;
-        await fetch(deviceUpdateUrl, {
-            method: 'PATCH',
-            body: JSON.stringify({ deviceCode: deviceCode })
-        });
+        const deviceRef = db.ref(`${userUID}/${deviceCode}`);
+        await deviceRef.update(
+            {
+                deviceCode: deviceCode,
+            }
+        );
 
-        if (purpose === "FEED") {
+
+
+        if (purpose == "FEED") {
+
             const { feedName, data } = bodyData;
             let errors = {};
 
@@ -46,21 +54,18 @@ export async function POST(request) {
 
             data.time = new Date().getTime();
 
-            // Equivalent to dbRef.update(data)
-            const feedUpdateUrl = `${fbBase}/${userUID}/${deviceCode}/devFeeds/${feedName}.json?auth=${secret}`;
-            await fetch(feedUpdateUrl, {
-                method: 'PATCH',
-                body: JSON.stringify(data)
-            });
+            const dbRef = db.ref(`${userUID}/${deviceCode}/devFeeds/${feedName}`);
+            await dbRef.update(data);
+
+            // const snapshot = await dbRef.once('value');
+            // const snapShotData = snapshot.val();
 
             return NextResponse.json({ "msg": "Data Updated Successfully" }, { status: 200 });
 
-        } else if (purpose === "delDeviceProfile") {
-            // Equivalent to dbRef.remove()
-            const deviceDeleteUrl = `${fbBase}/${userUID}/${deviceCode}.json?auth=${secret}`;
-            await fetch(deviceDeleteUrl, {
-                method: 'DELETE'
-            });
+        } else if (purpose == "delDeviceProfile") {
+
+            const dbRef = db.ref(`${userUID}/${deviceCode}`);
+            await dbRef.remove();
 
             return NextResponse.json({ "msg": "Device Deleted" }, { status: 200 });
 
@@ -68,9 +73,13 @@ export async function POST(request) {
             return NextResponse.json({ "error": "Wrong Purpose Detected" }, { status: 400 });
         }
 
+
+
     } catch (error) {
         console.error('Error:', error);
+        if (error.code === 'auth/user-not-found') {
+            return NextResponse.json({ "msg": "User Not Found" }, { status: 404 });
+        }
         return NextResponse.json({ "msg": "An error occurred", "error": error.message }, { status: 500 });
     }
 }
-

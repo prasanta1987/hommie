@@ -39,7 +39,7 @@ export const GET = async (request) => {
 
             let masterState = {};
             const keysToRemove = ['isSelected', 'time', 'rangeMax', 'rangeMin']; // Keeping timerEndTime as it was in your example
-            const typesToRemove = ['Gauge',"Card"];
+            const typesToRemove = ['Gauge', "Card"];
 
             function clean(obj) {
                 if (!obj || typeof obj !== 'object') return obj;
@@ -78,7 +78,7 @@ export const GET = async (request) => {
 
                     try {
                         const parsed = JSON.parse(rawData);
-                    
+
                         // --- MERGE INTO MASTER STATE ---
                         if (eventType === 'put') {
                             if (parsed.path === "/") {
@@ -101,7 +101,7 @@ export const GET = async (request) => {
                             }
                         } else if (eventType === 'patch') {
                             const pathKey = parsed.path.replace('/', '');
-                            
+
                             if (parsed.data === null) {
                                 // Explicit deletion via PATCH
                                 if (pathKey !== "") delete masterState[pathKey];
@@ -119,14 +119,14 @@ export const GET = async (request) => {
                                 masterState[pathKey] = { ...masterState[pathKey], ...clean(parsed.data) };
                             }
                         }
-                    
+
                         // --- THE FILTERED OUTPUT ---
                         // Only send the state if it's a valid object and NOT an empty "path" noise packet
                         if (Object.keys(masterState).length > 0 || eventType === 'put' || eventType === 'patch') {
                             const cleanOutput = `data: ${JSON.stringify(masterState)}\n\n`;
                             controller.enqueue(encoder.encode(cleanOutput));
                         }
-                    
+
                     } catch (e) {
                         // Ignore parsing errors
                     }
