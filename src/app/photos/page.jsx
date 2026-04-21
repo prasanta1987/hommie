@@ -26,7 +26,7 @@ export default function TagPage() {
 
     if (user) {
         return (
-            <div className="container-fluid py-4">
+            <div className="container-fluid py-4 bg-dark">
                 <InfiniteGallery initialTag="" />
             </div>
         );
