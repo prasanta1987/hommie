@@ -8,7 +8,7 @@ export default function TagPage() {
     const tag = params?.tag ? decodeURIComponent(params.tag) : "ALL";
 
     return (
-        <div className="container-fluid py-4">
+        <div className="container-fluid py-4 bg-dark">
             <h2 className="text-center text-uppercase fw-bold mb-4">
                 Category: {tag}
             </h2>
