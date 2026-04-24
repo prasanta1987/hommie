@@ -40,30 +40,47 @@ export default function Boards({ boardData, uid, boardList }) {
     };
 
     const handleSaveName = () => {
-
-        if (!deviceType || deviceType == "Select MCU") {
-            alert("Please Select Device Type")
-            return
+        if (!deviceType || deviceType === "Select MCU") {
+            alert("Please Select Device Type");
+            return;
         }
 
         setBoardName(boardName);
 
-        const data = {
+        const deviceMetadata = {
             deviceName: boardName,
+            deviceType: deviceType,
             deviceCode: deviceCode,
-            deviceType: deviceType
-        }
+        };
 
-        updateValuesToDatabase(`${uid}/devices/${deviceCode}`, data);
+        const updates = {};
+        // Update metadata in the main device object
+        updates[`${uid}/${deviceCode}/deviceName`] = boardName;
+        updates[`${uid}/${deviceCode}/deviceType`] = deviceType;
+
+        // Update metadata in the /devices list
+        updates[`${uid}/devices/${deviceCode}`] = deviceMetadata;
+
+        // Perform an atomic multi-path update
+        updateValuesToDatabase('/', updates);
+
         handleCloseModal();
     };
 
 
 
     const deleteBoard = () => {
-        if (!confirm("Are Sure Want to Delete?")) return;
+        if (!confirm("Are you sure you want to delete this board and all its feeds?")) return;
 
-        setValueToDatabase(`${uid}/${deviceCode}`, null)
+        const updates = {};
+        // Path to the main device data, including its feeds
+        updates[`${uid}/${deviceCode}`] = null;
+        // Path to the device's metadata in the /devices list
+        updates[`${uid}/devices/${deviceCode}`] = null;
+
+        // Perform an atomic multi-path update from the root of the database.
+        updateValuesToDatabase('/', updates);
+
         setShowModal(false);
     };
 
