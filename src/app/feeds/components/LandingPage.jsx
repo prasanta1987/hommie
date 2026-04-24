@@ -13,13 +13,9 @@ const LandingPage = ({ userDbData, userData }) => {
   const [devices, setDevices] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
+  // console.log(boardList);
 
   const userUid = userData.uid;
-
-  const boardSelection = (devCode, devFeed) => {
-    const feedStatus = userDbData[devCode].devFeeds[devFeed].isSelected;
-    updateValuesToDatabase(`${userUid}/${devCode}/devFeeds/${devFeed}`, { "isSelected": !feedStatus });
-  }
 
   useEffect(() => {
     const deviceList = Object.entries(userDbData)
@@ -48,7 +44,6 @@ const LandingPage = ({ userDbData, userData }) => {
                 <Boards
                   key={data}
                   boardKey={data}
-                  sendSelectedBoard={boardSelection}
                   boardData={userDbData[data]}
                   uid={userUid}
                 />

@@ -18,7 +18,6 @@ export default function FeedModal({
     const [gPIN, setGPIN] = useState(0);
     const [bPIN, setBPIN] = useState(0);
     const [pinDescription, setPinDescription] = useState('');
-    // const [mcuType, setMcuType] = useState('');
 
 
     if (!isOpen) return null;

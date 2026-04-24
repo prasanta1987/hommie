@@ -7,12 +7,15 @@ import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
 import SignIn from '@/app/components/sign-in';
 
 export default function Home() {
-  const { user, loading, error } = useAuth();
+  const { user, loading: authLoading, error: authError } = useAuth();
   const { data: dbData, loading: dataLoading, error: dataError } = useRTDB(
     user ? user.uid : null
   );
 
-  if (loading || (user && dataLoading)) {
+  const loading = authLoading || (user && dataLoading);
+  const error = authError || dataError;
+
+  if (loading) {
     return (
       <div className='text-center bg-dark flex-grow-1 d-flex justify-content-center align-items-center' style={{ minHeight: '100vh' }}>
         <Spinner animation="grow" variant="info" size="lg" />
@@ -20,38 +23,39 @@ export default function Home() {
     );
   }
 
-  if (error || dataError) {
-    return <div>Error: {error?.message || dataError?.message}</div>;
+  if (error) {
+    return <div>Error: {error.message}</div>;
   }
 
   if (!user) {
     return <SignIn />;
   }
 
-  // Define your filters
-  const keyFilters = ["devices"];
+  // Get the list of devices from the /devices key
+  const deviceList = dbData?.devices;
 
-  // Perform the filtering in the main scope of the function
-  const filteredData = dbData
-    ? Object.keys(dbData)
-        .filter((key) => !keyFilters.includes(key))
-        .reduce((obj, key) => {
-          obj[key] = dbData[key];
-          return obj;
-        }, {})
-    : null;
+  // Reconstruct the data structure expected by the downstream components
+  const userDbData = {};
+  if (deviceList && dbData) {
+    Object.keys(deviceList).forEach(deviceCode => {
+      // Combine device metadata from /devices with feed data from /<deviceCode>
+      userDbData[deviceCode] = {
+        ...(dbData[deviceCode] || {}), // Contains devFeeds
+        ...deviceList[deviceCode],    // Contains deviceName, deviceType
+        deviceCode: deviceCode,       // Ensure deviceCode is present
+      };
+    });
+  }
 
-  // Check if we have valid filtered data to render
-  const hasData = filteredData && Object.keys(filteredData).length > 0;
+  const hasData = dbData && Object.keys(userDbData).length > 0;
 
   return (
     <>
       {hasData ? (
-        <LandingPage userDbData={filteredData} userData={user} />
+        <LandingPage userDbData={userDbData} userData={user} />
       ) : (
-        <NoBoard />
+        <NoBoard uid={user.uid} />
       )}
-      {/* <Footer userData={user.uid} /> */}
     </>
   );
 }

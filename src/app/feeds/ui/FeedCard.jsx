@@ -58,23 +58,6 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                 time: new Date().getTime()
             });
 
-        // if (type == "Toggle") {
-        //     const multiUpdate = {};
-
-        //     multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/value`] = value;
-        //     multiUpdate[`${uid}/${deviceCode}/devFeeds/${feedName}/time`] = new Date().getTime();
-        //     multiUpdate[`${uid}/${deviceCode}/display/${feedName}/value`] = value;
-
-        //     updateValuesToDatabase(`/`, multiUpdate);
-
-        // } else {
-        //     updateValuesToDatabase(`${uid}/${deviceCode}/devFeeds/${feedName}`,
-        //         {
-        //             value: value,
-        //             time: new Date().getTime()
-        //         });
-        // }
-
     }
 
     return (

@@ -28,11 +28,7 @@ export function useAuth() {
 }
 
 
-
-
-
-import { ref, onValue } from 'firebase/database';
-import { db } from '@/firebaseConfig/config'; // Import your DB instance here
+import { getDatabase, ref, onValue } from 'firebase/database';
 
 export function useRTDB(path) {
   const [data, setData] = useState(null);
@@ -40,9 +36,16 @@ export function useRTDB(path) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!path) return;
+    if (!path) {
+      setLoading(false);
+      return;
+    }
 
-    // Create the reference inside the hook
+    setLoading(true);
+
+    // Get the database instance directly inside the hook
+    // to prevent issues with stale instances in a dev environment.
+    const db = getDatabase();
     const dbRef = ref(db, path);
 
     const unsubscribe = onValue(dbRef, (snapshot) => {
@@ -54,7 +57,7 @@ export function useRTDB(path) {
     });
 
     return () => unsubscribe();
-  }, [path]); // Re-runs if the path string changes
+  }, [path]);
 
   return { data, loading, error };
 }

@@ -8,7 +8,7 @@ import './Boards.css';
 
 import { setValueToDatabase, updateValuesToDatabase } from '../../miscFunctions/actions';
 
-export default function Boards({ boardData, uid, sendSelectedBoard }) {
+export default function Boards({ boardData, uid, boardList }) {
     const [isOpen, setIsOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(boardData.deviceName || '');
@@ -16,9 +16,9 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
 
     const deviceCode = boardData.deviceCode;
 
-
     const onFeedSelect = (devCode, devFeed) => {
-        sendSelectedBoard(devCode, devFeed);
+        const feedStatus = boardData.devFeeds[devFeed].isSelected;
+        updateValuesToDatabase(`${uid}/${devCode}/devFeeds/${devFeed}`, { "isSelected": !feedStatus });
         setIsOpen(false); // Close dropdown after selection
     };
 
@@ -54,7 +54,7 @@ export default function Boards({ boardData, uid, sendSelectedBoard }) {
             deviceType: deviceType
         }
 
-        updateValuesToDatabase(`${uid}/${deviceCode}`, data);
+        updateValuesToDatabase(`${uid}/devices/${deviceCode}`, data);
         handleCloseModal();
     };
 
