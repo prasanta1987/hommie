@@ -15,6 +15,7 @@ export default function Boards({ boardData, uid, boardList }) {
     const [deviceType, setDeviceType] = useState(boardData.deviceType || null);
 
     const deviceCode = boardData.deviceCode;
+    const feedCount = boardData.devFeeds ? Object.keys(boardData.devFeeds).length : 0;
 
     const onFeedSelect = (devCode, devFeed) => {
         const feedStatus = boardData.devFeeds[devFeed].isSelected;
@@ -98,11 +99,20 @@ export default function Boards({ boardData, uid, boardList }) {
                 <button
                     onClick={toggleDropdown}
                     className={`boards-dropdown-toggle ${(!boardData.deviceType) && "bg-warning"}`}
-                    style={{ backgroundColor: isOpen && '#153b68' }}
+                    style={{ backgroundColor: isOpen && '#153b68', paddingLeft: '10px' }}
                 >
-                    <BiSolidBoltCircle size={20} color="#ebf1eb" className="boards-dropdown-item-icon" />
-                    <span className='m-2'>{boardName || deviceCode}</span>
-                    {/* {isOpen ? <FiChevronUp /> : <FiChevronDown />} */}
+                    {feedCount > 0 && (
+                        <Badge
+                            bg="dark"
+                            text="light"
+                            pill
+                            className="me-2"
+                            style={{ fontSize: '10px', minWidth: '10px' }}
+                        >
+                            {feedCount}
+                        </Badge>
+                    )}
+                    <span className='m-1'>{boardName || deviceCode}</span>
                 </button>
                 <div className='board-settings' onClick={handleShowModal}>
                     <FiSettings style={{ cursor: 'pointer', color: '#00fff2' }} />
