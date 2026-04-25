@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Modal, Button, Form } from 'react-bootstrap';
-import { FiHardDrive, FiChevronDown, FiChevronUp, FiEdit, FiSettings } from 'react-icons/fi';
-import { BiSolidBoltCircle } from "react-icons/bi"
+import { FiSettings } from 'react-icons/fi';
+// import { BiSolidBoltCircle } from "react-icons/bi"
 import { mcuTypes } from '@/app/miscFunctions/espSafeGPIOs';
 
 import './Boards.css';
@@ -56,8 +56,8 @@ export default function Boards({ boardData, uid, boardList }) {
 
         const updates = {};
         // Update metadata in the main device object
-        updates[`${uid}/${deviceCode}/deviceName`] = boardName;
-        updates[`${uid}/${deviceCode}/deviceType`] = deviceType;
+        // updates[`${uid}/${deviceCode}/deviceName`] = boardName;
+        // updates[`${uid}/${deviceCode}/deviceType`] = deviceType;
 
         // Update metadata in the /devices list
         updates[`${uid}/devices/${deviceCode}`] = deviceMetadata;
