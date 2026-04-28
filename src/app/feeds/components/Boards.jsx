@@ -98,7 +98,7 @@ export default function Boards({ boardData, uid, boardList }) {
             <div className={"boards-dropdown"}>
                 <button
                     onClick={toggleDropdown}
-                    className={`boards-dropdown-toggle ${(!boardData.deviceType) && "bg-warning"}`}
+                    className={`boards-dropdown-toggle ${(!boardData.deviceType || !boardData.deviceName) && "bg-warning"}`}
                     style={{ backgroundColor: isOpen && '#153b68', paddingLeft: '10px' }}
                 >
                     {feedCount > 0 && (
