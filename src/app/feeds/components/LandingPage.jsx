@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Boards from './Boards';
 import Feeds from './Feeds';
 import { FiPlus } from 'react-icons/fi';
@@ -31,6 +31,35 @@ const LandingPage = ({ userDbData, userData }) => {
       setSelectedDeviceCode(deviceList[0].deviceCode);
     }
   }, [userDbData]);
+
+  const hasCleaned = useRef(false);
+  useEffect(() => {
+    if (hasCleaned.current || !userDbData || Object.keys(userDbData).length === 0) return;
+
+    const updates = {};
+    Object.keys(userDbData).forEach(deviceCode => {
+      const board = userDbData[deviceCode];
+      if (board.devFeeds) {
+        Object.keys(board.devFeeds).forEach(feedName => {
+          const feed = board.devFeeds[feedName];
+          if (feed.type === 'HGraph') {
+            // Identify and clear historical data points (objects with 'time' and 'value')
+            Object.keys(feed).forEach(key => {
+              if (typeof feed[key] === 'object' && feed[key] !== null && feed[key].time !== undefined) {
+                updates[`${userUid}/${deviceCode}/devFeeds/${feedName}/${key}`] = null;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    if (Object.keys(updates).length > 0) {
+      console.log("Cleaning HGraph data on load:", updates);
+      updateValuesToDatabase('/', updates);
+    }
+    hasCleaned.current = true;
+  }, [userDbData, userUid]);
 
 
   return (

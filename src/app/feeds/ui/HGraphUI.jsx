@@ -12,7 +12,7 @@ import {
     Area
 } from 'recharts';
 
-const HGraphUI = ({ value }) => {
+const HGraphUI = ({ value, height = 180 }) => {
     // Transform the object data into an array of { time, value }
     const data = React.useMemo(() => {
         if (!value || typeof value !== 'object') return [];
@@ -44,7 +44,7 @@ const HGraphUI = ({ value }) => {
     };
 
     return (
-        <div style={{ width: '100%', height: 180, position: 'relative', marginTop: '10px' }}>
+        <div style={{ width: '100%', height: height, position: 'relative', marginTop: '10px' }}>
             <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                     <defs>

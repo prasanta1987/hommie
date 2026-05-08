@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Modal } from 'react-bootstrap';
 import { FiZap, FiCpu, FiClock, FiSettings } from 'react-icons/fi';
 import { calculateAgeing } from '../../miscFunctions/timeCalculation';
 import './FeedCard.css';
@@ -15,6 +16,7 @@ import FeedSettingsModal from '@/app/feeds/ui/FeedSettingsModal'
 export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, type }) {
 
     const [showModal, setShowModal] = useState(false);
+    const [showGraphModal, setShowGraphModal] = useState(false);
     const [longAging, setLongAging] = useState(false);
     const [millis, setMillis] = useState(0);
     const [sliderValue, setSliderValue] = useState(feed.value);
@@ -124,7 +126,11 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                             }}
                         />
                     ) : type === 'HGraph' ? (
-                        <div className="hgraph-container">
+                        <div 
+                            className="hgraph-container" 
+                            onClick={() => setShowGraphModal(true)}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <HGraphUI value={(feed.value && typeof feed.value === 'object') ? feed.value : feed} />
                         </div>
                     ) : (
@@ -146,6 +152,27 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
             </div>
 
             <FeedSettingsModal isOpen={showModal} setShowModal={() => setShowModal(false)} feed={feed} uid={uid} />
+
+            <Modal 
+                show={showGraphModal} 
+                onHide={() => setShowGraphModal(false)} 
+                centered 
+                size="xl"
+                data-bs-theme="dark"
+                contentClassName="bg-dark border-secondary"
+            >
+                <Modal.Header closeButton className="border-secondary">
+                    <Modal.Title className="text-info">{feedName} - Expanded View</Modal.Title>
+                </Modal.Header>
+                <Modal.Body className="bg-dark p-4">
+                    <div style={{ minHeight: '400px' }}>
+                        <HGraphUI 
+                            value={(feed.value && typeof feed.value === 'object') ? feed.value : feed} 
+                            height={450} 
+                        />
+                    </div>
+                </Modal.Body>
+            </Modal>
         </>
     );
 };
