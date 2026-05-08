@@ -69,6 +69,19 @@ export default function FeedTypes({ feedType, setFeedType }) {
                 <label title="" htmlFor="colour-type" className="form-check-label">Colour</label>
             </div>
 
+            <div className="form-check">
+                <input
+                    type="radio"
+                    id="hgraph-type"
+                    className="form-check-input"
+                    label="HGraph"
+                    value="HGraph"
+                    checked={feedType === 'HGraph'}
+                    onChange={(e) => setFeedType(e.target.value)}
+                />
+                <label title="" htmlFor="hgraph-type" className="form-check-label">HGraph</label>
+            </div>
+
         </div>
     );
 }

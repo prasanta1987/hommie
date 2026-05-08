@@ -8,6 +8,7 @@ import GaugeUI from '../ui/GaugeUI';
 import SliderUI from '../ui/SliderUI';
 import ToggleUI from '../ui/ToggleUI';
 import ColourPickerUI from '../ui/ColourPickerUI';
+import HGraphUI from '../ui/HGraphUI';
 import FeedSettingsModal from '@/app/feeds/ui/FeedSettingsModal'
 
 
@@ -19,7 +20,22 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
     const [sliderValue, setSliderValue] = useState(feed.value);
 
 
-    const dbTimestamp = feed.time ? feed.time : null;
+    const getLatestTimestamp = (feed) => {
+        if (feed.time && typeof feed.time === 'number') return feed.time;
+        
+        // Search for the latest timestamp in the object (either at root or inside 'value')
+        const searchObj = (type === 'HGraph' && feed.value && typeof feed.value === 'object') ? feed.value : feed;
+        
+        if (typeof searchObj === 'object') {
+            const timestamps = Object.values(searchObj)
+                .filter(v => typeof v === 'object' && v && v.time)
+                .map(v => v.time);
+            return timestamps.length > 0 ? Math.max(...timestamps) : null;
+        }
+        return null;
+    };
+
+    const dbTimestamp = getLatestTimestamp(feed);
 
 
     useEffect(() => {
@@ -107,6 +123,10 @@ export default function FeedCard({ feed, boardName, feedName, deviceCode, uid, t
                                 sliderValueChange("Colour", value)
                             }}
                         />
+                    ) : type === 'HGraph' ? (
+                        <div className="hgraph-container">
+                            <HGraphUI value={(feed.value && typeof feed.value === 'object') ? feed.value : feed} />
+                        </div>
                     ) : (
                         <div className="feed-value">{feed.value}</div>
                     )}

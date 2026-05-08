@@ -131,7 +131,14 @@
 
 .feed-card-body {
     display: flex;
-    color: #2931a1;
+    width: 100%;
+    min-height: 100px;
+    align-items: center;
+    justify-content: center;
+}
+
+.hgraph-container {
+    width: 100%;
 }
 
 /* For Input Slider */
