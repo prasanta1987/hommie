@@ -68,7 +68,8 @@ const HGraphUI = ({ value, height = 180 }) => {
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: '#527daf', fontSize: 10 }}
-                        domain={['auto', 'auto']}
+                        //domain={['auto', 'auto']}
+domain={[30, 40]}
                     />
                     <Tooltip 
                         contentStyle={{ 
