@@ -256,7 +256,7 @@ export default function MusicPage() {
           <div className={styles.playerContent}>
             <Image src={currentSong.image} alt={currentSong.name} className={styles.playerImage} width={64} height={64} />
             <div className={styles.playerSongInfo}>
-              <p className={styles.playerSongName}>{liveMetadata || currentSong.name}</p>
+              <p className={styles.playerSongName}>{currentSong.name}</p>
               <p className={styles.playerArtistName}>{liveMetadata || currentSong.artist}</p>
               <p className={styles.playerAlbumName}>{currentSong.album}</p>
             </div>
