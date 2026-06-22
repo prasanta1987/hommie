@@ -366,7 +366,145 @@
   .floatingPlayer {
     left: 50%;
     transform: translateX(-50%);
-    border-radius: 30px;
-    width: 200px;
   }
+}
+
+/* --- Add Song Modal & Floating Button --- */
+.floatingAddButton {
+  position: fixed;
+  bottom: 120px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #6a20c2;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 999;
+  border: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.floatingAddButton:hover {
+  transform: scale(1.05);
+  background-color: var(--secondary-color, #8a30e2);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #333;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #fff;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.modalInput:focus {
+  border-color: #6a20c2;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.modalBtn {
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modalBtnSecondary {
+  background-color: #444;
+  color: white;
+}
+
+.modalBtnSecondary:hover {
+  background-color: #555;
+}
+
+.modalBtnPrimary {
+  background-color: #6a20c2;
+  color: white;
+}
+
+.modalBtnPrimary:hover {
+  background-color: #8a30e2;
+}
+
+.testPlayContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #2a2a2a;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.testPlayBtn {
+  background: none;
+  border: none;
+  color: #6a20c2;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testPlayBtn:hover {
+  color: #8a30e2;
+}
+
+.testPlayText {
+  font-size: 0.9rem;
+  color: #ccc;
 }

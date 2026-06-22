@@ -1,10 +1,10 @@
 'use client';
 
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useMusicPlayer } from '../context/MusicPlayerContext.jsx';
 import styles from './Music.module.css';
-import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward, FiHeart, FiShuffle, FiTrash2 } from 'react-icons/fi';
+import { FiSearch, FiMusic, FiPlayCircle, FiPauseCircle, FiSkipBack, FiSkipForward, FiHeart, FiShuffle, FiTrash2, FiPlus } from 'react-icons/fi';
 import { setValueToDatabase, updateValuesToDatabase } from '../miscFunctions/actions.js';
 import { Spinner } from 'react-bootstrap';
 import { useAuth, useRTDB } from '@/hooks/firebaseHooks';
@@ -54,6 +54,82 @@ export default function MusicPage() {
   const { data: playlist, loading } = useRTDB(
     user ? `playlist/${user.uid}` : null
   );
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [manualTitle, setManualTitle] = useState('');
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualAlbum, setManualAlbum] = useState('');
+  const [testAudioState, setTestAudioState] = useState('stopped'); // 'stopped', 'buffering', 'playing'
+  const testAudioRef = useRef(null);
+
+  const handleTestPlay = () => {
+    if (!manualUrl) return;
+
+    if (testAudioState === 'playing' || testAudioState === 'buffering') {
+      if (testAudioRef.current) {
+        testAudioRef.current.pause();
+        testAudioRef.current.currentTime = 0;
+      }
+      setTestAudioState('stopped');
+    } else {
+      const audio = new Audio(manualUrl);
+      testAudioRef.current = audio;
+      setTestAudioState('buffering');
+      
+      audio.onwaiting = () => setTestAudioState('buffering');
+      audio.onplaying = () => setTestAudioState('playing');
+      audio.onpause = () => setTestAudioState('stopped');
+      audio.onended = () => setTestAudioState('stopped');
+      audio.onerror = () => {
+        setTestAudioState('stopped');
+        console.error("Failed to play test audio");
+        alert("Could not play the URL. Please check if it's a valid audio link.");
+      };
+
+      audio.play().catch(err => {
+        console.error("Failed to play test audio", err);
+        setTestAudioState('stopped');
+        alert("Could not play the URL. Please check if it's a valid audio link.");
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    if (testAudioRef.current) {
+      testAudioRef.current.pause();
+      testAudioRef.current.currentTime = 0;
+    }
+    setTestAudioState('stopped');
+    setManualTitle('');
+    setManualUrl('');
+    setManualAlbum('');
+    setIsModalOpen(false);
+  };
+
+  const handleManualSave = () => {
+    if (!user) {
+      alert("You must be logged in to add a song.");
+      return;
+    }
+    if (!manualTitle.trim() || !manualUrl.trim()) {
+      alert("Please provide both a title and a valid audio URL.");
+      return;
+    }
+
+    const newSongId = Date.now().toString(); // Generate a simple unique ID
+    const path = 'playlist/' + user.uid;
+    const values = {
+      [newSongId]: {
+        name: manualTitle.trim(),
+        image: `https://placehold.co/150x150.png`, // Random duty-free image (using .png for Next.js compatibility)
+        artist: 'Manually Added',
+        album: manualAlbum.trim() || 'Unknown Album',
+        url: manualUrl.trim(),
+      }
+    };
+    updateValuesToDatabase(path, values);
+    handleCloseModal();
+  };
 
   useEffect(() => {
     if (playlist && !query) {
@@ -201,6 +277,66 @@ export default function MusicPage() {
               <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
                 <div className={styles.progressBarThumb}></div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Add Button */}
+      {user && (
+        <button className={styles.floatingAddButton} onClick={() => setIsModalOpen(true)}>
+          <FiPlus size={32} />
+        </button>
+      )}
+
+      {/* Add Song Modal */}
+      {isModalOpen && (
+        <div className={styles.modalOverlay} onClick={handleCloseModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <h2 className={styles.modalTitle}>Add Song Manually</h2>
+
+            <input
+              type="text"
+              placeholder="Song Title"
+              className={styles.modalInput}
+              value={manualTitle}
+              onChange={(e) => setManualTitle(e.target.value)}
+            />
+
+            <input
+              type="text"
+              placeholder="Album Name (Optional)"
+              className={styles.modalInput}
+              value={manualAlbum}
+              onChange={(e) => setManualAlbum(e.target.value)}
+            />
+
+            <input
+              type="url"
+              placeholder="Song Audio URL (e.g. .mp3 link)"
+              className={styles.modalInput}
+              value={manualUrl}
+              onChange={(e) => setManualUrl(e.target.value)}
+            />
+
+            <div className={styles.testPlayContainer}>
+              <button className={styles.testPlayBtn} onClick={handleTestPlay}>
+                {(testAudioState === 'playing' || testAudioState === 'buffering') ? <FiPauseCircle size={28} /> : <FiPlayCircle size={28} />}
+              </button>
+              <span className={styles.testPlayText}>
+                {testAudioState === 'buffering' ? "Buffering..." :
+                 testAudioState === 'playing' ? "Playing test audio..." :
+                 "Test URL before saving"}
+              </span>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={`${styles.modalBtn} ${styles.modalBtnSecondary}`} onClick={handleCloseModal}>
+                Cancel
+              </button>
+              <button className={`${styles.modalBtn} ${styles.modalBtnPrimary}`} onClick={handleManualSave}>
+                Save Song
+              </button>
             </div>
           </div>
         </div>
