@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useRef, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 
 const MusicPlayerContext = createContext();
 
@@ -13,6 +13,7 @@ export function MusicPlayerProvider({ children }) {
   const [query, setQuery] = useState('');
   const [playingSongId, setPlayingSongId] = useState(null);
   const [currentSong, setCurrentSong] = useState(null);
+  const [liveMetadata, setLiveMetadata] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -21,7 +22,7 @@ export function MusicPlayerProvider({ children }) {
   const audioRef = useRef(null);
 
   const searchSong = useCallback(async (e) => {
-    if(e) e.preventDefault();
+    if (e) e.preventDefault();
     if (!query) return;
 
     setIsLoading(true);
@@ -69,33 +70,65 @@ export function MusicPlayerProvider({ children }) {
         audioRef.current.play();
       }
       setIsPlaying(!isPlaying);
-    } else { 
+    } else {
       setCurrentSong(song);
       setPlayingSongId(song.id);
       if (audioRef.current) {
         audioRef.current.src = song.url;
+        setLiveMetadata(null); // Reset live metadata on new song
         audioRef.current.play().then(() => {
-            setIsPlaying(true);
+          setIsPlaying(true);
         }).catch(e => {
-            console.error("Playback failed:", e);
-            setError(`Could not play "${song.name}". The audio might be unavailable.`);
-            setIsPlaying(false);
-            setPlayingSongId(null);
-            setCurrentSong(null);
+          console.error("Playback failed:", e);
+          setError(`Could not play "${song.name}". The audio might be unavailable.`);
+          setIsPlaying(false);
+          setPlayingSongId(null);
+          setCurrentSong(null);
         });
       }
     }
   }, [playingSongId, isPlaying]);
 
+  // Live metadata polling
+  useEffect(() => {
+    let intervalId;
+
+    if (isPlaying && currentSong && currentSong.url && !currentSong.url.includes('saavncdn.com')) {
+      const fetchMetadata = async () => {
+        try {
+          const res = await fetch(`/api/radio-metadata?url=${encodeURIComponent(currentSong.url)}`);
+          if (res.ok) {
+            const data = await res.json();
+            console.log("Live Radio Metadata:", data);
+            if (data.title) {
+              setLiveMetadata(data.title);
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch live metadata", e);
+        }
+      };
+
+      // Fetch immediately
+      fetchMetadata();
+      // Then poll every 15 seconds
+      intervalId = setInterval(fetchMetadata, 15000);
+    } else {
+      setLiveMetadata(null);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isPlaying, currentSong]);
+
   const handleSongNavigation = useCallback((direction) => {
     if (!currentSong || songs.length < 1) return;
     const currentIndex = songs.findIndex(s => s.id === currentSong.id);
-    
+
     if (currentIndex === -1) return;
 
     if (shuffle) {
       let newIndex = Math.floor(Math.random() * songs.length);
-      while(newIndex === currentIndex) {
+      while (newIndex === currentIndex) {
         newIndex = Math.floor(Math.random() * songs.length);
       }
       const nextSong = songs[newIndex];
@@ -109,12 +142,12 @@ export function MusicPlayerProvider({ children }) {
 
     let newIndex = currentIndex;
     for (let i = 0; i < songs.length; i++) {
-        newIndex = (newIndex + direction + songs.length) % songs.length;
-        const nextSong = songs[newIndex];
-        if (nextSong.url) {
-            handlePlayPause(nextSong);
-            return;
-        }
+      newIndex = (newIndex + direction + songs.length) % songs.length;
+      const nextSong = songs[newIndex];
+      if (nextSong.url) {
+        handlePlayPause(nextSong);
+        return;
+      }
     }
     setError("No other available songs to play.");
   }, [currentSong, songs, handlePlayPause, shuffle]);
@@ -126,11 +159,11 @@ export function MusicPlayerProvider({ children }) {
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-        const { currentTime, duration } = audioRef.current;
-        if (duration) {
-          const progressPercent = (currentTime / duration) * 100;
-          setProgress(progressPercent);
-        }
+      const { currentTime, duration } = audioRef.current;
+      if (duration) {
+        const progressPercent = (currentTime / duration) * 100;
+        setProgress(progressPercent);
+      }
     }
   };
 
@@ -138,13 +171,13 @@ export function MusicPlayerProvider({ children }) {
     const progressBar = e.currentTarget;
     const clickX = e.clientX - progressBar.getBoundingClientRect().left;
     const newProgress = (clickX / progressBar.offsetWidth) * 100;
-    
+
     if (audioRef.current && audioRef.current.duration) {
-        const { duration } = audioRef.current;
-        audioRef.current.currentTime = (newProgress / 100) * duration;
+      const { duration } = audioRef.current;
+      audioRef.current.currentTime = (newProgress / 100) * duration;
     }
   };
-  
+
   const value = {
     songs,
     setSongs,
@@ -152,6 +185,7 @@ export function MusicPlayerProvider({ children }) {
     setQuery,
     playingSongId,
     currentSong,
+    liveMetadata,
     isLoading,
     error,
     isPlaying,
@@ -174,7 +208,7 @@ export function MusicPlayerProvider({ children }) {
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleTimeUpdate}
         onEnded={handleNextSong}
-       />
+      />
     </MusicPlayerContext.Provider>
   );
 }

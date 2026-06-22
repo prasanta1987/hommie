@@ -38,6 +38,7 @@ export default function MusicPage() {
     isLoading,
     error,
     currentSong,
+    liveMetadata,
     playingSongId,
     isPlaying,
     progress,
@@ -75,7 +76,7 @@ export default function MusicPage() {
       const audio = new Audio(manualUrl);
       testAudioRef.current = audio;
       setTestAudioState('buffering');
-      
+
       audio.onwaiting = () => setTestAudioState('buffering');
       audio.onplaying = () => setTestAudioState('playing');
       audio.onpause = () => setTestAudioState('stopped');
@@ -143,7 +144,7 @@ export default function MusicPage() {
   // This useEffect hook will update the metadata
   useEffect(() => {
     if (currentSong) {
-      document.title = currentSong.name;
+      document.title = liveMetadata || currentSong.name;
       let metaDescription = document.querySelector('meta[name="description"]');
       if (!metaDescription) {
         metaDescription = document.createElement('meta');
@@ -158,7 +159,7 @@ export default function MusicPage() {
         metaDescription.content = "Search for and listen to your favorite music.";
       }
     }
-  }, [currentSong]);
+  }, [currentSong, liveMetadata]);
 
 
   const isLiked = (songId) => {
@@ -255,8 +256,8 @@ export default function MusicPage() {
           <div className={styles.playerContent}>
             <Image src={currentSong.image} alt={currentSong.name} className={styles.playerImage} width={64} height={64} />
             <div className={styles.playerSongInfo}>
-              <p className={styles.playerSongName}>{currentSong.name}</p>
-              <p className={styles.playerArtistName}>{currentSong.artist}</p>
+              <p className={styles.playerSongName}>{liveMetadata || currentSong.name}</p>
+              <p className={styles.playerArtistName}>{liveMetadata || currentSong.artist}</p>
               <p className={styles.playerAlbumName}>{currentSong.album}</p>
             </div>
             <div className={styles.playerControls}>
@@ -325,8 +326,8 @@ export default function MusicPage() {
               </button>
               <span className={styles.testPlayText}>
                 {testAudioState === 'buffering' ? "Buffering..." :
-                 testAudioState === 'playing' ? "Playing test audio..." :
-                 "Test URL before saving"}
+                  testAudioState === 'playing' ? "Playing test audio..." :
+                    "Test URL before saving"}
               </span>
             </div>
 
