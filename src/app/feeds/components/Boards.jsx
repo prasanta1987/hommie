@@ -13,6 +13,8 @@ export default function Boards({ boardData, uid, boardList }) {
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(boardData.deviceName || '');
     const [deviceType, setDeviceType] = useState(boardData.deviceType || null);
+    const [updateThreshold, setUpdateThreshold] = useState(boardData.updateThreshold || 120);
+    const [isActive, setIsActive] = useState(false);
 
     const deviceCode = boardData.deviceCode;
     const feedCount = boardData.devFeeds ? Object.keys(boardData.devFeeds).length : 0;
@@ -52,12 +54,14 @@ export default function Boards({ boardData, uid, boardList }) {
             deviceName: boardName,
             deviceType: deviceType,
             deviceCode: deviceCode,
+            updateThreshold: Number(updateThreshold) || 120,
         };
 
         const updates = {};
         // Update metadata in the main device object
-        // updates[`${uid}/${deviceCode}/deviceName`] = boardName;
-        // updates[`${uid}/${deviceCode}/deviceType`] = deviceType;
+        updates[`${uid}/${deviceCode}/deviceName`] = boardName;
+        updates[`${uid}/${deviceCode}/deviceType`] = deviceType;
+        updates[`${uid}/${deviceCode}/updateThreshold`] = Number(updateThreshold) || 120;
 
         // Update metadata in the /devices list
         updates[`${uid}/devices/${deviceCode}`] = deviceMetadata;
@@ -88,22 +92,67 @@ export default function Boards({ boardData, uid, boardList }) {
     useEffect(() => {
         if (!boardData.deviceType) setShowModal(true);
         setDeviceType(boardData.deviceType);
+        setUpdateThreshold(boardData.updateThreshold || 120);
     }, [boardData])
+
+    useEffect(() => {
+        const checkActiveStatus = () => {
+            if (!boardData.devFeeds) return false;
+            const now = new Date().getTime();
+            const thresholdMs = (Number(updateThreshold) || 120) * 1000;
+            
+            for (const feedName in boardData.devFeeds) {
+                const feed = boardData.devFeeds[feedName];
+                
+                // Check feed.time
+                if (feed.time && typeof feed.time === 'number') {
+                    if (now - feed.time <= thresholdMs) return true;
+                }
+                // Check for HGraph or nested objects
+                if (typeof feed === 'object' && feed !== null) {
+                    for (const key in feed) {
+                        const nested = feed[key];
+                        if (typeof nested === 'object' && nested !== null && nested.time) {
+                            if (now - nested.time <= thresholdMs) return true;
+                        }
+                    }
+                }
+                if (feed.value && typeof feed.value === 'object' && feed.value !== null) {
+                    for (const key in feed.value) {
+                        const nested = feed.value[key];
+                        if (typeof nested === 'object' && nested !== null && nested.time) {
+                            if (now - nested.time <= thresholdMs) return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        };
+
+        const interval = setInterval(() => {
+            setIsActive(checkActiveStatus());
+        }, 1000);
+        
+        setIsActive(checkActiveStatus());
+        
+        return () => clearInterval(interval);
+    }, [boardData, updateThreshold]);
+
 
     return (
         // (props.boardData.hasOwnProperty("name") && props.boardData.hasOwnProperty("deviceCode"))
-        (typeof boardData == 'object')
+        (typeof boardData == 'object' && boardData.deviceCode)
         &&
         <>
             <div className={"boards-dropdown"}>
                 <button
                     onClick={toggleDropdown}
-                    className={`boards-dropdown-toggle ${(!boardData.deviceType || !boardData.deviceName) && "bg-warning"}`}
-                    style={{ backgroundColor: isOpen && '#153b68', paddingLeft: '10px' }}
+                    className={`boards-dropdown-toggle ${(!boardData.deviceType || !boardData.deviceName) ? "bg-warning" : ""}`}
+                    style={{ backgroundColor: isOpen ? '#153b68' : '', paddingLeft: '10px' }}
                 >
                     {feedCount > 0 && (
                         <Badge
-                            bg="dark"
+                            bg={isActive ? "success" : "dark"}
                             text="light"
                             pill
                             className="me-2"
@@ -133,7 +182,7 @@ export default function Boards({ boardData, uid, boardList }) {
                                         onClick={() => onFeedSelect(deviceCode, devFeed)}
                                     >
                                         <span>{devFeed}</span>
-                                        <Badge className='bg-dark'>{boardData.devFeeds[devFeed].value}</Badge>
+                                        <Badge className='bg-dark'>{(typeof boardData.devFeeds[devFeed].value === 'object') ? 'Data' : boardData.devFeeds[devFeed].value}</Badge>
                                     </div>
                                 )
                             })
@@ -157,11 +206,20 @@ export default function Boards({ boardData, uid, boardList }) {
                             />
                         </Form.Group>
 
+                        <Form.Group className="mb-3" controlId="formUpdateThreshold">
+                            <Form.Label>Active Status Threshold (seconds)</Form.Label>
+                            <Form.Control
+                                type="number"
+                                value={updateThreshold}
+                                onChange={(e) => setUpdateThreshold(e.target.value)}
+                            />
+                        </Form.Group>
+
                         <Form.Group className="w-100 mb-3">
-                            <Form.Label className={(deviceType == "Select MCU" || !boardData.deviceType) && 'text-danger fw-bold'}>Select Microcontroller</Form.Label>
+                            <Form.Label className={(deviceType == "Select MCU" || !boardData.deviceType) ? 'text-danger fw-bold' : ''}>Select Microcontroller</Form.Label>
                             <Form.Select
                                 value={deviceType || boardData.deviceType}
-                                className={!deviceType && 'border-danger'}
+                                className={!deviceType ? 'border-danger' : ''}
                                 onChange={(e) => setDeviceType(e.target.value)}
                                 required={true}
                             >
