@@ -28,7 +28,17 @@ export default function QuizPage() {
         import('bootstrap/dist/js/bootstrap.bundle.min.js');
     }, []);
 
-    // Fetch and flatten quiz data
+    // Fisher-Yates Shuffle helper to randomize array items fairly
+    const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    };
+
+    // Fetch, flatten, and RANDOMIZE quiz data
     useEffect(() => {
         if (data) {
             const allQuizzes = Object.keys(data).flatMap(categoryName => {
@@ -42,7 +52,9 @@ export default function QuizPage() {
                     };
                 });
             });
-            setQuizzes(allQuizzes.reverse());
+
+            // Randomize questions instead of reversing
+            setQuizzes(shuffleArray(allQuizzes));
         } else {
             setQuizzes([]);
         }
@@ -76,7 +88,9 @@ export default function QuizPage() {
         }
     };
 
+    // Reshuffle questions when clicking "Play Again"
     const restartQuiz = () => {
+        setQuizzes(prev => shuffleArray(prev));
         setActiveQuestionIndex(0);
         setSelectedOption(null);
         setScore(0);
@@ -84,8 +98,10 @@ export default function QuizPage() {
         setAnswered(false);
     };
 
+    // Reshuffle questions when changing category
     const handleCategoryChange = (cat) => {
         setSelectedCategory(cat);
+        setQuizzes(prev => shuffleArray(prev));
         setActiveQuestionIndex(0);
         setSelectedOption(null);
         setScore(0);
