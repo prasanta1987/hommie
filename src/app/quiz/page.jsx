@@ -178,7 +178,7 @@ export default function QuizPage() {
                 {filteredQuizzes.length === 0 ? (
                     <div className="card border-0 shadow-lg rounded-5 text-center p-5 bg-white">
                         <h3 className="text-muted mb-3">No questions found in this category yet! 🎈</h3>
-                        <p className="text-secondary">Click "Manage Questions" to add some fun questions.</p>
+                        <p className="text-secondary">Click Manage Questions to add some fun questions.</p>
                     </div>
                 ) : showResults ? (
                     /* SCORE / RESULTS CARD */
