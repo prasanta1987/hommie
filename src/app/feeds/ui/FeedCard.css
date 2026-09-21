@@ -143,7 +143,7 @@
 
 /* For Input Slider */
 
-.input-slider{
+.input-slider {
     --slider-height: 41px;
     --slider-knob-size: calc(var(--slider-height) - 10px);
 }
@@ -185,45 +185,89 @@
 
 
 /* For Toggle Switch */
-.feed-toggler {
-    --toggler-height: 50px;
-    --toggler-width: calc(var(--toggler-height) * 2);
-}
-
-.feed-toggler {
-    width: var(--toggler-width);
-    height: var(--toggler-height);
+.switch {
     position: relative;
-    appearance: none;
-    background: #cb3729;
-    outline: none;
-    border-radius: 25px;
-    box-shadow: inset 0 0 7px 3px rgb(0 0 0);
-    border: 2px solid #75898d;
-    transition: .3s;
-    cursor: pointer;
+    display: inline-block;
+    width: 70px;
+    height: 110px;
+    perspective: 600px;
 }
 
-.feed-toggler:checked {
-    background: #6fb351;
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.feed-toggler::before {
-    content: '';
+.switch .slider {
     position: absolute;
-    width: var(--toggler-height);
-    height: var(--toggler-height);
-    border-radius: 50%;
-    top: -2px;
-    left: -2px;
-    background: #307197;
-    box-shadow: -2px 0px 7px 1px rgb(0 0 0);
-    transition: .3s;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, #cfd3d8, #e7e9ed);
+    border-radius: 10px;
+    box-shadow:
+        0 6px 12px rgba(0, 0, 0, 0.5),
+        inset 0 2px 4px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+    border: 1px solid #9ca3af;
 }
 
-.feed-toggler:checked::before {
-    transition: .3s;
-    left: calc(var(--toggler-width) - var(--toggler-height));
+.switch .slider:before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
+    border-radius: 6px;
+    transform-style: preserve-3d;
+    transform-origin: center;
+    /* OFF state (Red): Top out, Bottom in */
+    transform: rotateX(-15deg);
+    background: linear-gradient(to bottom, #ffffff 0%, #e0e3e8 100%);
+    box-shadow:
+        0 -4px 6px -4px rgba(0, 0, 0, 0.4),
+        inset 0 -8px 10px -4px rgba(0, 0, 0, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 1);
+    transition: all .3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.switch .slider:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 5px solid #c8322c;
+    box-shadow:
+        0 0 8px rgba(200, 50, 44, 0.8),
+        inset 0 0 6px rgba(200, 50, 44, 0.8);
+    transition: all .3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: 10;
+}
+
+.switch input:checked+.slider:before {
+    /* ON state (Green): Top in, Bottom out */
+    transform: rotateX(15deg);
+    background: linear-gradient(to bottom, #d1d5db 0%, #ffffff 100%);
+    box-shadow:
+        0 6px 8px -4px rgba(0, 0, 0, 0.5),
+        inset 0 8px 10px -4px rgba(0, 0, 0, 0.4),
+        inset 0 -2px 4px rgba(255, 255, 255, 1);
+}
+
+.switch input:checked+.slider:after {
+    border-color: #7ab648;
+    box-shadow:
+        0 0 8px rgba(122, 182, 72, 0.8),
+        inset 0 0 6px rgba(122, 182, 72, 0.8);
 }
 
 .feed-slider {
