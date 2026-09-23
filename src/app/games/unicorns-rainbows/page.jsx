@@ -157,7 +157,7 @@ const UnicornsRainbows = () => {
           <h1 className="magical-title" style={{ fontSize: '2.5rem' }}>Unicorns &<br/>Rainbows</h1>
           
           <div className="current-turn" style={{ color: players[currentTurn].color }}>
-            {players[currentTurn].name}'s Turn
+            {players[currentTurn].name} s Turn
           </div>
           
           <div className="dice-container">
