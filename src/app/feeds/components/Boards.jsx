@@ -97,34 +97,11 @@ export default function Boards({ boardData, uid, boardList }) {
 
     useEffect(() => {
         const checkActiveStatus = () => {
-            if (!boardData.devFeeds) return false;
             const now = new Date().getTime();
             const thresholdMs = (Number(updateThreshold) || 120) * 1000;
             
-            for (const feedName in boardData.devFeeds) {
-                const feed = boardData.devFeeds[feedName];
-                
-                // Check feed.time
-                if (feed.time && typeof feed.time === 'number') {
-                    if (now - feed.time <= thresholdMs) return true;
-                }
-                // Check for HGraph or nested objects
-                if (typeof feed === 'object' && feed !== null) {
-                    for (const key in feed) {
-                        const nested = feed[key];
-                        if (typeof nested === 'object' && nested !== null && nested.time) {
-                            if (now - nested.time <= thresholdMs) return true;
-                        }
-                    }
-                }
-                if (feed.value && typeof feed.value === 'object' && feed.value !== null) {
-                    for (const key in feed.value) {
-                        const nested = feed.value[key];
-                        if (typeof nested === 'object' && nested !== null && nested.time) {
-                            if (now - nested.time <= thresholdMs) return true;
-                        }
-                    }
-                }
+            if (boardData.timestamp) {
+                if (now - boardData.timestamp <= thresholdMs) return true;
             }
             return false;
         };
@@ -150,9 +127,14 @@ export default function Boards({ boardData, uid, boardList }) {
                     className={`boards-dropdown-toggle ${(!boardData.deviceType || !boardData.deviceName) ? "bg-warning" : ""}`}
                     style={{ backgroundColor: isOpen ? '#153b68' : '', paddingLeft: '10px' }}
                 >
+                    <div
+                        className={`me-2 rounded-circle bg-${isActive ? 'success' : 'danger'}`}
+                        style={{ width: '10px', height: '10px', display: 'inline-block' }}
+                        title={isActive ? "Online" : "Offline"}
+                    ></div>
                     {feedCount > 0 && (
                         <Badge
-                            bg={isActive ? "success" : "dark"}
+                            bg="dark"
                             text="light"
                             pill
                             className="me-2"
