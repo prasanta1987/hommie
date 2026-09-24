@@ -13,7 +13,7 @@ export default function Boards({ boardData, uid, boardList }) {
     const [showModal, setShowModal] = useState(false);
     const [boardName, setBoardName] = useState(boardData.deviceName || '');
     const [deviceType, setDeviceType] = useState(boardData.deviceType || null);
-    const [updateThreshold, setUpdateThreshold] = useState(boardData.updateThreshold || 120);
+
     const [isActive, setIsActive] = useState(false);
 
     const deviceCode = boardData.deviceCode;
@@ -54,14 +54,14 @@ export default function Boards({ boardData, uid, boardList }) {
             deviceName: boardName,
             deviceType: deviceType,
             deviceCode: deviceCode,
-            updateThreshold: Number(updateThreshold) || 120,
+
         };
 
         const updates = {};
         // Update metadata in the main device object
         updates[`${uid}/${deviceCode}/deviceName`] = boardName;
         updates[`${uid}/${deviceCode}/deviceType`] = deviceType;
-        updates[`${uid}/${deviceCode}/updateThreshold`] = Number(updateThreshold) || 120;
+        // Remove updateThreshold updates
 
         // Update metadata in the /devices list
         updates[`${uid}/devices/${deviceCode}`] = deviceMetadata;
@@ -92,13 +92,13 @@ export default function Boards({ boardData, uid, boardList }) {
     useEffect(() => {
         if (!boardData.deviceType) setShowModal(true);
         setDeviceType(boardData.deviceType);
-        setUpdateThreshold(boardData.updateThreshold || 120);
+
     }, [boardData])
 
     useEffect(() => {
         const checkActiveStatus = () => {
             const now = new Date().getTime();
-            const thresholdMs = (Number(updateThreshold) || 120) * 1000;
+            const thresholdMs = 12000; // 12 seconds
             
             if (boardData.timestamp) {
                 if (now - boardData.timestamp <= thresholdMs) return true;
@@ -113,7 +113,7 @@ export default function Boards({ boardData, uid, boardList }) {
         setIsActive(checkActiveStatus());
         
         return () => clearInterval(interval);
-    }, [boardData, updateThreshold]);
+    }, [boardData]);
 
 
     return (
@@ -188,14 +188,7 @@ export default function Boards({ boardData, uid, boardList }) {
                             />
                         </Form.Group>
 
-                        <Form.Group className="mb-3" controlId="formUpdateThreshold">
-                            <Form.Label>Active Status Threshold (seconds)</Form.Label>
-                            <Form.Control
-                                type="number"
-                                value={updateThreshold}
-                                onChange={(e) => setUpdateThreshold(e.target.value)}
-                            />
-                        </Form.Group>
+
 
                         <Form.Group className="w-100 mb-3">
                             <Form.Label className={(deviceType == "Select MCU" || !boardData.deviceType) ? 'text-danger fw-bold' : ''}>Select Microcontroller</Form.Label>
