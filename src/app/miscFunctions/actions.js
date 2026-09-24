@@ -53,7 +53,14 @@ const setValueToDatabase = async (reference, feed) => {
 
 const handleSignIn = async (email, password) => {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await userCredential.user.getIdToken();
+    await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken })
+    });
+    window.location.reload();
   } catch (error) {
     throw error
   }
@@ -80,6 +87,14 @@ const handleSignUp = async (email, password, displayName, setError) => {
       multiUpdate[`userCred/APItoUID/${apiKey}/fbUID`] = user.uid;
 
       updateValuesToDatabase(`/`, multiUpdate);
+
+      const idToken = await user.getIdToken();
+      await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken })
+      });
+      window.location.reload();
 
     } catch (error) {
       deleteUser(userCredential.user);

@@ -19,15 +19,32 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+import { AuthProvider } from './context/AuthContext';
+import { cookies } from 'next/headers';
+import { verifySessionCookie } from '@/firebaseAdmin/config';
+
+export default async function RootLayout({ children }) {
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('__session')?.value;
+  let initialUser = null;
+
+  if (sessionCookie) {
+    const decoded = await verifySessionCookie(sessionCookie);
+    if (decoded) {
+      initialUser = { uid: decoded.uid, email: decoded.email };
+    }
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        <MusicPlayerProvider>
-          <AppNavbar />
-          {children}
-          <GlobalMusicPlayer />
-        </MusicPlayerProvider>
+        <AuthProvider initialUser={initialUser}>
+          <MusicPlayerProvider>
+            <AppNavbar />
+            {children}
+            <GlobalMusicPlayer />
+          </MusicPlayerProvider>
+        </AuthProvider>
       </body>
     </html>
   );

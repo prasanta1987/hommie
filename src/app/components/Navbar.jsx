@@ -120,7 +120,11 @@ const AppNavbar = () => {
                       style={{ cursor: 'pointer' }}
                       color="#d42013"
                       size={28}
-                      onClick={() => signOut(auth)} />
+                      onClick={async () => {
+                        await fetch('/api/auth/logout', { method: 'POST' });
+                        await signOut(auth);
+                        window.location.reload();
+                      }} />
                   </>
                 ) : (
                   <FiLogIn
