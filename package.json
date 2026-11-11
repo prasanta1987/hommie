@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "generate:sw": "node scripts/generate-sw.js",
+    "build": "node scripts/generate-sw.js && next build",
     "start": "next start",
     "lint": "eslint"
   },
